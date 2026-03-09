@@ -1,6 +1,6 @@
 {
   "name": "kiroo",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Git for API interactions. Record, replay, snapshot, and diff your APIs.",
   "type": "module",
   "main": "src/index.js",

@@ -4,7 +4,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { executeRequest } from '../src/executor.js';
 import { listInteractions, replayInteraction } from '../src/replay.js';
-// import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
+import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
 // import { showGraph } from '../src/graph.js';
 import { initProject } from '../src/init.js';
 // import { showStats } from '../src/stats.js';
@@ -43,6 +43,7 @@ program
   .command('list')
   .description('List all stored interactions')
   .option('-n, --limit <number>', 'Number of interactions to show', '10')
+  .option('-o, --offset <number>', 'Number of interactions to skip', '0')
   .action(async (options) => {
     await listInteractions(options);
   });
@@ -56,7 +57,6 @@ program
   });
 
 // Snapshot commands
-/*
 const snapshot = program.command('snapshot').description('Snapshot management');
 
 snapshot
@@ -79,7 +79,6 @@ snapshot
   .action(async (tag1, tag2) => {
     await compareSnapshots(tag1, tag2);
   });
-*/
 
 // Graph command
 /*

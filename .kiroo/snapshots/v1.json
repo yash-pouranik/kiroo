@@ -1,0 +1,603 @@
+{
+  "tag": "v1",
+  "timestamp": "2026-03-09T20:35:48.093Z",
+  "interactions": [
+    {
+      "id": "2026-03-09T20-33-13-033Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 619
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-59-828Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 7445
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-49-694Z",
+      "method": "GET",
+      "url": "https://example.com/2",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/2",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 3456
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-44-606Z",
+      "method": "GET",
+      "url": "https://example.com/1",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 3154
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-39-945Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 1579
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-37-303Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 3303
+      }
+    },
+    {
+      "id": "2026-03-09T20-32-30-018Z",
+      "method": "GET",
+      "url": "https://example.com",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "foo": "bar"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true
+        }
+      },
+      "metadata": {
+        "duration_ms": 100
+      }
+    },
+    {
+      "id": "2026-03-09T20-31-04-320Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 28460
+      }
+    },
+    {
+      "id": "2026-03-09T20-30-29-417Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 3222
+      }
+    },
+    {
+      "id": "2026-03-09T20-30-20-242Z",
+      "method": "GET",
+      "url": "https://example.com/2",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/2",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 12277
+      }
+    },
+    {
+      "id": "2026-03-09T20-29-59-958Z",
+      "method": "GET",
+      "url": "https://example.com/1",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 1759
+      }
+    },
+    {
+      "id": "2026-03-09T20-29-50-170Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 4927
+      }
+    },
+    {
+      "id": "2026-03-09T20-29-40-144Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 2076
+      }
+    },
+    {
+      "id": "2026-03-09T20-29-35-408Z",
+      "method": "GET",
+      "url": "https://example.com",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "foo": "bar"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true
+        }
+      },
+      "metadata": {
+        "duration_ms": 100
+      }
+    },
+    {
+      "id": "2026-03-09T20-28-05-324Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 928
+      }
+    },
+    {
+      "id": "2026-03-09T20-28-00-949Z",
+      "method": "GET",
+      "url": "https://example.com/2",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/2",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 3219
+      }
+    },
+    {
+      "id": "2026-03-09T20-27-56-713Z",
+      "method": "GET",
+      "url": "https://example.com/1",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 4238
+      }
+    },
+    {
+      "id": "2026-03-09T20-27-48-456Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 3049
+      }
+    },
+    {
+      "id": "2026-03-09T20-27-39-041Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 1733
+      }
+    },
+    {
+      "id": "2026-03-09T20-27-29-562Z",
+      "method": "GET",
+      "url": "https://example.com",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "foo": "bar"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true
+        }
+      },
+      "metadata": {
+        "duration_ms": 100
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-40-341Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 627
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-36-144Z",
+      "method": "GET",
+      "url": "https://example.com/2",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/2",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 2398
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-32-688Z",
+      "method": "GET",
+      "url": "https://example.com/1",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 516
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-30-796Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 1149
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-28-686Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 648
+      }
+    },
+    {
+      "id": "2026-03-09T20-26-24-614Z",
+      "method": "GET",
+      "url": "https://example.com",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "foo": "bar"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true
+        }
+      },
+      "metadata": {
+        "duration_ms": 100
+      }
+    },
+    {
+      "id": "2026-03-09T20-21-14-177Z",
+      "method": "GET",
+      "url": "https://api.urbackend.bitbros.in",
+      "request": {
+        "method": "GET",
+        "url": "https://api.urbackend.bitbros.in",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "urBackend API is running 🚀"
+        }
+      },
+      "metadata": {
+        "duration_ms": 1565
+      }
+    },
+    {
+      "id": "2026-03-09T20-18-32-570Z",
+      "method": "GET",
+      "url": "https://api.urbackend.bitbros.in",
+      "request": {
+        "method": "GET",
+        "url": "https://api.urbackend.bitbros.in",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "status": "success",
+          "message": "urBackend API is running 🚀"
+        }
+      },
+      "metadata": {
+        "duration_ms": 9318
+      }
+    },
+    {
+      "id": "2026-03-09T20-18-01-428Z",
+      "method": "GET",
+      "url": "https://urbackend.bitbros.in",
+      "request": {
+        "method": "GET",
+        "url": "https://urbackend.bitbros.in",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" type=\"image/png\" href=\"https://cdn.jsdelivr.net/gh/yash-pouranik/urBackend@main/frontend/public/LOGO_SQ.png\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>urBackend | Instant Backend for Developers</title>\n    <!-- Google Fonts -->\n    \n    \n    <style type=\"text/css\">@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:400;src:url(/cf-fonts/v/inter/5.0.16/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:500;src:url(/cf-fonts/v/inter/5.0.16/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:600;src:url(/cf-fonts/v/inter/5.0.16/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:700;src:url(/cf-fonts/v/inter/5.0.16/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:Inter;font-style:normal;font-weight:800;src:url(/cf-fonts/v/inter/5.0.16/greek-ext/wght/normal.woff2);unicode-range:U+1F00-1FFF;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:400;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/cyrillic-ext/wght/normal.woff2);unicode-range:U+0460-052F,U+1C80-1C88,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/greek/wght/normal.woff2);unicode-range:U+0370-03FF;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/latin-ext/wght/normal.woff2);unicode-range:U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:JetBrains Mono;font-style:normal;font-weight:600;src:url(/cf-fonts/v/jetbrains-mono/5.0.18/cyrillic/wght/normal.woff2);unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;font-display:swap;}</style>\n    <script type=\"module\" crossorigin src=\"/assets/index-r1epwUEw.js\"></script>\n    <link rel=\"stylesheet\" crossorigin href=\"/assets/index-Ckynf1r1.css\">\n  </head>\n  <body>\n    <div id=\"root\"></div>\n  </body>\n</html>\n"
+      },
+      "metadata": {
+        "duration_ms": 1109
+      }
+    }
+  ]
+}

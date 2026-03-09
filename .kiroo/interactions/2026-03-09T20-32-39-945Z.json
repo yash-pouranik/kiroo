@@ -1,6 +1,6 @@
 {
-  "id": "2026-03-09T19-26-14-021Z",
-  "timestamp": "2026-03-09T19:26:14.021Z",
+  "id": "2026-03-09T20-32-39-945Z",
+  "timestamp": "2026-03-09T20:32:39.945Z",
   "request": {
     "method": "GET",
     "url": "https://jsonplaceholder.typicode.com/posts/1",
@@ -10,7 +10,7 @@
     "status": 200,
     "statusText": "OK",
     "headers": {
-      "date": "Mon, 09 Mar 2026 19:26:17 GMT",
+      "date": "Mon, 09 Mar 2026 20:32:43 GMT",
       "content-type": "application/json; charset=utf-8",
       "transfer-encoding": "chunked",
       "connection": "keep-alive",
@@ -30,9 +30,9 @@
       "x-ratelimit-limit": "1000",
       "x-ratelimit-remaining": "999",
       "x-ratelimit-reset": "1769696416",
-      "age": "12343",
+      "age": "16329",
       "cf-cache-status": "HIT",
-      "cf-ray": "9d9c786e2c6f3e32-SIN",
+      "cf-ray": "9d9cd9bd8fa6fd64-SIN",
       "alt-svc": "h3=\":443\"; ma=86400"
     },
     "data": {
@@ -43,6 +43,6 @@
     }
   },
   "metadata": {
-    "duration_ms": 7968
+    "duration_ms": 1579
   }
 }

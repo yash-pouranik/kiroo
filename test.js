@@ -70,3 +70,51 @@ test('CLI: both GET and get commands work', async () => {
   const resultLower = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/posts/1'], { encoding: 'utf8' });
   assert.strictEqual(resultLower.status, 0, 'get should work');
 });
+
+test('CLI: list pagination works', async () => {
+  const { spawnSync } = await import('node:child_process');
+  
+  // Ensure we have some interactions
+  spawnSync('node', ['bin/kiroo.js', 'get', 'https://example.com/1'], { encoding: 'utf8' });
+  spawnSync('node', ['bin/kiroo.js', 'get', 'https://example.com/2'], { encoding: 'utf8' });
+  
+  const result = spawnSync('node', ['bin/kiroo.js', 'list', '--limit', '1', '--offset', '1'], { encoding: 'utf8' });
+  assert.strictEqual(result.status, 0);
+  assert.match(result.stdout, /Showing 2-2/);
+});
+
+test('CLI: replay command works', async () => {
+  const { spawnSync } = await import('node:child_process');
+  
+  // Create an interaction to replay
+  spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
+  const interactions = storage.getAllInteractions();
+  const id = interactions[0].id;
+  
+  const result = spawnSync('node', ['bin/kiroo.js', 'replay', id], { encoding: 'utf8' });
+  assert.strictEqual(result.status, 0);
+  assert.match(result.stdout, /Replaying interaction/);
+  assert.match(result.stdout, /Comparison with stored response/);
+});
+
+test('CLI: snapshot commands work', async () => {
+  const { spawnSync } = await import('node:child_process');
+  
+  // Ensure we have interactions
+  spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
+
+  // 1. Save snapshot
+  const saveResult = spawnSync('node', ['bin/kiroo.js', 'snapshot', 'save', 'test-snap'], { encoding: 'utf8' });
+  assert.strictEqual(saveResult.status, 0);
+  assert.ok(saveResult.stdout.includes('Snapshot saved') && saveResult.stdout.includes('test-snap'), 'Snapshot save message missing');
+  
+  // 2. List snapshots
+  const listResult = spawnSync('node', ['bin/kiroo.js', 'snapshot', 'list'], { encoding: 'utf8' });
+  assert.strictEqual(listResult.status, 0);
+  assert.ok(listResult.stdout.includes('test-snap'), 'test-snap missing from list');
+  
+  // 3. Compare snapshots (same snapshot)
+  const compareResult = spawnSync('node', ['bin/kiroo.js', 'snapshot', 'compare', 'test-snap', 'test-snap'], { encoding: 'utf8' });
+  assert.strictEqual(compareResult.status, 0);
+  assert.ok(compareResult.stdout.includes('No differences detected'), 'Diff check failed for identical snapshots');
+});
