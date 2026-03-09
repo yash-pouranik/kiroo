@@ -1,0 +1,38 @@
+{
+  "name": "kiroo",
+  "version": "1.0.0",
+  "description": "Git for API interactions. Record, replay, snapshot, and diff your APIs.",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "kiroo": "./bin/kiroo.js"
+  },
+  "scripts": {
+    "dev": "node bin/kiroo.js",
+    "test": "node --test test.js"
+  },
+  "keywords": [
+    "api",
+    "testing",
+    "cli",
+    "replay",
+    "snapshot",
+    "diff",
+    "git-native",
+    "developer-tools"
+  ],
+  "author": "Yash Pouranik",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.3",
+    "commander": "^12.0.0",
+    "inquirer": "^9.2.15",
+    "js-yaml": "^4.1.0",
+    "ora": "^8.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

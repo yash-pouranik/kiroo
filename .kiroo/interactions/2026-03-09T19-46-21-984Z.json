@@ -1,0 +1,54 @@
+{
+  "id": "2026-03-09T19-46-21-984Z",
+  "timestamp": "2026-03-09T19:46:21.984Z",
+  "request": {
+    "method": "POST",
+    "url": "https://api.urbackend.bitbros.in/api/data/users",
+    "headers": {
+      "x-api-key": "sk_live_p7BWJjsYlKmauBOjiEeiLRuu4DokkBWsgYne_E6osTo",
+      "X-Custom-Header": "value"
+    },
+    "body": {
+      "name": "yash",
+      "email": "yashpouranik@gmail.com",
+      "password": "121C212",
+      "isVerified": "false"
+    }
+  },
+  "response": {
+    "status": 400,
+    "statusText": "Bad Request",
+    "headers": {
+      "date": "Mon, 09 Mar 2026 19:46:25 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "53",
+      "connection": "keep-alive",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uET9TiooBfT%2Bh%2B2f09nEDsun3MNdXcizf6KQAC9sPfgzABOX3EhT6b2q1T2haEo90AtyCl%2FjWdg424LtnxyTUC0WFz52SWChqSzzPG59B15bz%2FtwNVYNyg%3D%3D\"}]}",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "server": "cloudflare",
+      "access-control-allow-headers": "Content-Type, Authorization, x-api-key",
+      "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+      "access-control-allow-origin": "*",
+      "etag": "W/\"31-nfm8eEPQqey+g672DsHmBCf3BvQ\"",
+      "ratelimit-limit": "100",
+      "ratelimit-policy": "100;w=900",
+      "ratelimit-remaining": "99",
+      "ratelimit-reset": "900",
+      "rndr-id": "878ee671-a34c-480d",
+      "vary": "Accept-Encoding",
+      "x-powered-by": "Express",
+      "x-ratelimit-limit": "500",
+      "x-ratelimit-remaining": "498",
+      "x-ratelimit-reset": "1773086454",
+      "x-render-origin-server": "Render",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9d9c95ea3b552c14-SIN"
+    },
+    "data": {
+      "error": "Field 'isVerified' must be a Boolean."
+    }
+  },
+  "metadata": {
+    "duration_ms": 883
+  }
+}

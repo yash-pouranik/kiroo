@@ -1,0 +1,88 @@
+{
+  "id": "2026-03-09T19-49-52-288Z",
+  "timestamp": "2026-03-09T19:49:52.288Z",
+  "request": {
+    "method": "GET",
+    "url": "https://api.urbackend.bitbros.in/api/data/users",
+    "headers": {
+      "x-api-key": "sk_live_p7BWJjsYlKmauBOjiEeiLRuu4DokkBWsgYne_E6osTo",
+      "X-Custom-Header": "value"
+    }
+  },
+  "response": {
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "date": "Mon, 09 Mar 2026 19:49:55 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "276",
+      "connection": "keep-alive",
+      "speculation-rules": "\"/cdn-cgi/speculation\"",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=HCVA0dQb9j5Ts%2Fd%2F2iSqbWNYtjCkO3DjdtSZDPQSbP7RIzQuyqOVhInHdwsWR48hTm64XfcES97lKGyG5xlMMre39FsCsGxk9OchtYCStY9NrL4JnxakJA%3D%3D\"}]}",
+      "server": "cloudflare",
+      "access-control-allow-headers": "Content-Type, Authorization, x-api-key",
+      "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+      "access-control-allow-origin": "*",
+      "etag": "W/\"376-LbRdzesbNVlUEcq8tbjchNucJR4\"",
+      "ratelimit-limit": "100",
+      "ratelimit-policy": "100;w=900",
+      "ratelimit-remaining": "97",
+      "ratelimit-reset": "298",
+      "rndr-id": "2961989f-f5c0-47a4",
+      "vary": "Accept-Encoding",
+      "x-powered-by": "Express",
+      "x-ratelimit-limit": "500",
+      "x-ratelimit-remaining": "493",
+      "x-ratelimit-reset": "1773086454",
+      "x-render-origin-server": "Render",
+      "cf-cache-status": "DYNAMIC",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "cf-ray": "9d9c9b0d1c5b20c7-SIN"
+    },
+    "data": [
+      {
+        "_id": "69af24159c73e72125eb3ed5",
+        "name": "yash",
+        "email": "yashpouranik@gmail.com",
+        "password": "$2b$10$qulJgtXtmxpmiKGX/wipfeZ5I.Bc2L.4eE3MmwG6pn7UfqyQitJwW",
+        "isVerified": false,
+        "createdAt": "2026-03-09T19:48:37.162Z",
+        "updatedAt": "2026-03-09T19:49:15.953Z",
+        "__v": 0
+      },
+      {
+        "_id": "69af240e9c73e72125eb3ecf",
+        "name": "yash",
+        "email": "yashpouranik@gmail.com",
+        "password": "121C212",
+        "isVerified": false,
+        "createdAt": "2026-03-09T19:48:30.358Z",
+        "updatedAt": "2026-03-09T19:48:30.358Z",
+        "__v": 0
+      },
+      {
+        "_id": "69af24069c73e72125eb3ec9",
+        "name": "yash",
+        "email": "yashpouranik@gmail.com",
+        "password": "121C212",
+        "isVerified": false,
+        "createdAt": "2026-03-09T19:48:22.339Z",
+        "updatedAt": "2026-03-09T19:48:22.339Z",
+        "__v": 0
+      },
+      {
+        "_id": "69af23f79c73e72125eb3ec3",
+        "name": "yash",
+        "email": "yashpouranik@gmail.com",
+        "password": "121C212",
+        "isVerified": false,
+        "createdAt": "2026-03-09T19:48:07.292Z",
+        "updatedAt": "2026-03-09T19:48:07.292Z",
+        "__v": 0
+      }
+    ]
+  },
+  "metadata": {
+    "duration_ms": 812
+  }
+}

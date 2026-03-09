@@ -1,0 +1,61 @@
+{
+  "id": "2026-03-09T19-48-04-094Z",
+  "timestamp": "2026-03-09T19:48:04.094Z",
+  "request": {
+    "method": "POST",
+    "url": "https://api.urbackend.bitbros.in/api/data/users",
+    "headers": {
+      "x-api-key": "sk_live_p7BWJjsYlKmauBOjiEeiLRuu4DokkBWsgYne_E6osTo",
+      "X-Custom-Header": "value"
+    },
+    "body": {
+      "name": "yash",
+      "email": "yashpouranik@gmail.com",
+      "password": "121C212",
+      "isVerified": false
+    }
+  },
+  "response": {
+    "status": 201,
+    "statusText": "Created",
+    "headers": {
+      "date": "Mon, 09 Mar 2026 19:48:07 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "143",
+      "connection": "keep-alive",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=uoZgzepVrYpebJu0YZ%2BvuRRITvcPnEpepQ%2Fb%2BWaEfUbEvfBwplLUJETJk7sJ3LC0GpeO5hDhmEYFi6JeseTZ69%2FSr6m1lO%2F2t0BjpKAr3sfor0CbvwgkUg%3D%3D\"}]}",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "server": "cloudflare",
+      "access-control-allow-headers": "Content-Type, Authorization, x-api-key",
+      "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+      "access-control-allow-origin": "*",
+      "etag": "W/\"cf-HIQjI1OHAG0Qzv/qlntywl2oqN0\"",
+      "ratelimit-limit": "100",
+      "ratelimit-policy": "100;w=900",
+      "ratelimit-remaining": "98",
+      "ratelimit-reset": "406",
+      "rndr-id": "a7804f37-cf6d-45a6",
+      "vary": "Accept-Encoding",
+      "x-powered-by": "Express",
+      "x-ratelimit-limit": "500",
+      "x-ratelimit-remaining": "497",
+      "x-ratelimit-reset": "1773086454",
+      "x-render-origin-server": "Render",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9d9c98681b36ce41-SIN"
+    },
+    "data": {
+      "name": "yash",
+      "email": "yashpouranik@gmail.com",
+      "password": "121C212",
+      "isVerified": false,
+      "_id": "69af23f79c73e72125eb3ec3",
+      "createdAt": "2026-03-09T19:48:07.292Z",
+      "updatedAt": "2026-03-09T19:48:07.292Z",
+      "__v": 0
+    }
+  },
+  "metadata": {
+    "duration_ms": 1001
+  }
+}
