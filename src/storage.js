@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
 
 const KIROO_DIR = '.kiroo';
@@ -110,6 +110,17 @@ export function getAllSnapshots() {
   return readdirSync(SNAPSHOTS_DIR)
     .filter(f => f.endsWith('.json'))
     .map(f => f.replace('.json', ''));
+}
+
+export function clearAllInteractions() {
+  ensureKirooDir();
+  if (existsSync(INTERACTIONS_DIR)) {
+    const files = readdirSync(INTERACTIONS_DIR);
+    files.forEach(f => {
+      const filepath = join(INTERACTIONS_DIR, f);
+      rmSync(filepath, { force: true });
+    });
+  }
 }
 
 export function loadEnv() {

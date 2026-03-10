@@ -10,13 +10,14 @@ import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
 import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
+import { clearAllInteractions } from '../src/storage.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.3.3');
+  .version('0.3.4');
 
 // Init command
 program
@@ -57,6 +58,28 @@ program
   .description('Replay a stored interaction')
   .action(async (id) => {
     await replayInteraction(id);
+  });
+
+// Clear command
+program
+  .command('clear')
+  .description('Clear all stored interaction history')
+  .option('-f, --force', 'Force clear without confirmation')
+  .action(async (options) => {
+    if (!options.force) {
+      const inquirer = (await import('inquirer')).default;
+      const { confirm } = await inquirer.prompt([
+        {
+          type: 'confirm',
+          name: 'confirm',
+          message: chalk.red('Are you sure you want to clear all history?'),
+          default: false
+        }
+      ]);
+      if (!confirm) return;
+    }
+    clearAllInteractions();
+    console.log(chalk.green('\n  ✨ History cleared successfully.\n'));
   });
 
 // Environment commands
