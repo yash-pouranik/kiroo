@@ -17,7 +17,7 @@ export async function listInteractions(options) {
   
   const table = new Table({
     head: ['ID', 'Method', 'URL', 'Status', 'Duration'].map(h => chalk.cyan(h)),
-    colWidths: [22, 8, 50, 8, 10],
+    colWidths: [26, 8, 45, 8, 12],
   });
   
   const page = interactions.slice(offset, offset + limit);
@@ -32,7 +32,7 @@ export async function listInteractions(options) {
     table.push([
       chalk.white(int.id),
       chalk.white(int.request.method),
-      chalk.gray(int.request.url.substring(0, 47) + (int.request.url.length > 47 ? '...' : '')),
+      chalk.gray(int.request.url.substring(0, 42) + (int.request.url.length > 42 ? '...' : '')),
       statusColor(int.response.status),
       chalk.gray(int.metadata.duration_ms + 'ms'),
     ]);

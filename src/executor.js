@@ -20,8 +20,32 @@ function applyEnvReplacements(data, envVars) {
   return data;
 }
 
-function getValueByPath(obj, path) {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+function setDeep(obj, path, value) {
+  const keys = path.split(/[.[\]]+/).filter(Boolean);
+  let current = obj;
+  
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const isLast = i === keys.length - 1;
+    
+    if (isLast) {
+      current[key] = value;
+    } else {
+      // Check if next key looks like a number (array index)
+      const nextKey = keys[i + 1];
+      const isNextNumber = !isNaN(nextKey);
+      
+      if (!current[key]) {
+        current[key] = isNextNumber ? [] : {};
+      }
+      current = current[key];
+    }
+  }
+}
+
+function getDeep(obj, path) {
+  const keys = path.split(/[.[\]]+/).filter(Boolean);
+  return keys.reduce((acc, key) => acc && acc[key], obj);
 }
 
 export async function executeRequest(method, url, options = {}) {
@@ -52,15 +76,26 @@ export async function executeRequest(method, url, options = {}) {
       body = JSON.parse(rawData);
     } catch {
       body = {};
-      rawData.split(' ').forEach(pair => {
-        const [key, value] = pair.split('=');
+      // Improved shorthand parser to handle quoted strings and nested objects
+      const pairs = rawData.match(/(\\.|[^ ])+/g) || [];
+      
+      pairs.forEach(pair => {
+        const [key, ...valueParts] = pair.split('=');
+        let value = valueParts.join('=');
+        
         if (key && value !== undefined) {
-          let parsedValue = value;
-          if (value === 'true') parsedValue = true;
-          else if (value === 'false') parsedValue = false;
-          else if (!isNaN(value) && value.trim() !== '') parsedValue = Number(value);
+          let parsedValue;
+          // Check for quoted strings
+          if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+            parsedValue = value.slice(1, -1);
+          } else {
+            parsedValue = value;
+            if (value === 'true') parsedValue = true;
+            else if (value === 'false') parsedValue = false;
+            else if (!isNaN(value) && value.trim() !== '') parsedValue = Number(value);
+          }
           
-          body[key] = parsedValue;
+          setDeep(body, key, parsedValue);
         }
       });
     }
@@ -95,7 +130,7 @@ export async function executeRequest(method, url, options = {}) {
       saves.forEach(s => {
         const [envKey, responsePath] = s.split('=');
         if (envKey && responsePath) {
-          const val = getValueByPath(response, responsePath);
+          const val = getDeep(response, responsePath);
           if (val !== undefined) {
             env.environments[env.current][envKey] = val;
             console.log(chalk.cyan(`  ✨ Saved to env:`), chalk.white(`${envKey}=${val}`));
