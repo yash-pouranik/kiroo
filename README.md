@@ -1,77 +1,105 @@
-# Kiroo 🚀
+<div align="center">
+  <img src="./kiroo_banner.png" alt="Kiroo Banner" width="100%">
 
-> **Version Control for API Interactions.** Record, Replay, Snapshot, and Diff your APIs just like Git handles code.
+  # 🦏 KIROO
+  ### **Version Control for API Interactions**
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-Kiroo treats your API requests and responses as versionable artifacts. Every interaction becomes a structured, reproducible file that stays right in your repository, making debugging and API testing seamless.
+  **Record, Replay, Snapshot, and Diff your APIs just like Git handles code.**
+
+  [Installation](#-installation) • [Quick Start](#-quick-start) • [Key Features](#-core-capabilities) • [Why Kiroo?](#-why-kiroo)
+
+</div>
 
 ---
 
-## 🏗️ Core Features
+## 📖 Introduction
 
-- **🔴 Auto-Recording**: Every request made through Kiroo is automatically saved with its response, status, and timing.
-- **🔄 Replay Engine**: Instantly reproduce any past interaction. Compare the new response with the stored record to detect regressions.
-- **📸 Snapshot System**: Bundle your API's current state into tagged snapshots.
-- **🔍 Semantic Diffs**: Compare two snapshots to detect breaking changes (removed fields, status changes, or performance drops).
-- **📟 Smart CLI**: Case-insensitive commands, smart type detection (Boolean/Numbers) for bodies, and paginated history.
-- **🔗 Git-Native**: All data lives in `.kiroo/`—commit your API interactions alongside your source code.
+Kiroo treats your API requests and responses as **first-class versionable artifacts**. 
+
+Ever had a production bug that worked fine on your machine? Ever refactored a backend only to find out you broke a critical field 3 days later? Kiroo solves this by letting you **store API interactions in your repository**.
+
+Every interaction is a structured, reproducibility-focused JSON file that lives in your `.kiroo/` directory.
+
+---
+
+## ✨ Core Capabilities
+
+### 🔴 **Auto-Recording**
+Every request made through Kiroo is automatically saved. No more manual exports from Postman.
+```bash
+kiroo post {{baseUrl}}/users -d "name=Yash email=yash@example.com"
+```
+
+### 🔄 **Replay Engine**
+Re-run any past interaction instantly and see if the backend behavior has changed.
+```bash
+kiroo replay <interaction-id>
+```
+
+### 🌍 **Smart Environments & Variables**
+Stop copy-pasting tokens. Chain requests together dynamically.
+```bash
+# Save a token from login
+kiroo post /login --save token=data.accessToken
+
+# Use it in the next request
+kiroo get /profile -H "Authorization: Bearer {{token}}"
+```
+
+### 📸 **Snapshot System & Diff Engine**
+Capture the "Status Quo" of your API and detect **Breaking Changes** during refactors.
+```bash
+# Before refactor
+kiroo snapshot save v1-stable
+
+# After refactor
+kiroo snapshot compare v1-stable current
+```
 
 ---
 
 ## 🚀 Quick Start
 
-### Installation
-
+### 1. Installation
 ```bash
-# Clone and link (while in development)
+# Clone the repo
+git clone https://github.com/yash-pouranik/kiroo.git
+cd kiroo
+
+# Install and link
 npm install
 npm link
 ```
 
-### Initialize Project
-
+### 2. Initialize
 ```bash
 kiroo init
 ```
 
-### Record Interactions
-
+### 3. Basic Request
 ```bash
-# Kiroo automatically detects types (Number/Boolean)
-kiroo post https://api.your-app.com/v1/users -d "name=Yash age=25 isVerified=true"
-```
-
-### View History
-
-```bash
-kiroo list
+kiroo env set baseUrl http://localhost:3000
+kiroo get {{baseUrl}}/health
 ```
 
 ---
 
-## 🛠️ Advanced Usage
+## 🛠️ Advanced Workflows
 
-### Replay a Specific Request
+### Nested Data Support
+Kiroo's shorthand parser understands nested objects and arrays:
 ```bash
-kiroo replay <interaction-id>
+kiroo put /products/1 -d "reviews[0].stars=5 metadata.isFeatured=true"
 ```
 
-### Snapshot & Diff Engine
+### Managing Environments
 ```bash
-# Save current state
-kiroo snapshot save v1-beta
-
-# ... after refactoring your backend ...
-
-# Save new state
-kiroo snapshot save v1-rc
-
-# Detect breaking changes
-kiroo snapshot compare v1-beta v1-rc
-```
-
-### Pagination
-```bash
-kiroo list --limit 5 --offset 10
+kiroo env use prod
+kiroo env list
 ```
 
 ---
@@ -84,10 +112,16 @@ kiroo list --limit 5 --offset 10
 | **Git-Native** | ❌ | ✅ | ✅ |
 | **Auto-Recording** | ❌ | ❌ | ✅ |
 | **Built-in Replay** | ❌ | ❌ | ✅ |
-| **Snapshot Testing** | ❌ | ❌ | ✅ |
+| **Variable Chaining** | ⚠️ | ⚠️ | ✅ |
 
 ---
 
 ## 📜 License
 
-MIT © [Yash Pouranik](https://github.com/yash-pouranik)
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  Built with ❤️ for Developers by <a href="https://github.com/yash-pouranik">Yash Pouranik</a>
+</div>
