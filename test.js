@@ -145,3 +145,27 @@ test('CLI: snapshot commands work', async () => {
   assert.strictEqual(compareResult.status, 0);
   assert.ok(compareResult.stdout.includes('No differences detected'), 'Diff check failed for identical snapshots');
 });
+
+test('CLI: Auto-BaseURL prepends baseUrl for paths starting with /', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  
+  // 1. Set baseUrl
+  spawnSync('node', ['bin/kiroo.js', 'env', 'set', 'baseUrl', 'http://localhost:1234'], { encoding: 'utf8' });
+  
+  // 2. Fetch using relative path
+  try {
+    spawnSync('node', ['bin/kiroo.js', 'get', '/auto-test-path'], { encoding: 'utf8' });
+  } catch (e) {
+    // Failure is okay, we just want to see what URL was saved
+  }
+  
+  // 3. Verify saved interaction
+  const interactionsDir = join('.kiroo', 'interactions');
+  const files = fs.readdirSync(interactionsDir);
+  const latest = files.sort().pop();
+  const data = JSON.parse(fs.readFileSync(join(interactionsDir, latest), 'utf8'));
+  
+  assert.strictEqual(data.request.url, 'http://localhost:1234/auto-test-path');
+});

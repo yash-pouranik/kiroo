@@ -55,6 +55,15 @@ export async function executeRequest(method, url, options = {}) {
   // Apply replacements to URL
   url = applyEnvReplacements(url, currentEnvVars);
 
+  // Auto-BaseURL: If URL starts with '/', prepend baseUrl from env
+  if (url.startsWith('/')) {
+    const baseUrl = currentEnvVars.baseUrl || '';
+    if (baseUrl) {
+      const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+      url = normalizedBaseUrl + url;
+    }
+  }
+
   // Parse headers
   const headers = {};
   if (options.header) {

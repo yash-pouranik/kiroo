@@ -1,0 +1,25 @@
+{
+  "id": "2026-03-10T19-59-44-604Z",
+  "timestamp": "2026-03-10T19:59:44.604Z",
+  "request": {
+    "method": "GET",
+    "url": "https://example.com",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "foo": "bar"
+    }
+  },
+  "response": {
+    "status": 200,
+    "statusText": "OK",
+    "headers": {},
+    "data": {
+      "success": true
+    }
+  },
+  "metadata": {
+    "duration_ms": 100
+  }
+}
