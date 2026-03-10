@@ -35,11 +35,10 @@ export async function handleImport(curlCommand) {
  * - URL (positional)
  */
 function parseCurl(curlString) {
-  // Clean up the string (handle multi-line backslashes)
-  const cleanStr = curlString.replace(/\\\n/g, ' ').trim();
+  // Clean up shell artifacts (Windows ^, backslashes for line continuation)
+  let cleanStr = curlString.replace(/\^/g, '').replace(/\\\n/g, ' ').trim();
   
-  // Basic tokenization (naive but works for most browser exports)
-  // We need to respect quotes when splitting
+  // Basic tokenization respecting quotes
   const tokens = [];
   let currentToken = '';
   let inQuotes = false;
@@ -47,7 +46,7 @@ function parseCurl(curlString) {
 
   for (let i = 0; i < cleanStr.length; i++) {
     const char = cleanStr[i];
-    if ((char === "'" || char === '"') && cleanStr[i-1] !== '\\') {
+    if ((char === "'" || char === '"') && (i === 0 || cleanStr[i - 1] !== '\\')) {
       if (inQuotes && char === quoteChar) {
         inQuotes = false;
         tokens.push(currentToken);
@@ -78,12 +77,14 @@ function parseCurl(curlString) {
   };
 
   for (let i = 0; i < tokens.length; i++) {
-    const token = tokens[i];
-    
+    const token = tokens[i].trim();
+    if (!token) continue;
+
     if (token === '-X' || token === '--request') {
       result.method = tokens[++i].toUpperCase();
     } else if (token === '-H' || token === '--header') {
       const headerStr = tokens[++i];
+      if (!headerStr) continue;
       const colonIdx = headerStr.indexOf(':');
       if (colonIdx !== -1) {
         const key = headerStr.substring(0, colonIdx).trim();
@@ -92,13 +93,20 @@ function parseCurl(curlString) {
       }
     } else if (token === '-d' || token === '--data' || token === '--data-raw' || token === '--data-binary') {
       result.body = tokens[++i];
-      if (result.method === 'GET') result.method = 'POST'; // Default to POST if data is present
-    } else if (token.startsWith('http')) {
-      result.url = token;
-    } else if (token !== 'curl' && !token.startsWith('-')) {
-      // Might be a naked URL without http prefix or an argument
+      if (result.method === 'GET') result.method = 'POST';
+    } else if (token.includes('://') || (token.startsWith('localhost') || token.startsWith('127.0.0.1'))) {
+      if (!result.url) result.url = token;
+    } else if (token === 'curl' || token.startsWith('-')) {
+      continue;
+    } else {
+      // Possible naked URL
       if (!result.url) result.url = token;
     }
+  }
+
+  // Final cleanup of URL (strip any remaining quotes if they leaked)
+  if (result.url) {
+    result.url = result.url.replace(/^["']|["']$/g, '');
   }
 
   return result;

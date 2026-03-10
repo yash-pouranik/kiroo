@@ -16,7 +16,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.3.0');
+  .version('0.3.1');
 
 // Init command
 program
@@ -108,10 +108,12 @@ snapshot
 
 // Import command
 program
-  .command('import [curl]')
-  .description('Import a request from a cURL command (opens editor if curl string is omitted)')
-  .action(async (curlArg) => {
-    let curl = curlArg;
+  .command('import')
+  .description('Import a request from a cURL command (opens editor if no command is provided)')
+  .allowUnknownOption()
+  .action(async (_, command) => {
+    let curl = command.args.join(' ');
+    
     if (!curl) {
       const inquirer = (await import('inquirer')).default;
       const response = await inquirer.prompt([
