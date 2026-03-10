@@ -16,7 +16,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.3.2');
+  .version('0.3.3');
 
 // Init command
 program

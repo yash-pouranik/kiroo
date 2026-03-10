@@ -55,12 +55,45 @@ export async function executeRequest(method, url, options = {}) {
   // Apply replacements to URL
   url = applyEnvReplacements(url, currentEnvVars);
 
-  // Auto-BaseURL: If URL starts with '/', prepend baseUrl from env
-  if (url.startsWith('/')) {
-    const baseUrl = currentEnvVars.baseUrl || '';
-    if (baseUrl) {
+  // Auto-BaseURL logic
+  if (currentEnvVars.baseUrl) {
+    let isRelative = false;
+    let pathPart = url;
+
+    // 1. Direct relative path
+    if (url.startsWith('/')) {
+      isRelative = true;
+    } 
+    // 2. Windows Git Bash conversion: Detect "C:/..." style paths with no protocol
+    else if (process.platform === 'win32' && /^[a-zA-Z]:[/\\]/.test(url) && !url.includes('://')) {
+      isRelative = true;
+      // Extract the part after the drive letter and potential Git Bash root
+      // We look for common markers or just the first segment that looks like a path
+      // Most reliable for Git Bash: The user's path is at the end.
+      // We'll try to find the /api, /v1, etc., or just fallback to the full path after the first few segments
+      const segments = url.split(/[/\\]/);
+      const apiIdx = segments.findIndex(s => s === 'api' || s === 'v1' || s === 'v2');
+      if (apiIdx !== -1) {
+        pathPart = '/' + segments.slice(apiIdx).join('/');
+      } else {
+        // Fallback: If we can't find a marker, it's hard to guess safely,
+        // but we can try to strip the drive letter and first few segments
+        // In Git Bash, it's usually C:/Program Files/Git/api...
+        // Let's at least strip the drive letter root
+        pathPart = url.replace(/^[a-zA-Z]:/, '').replace(/\\/g, '/');
+        if (!pathPart.startsWith('/')) pathPart = '/' + pathPart;
+      }
+    }
+    // 3. No leading slash but doesn't look like a host (no dots, no protocol)
+    else if (!url.includes('://') && !url.includes('.') && !url.includes(':') && !url.startsWith('localhost')) {
+      isRelative = true;
+      pathPart = '/' + url;
+    }
+
+    if (isRelative) {
+      const baseUrl = currentEnvVars.baseUrl;
       const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-      url = normalizedBaseUrl + url;
+      url = normalizedBaseUrl + (pathPart.startsWith('/') ? pathPart : '/' + pathPart);
     }
   }
 
