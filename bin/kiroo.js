@@ -8,14 +8,14 @@ import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.j
 import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
 // import { showGraph } from '../src/graph.js';
 import { initProject } from '../src/init.js';
-// import { showStats } from '../src/stats.js';
+import { showStats } from '../src/stats.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.2.1');
+  .version('0.2.2');
 
 // Init command
 program
@@ -116,14 +116,12 @@ program
 */
 
 // Stats command
-/*
 program
   .command('stats')
   .description('Show usage statistics')
   .action(async () => {
     await showStats();
   });
-*/
 
 // Error handling
 program.exitOverride();
