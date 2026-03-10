@@ -5,6 +5,7 @@ import chalk from 'chalk';
 import { executeRequest } from '../src/executor.js';
 import { listInteractions, replayInteraction } from '../src/replay.js';
 import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
+import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
 // import { showGraph } from '../src/graph.js';
 import { initProject } from '../src/init.js';
 // import { showStats } from '../src/stats.js';
@@ -33,6 +34,7 @@ program
     .description(`Execute ${method} request and store interaction`)
     .option('-H, --header <headers...>', 'Headers (key:value)')
     .option('-d, --data <data>', 'Request body (JSON string or key=value pairs)')
+    .option('-s, --save <pairs...>', 'Extract values from response to env (key=path.to.data)')
     .action(async (url, options) => {
       await executeRequest(method, url, options);
     });
@@ -55,6 +57,29 @@ program
   .action(async (id) => {
     await replayInteraction(id);
   });
+
+// Environment commands
+const env = program.command('env').description('Environment management');
+
+env
+  .command('use <name>')
+  .description('Switch to a specific environment')
+  .action((name) => setEnv(name));
+
+env
+  .command('list')
+  .description('List environments and variables')
+  .action(() => listEnv());
+
+env
+  .command('set <key> <value>')
+  .description('Set a variable in current environment')
+  .action((key, value) => setVar(key, value));
+
+env
+  .command('rm <key>')
+  .description('Remove a variable from current environment')
+  .action((key) => deleteVar(key));
 
 // Snapshot commands
 const snapshot = program.command('snapshot').description('Snapshot management');

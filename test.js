@@ -97,6 +97,33 @@ test('CLI: replay command works', async () => {
   assert.match(result.stdout, /Comparison with stored response/);
 });
 
+test('CLI: environment and variables work', async () => {
+  const { spawnSync } = await import('node:child_process');
+  
+  // 1. Set a variable
+  const setResult = spawnSync('node', ['bin/kiroo.js', 'env', 'set', 'testVar', 'testValue'], { encoding: 'utf8' });
+  assert.strictEqual(setResult.status, 0);
+  assert.ok(setResult.stdout.includes('Set testVar=testValue'), 'Var set message missing');
+  
+  // 2. Use variable in a request (mocking with a simple GET to jsonplaceholder)
+  const getResult = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/{{id}}'], { encoding: 'utf8' });
+  // This will fail to substitute since id is not set, it should try to call .../{{id}} literally and fail or work if server handles it
+  // Let's set id first
+  spawnSync('node', ['bin/kiroo.js', 'env', 'set', 'id', '1'], { encoding: 'utf8' });
+  const getResultSucc = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/{{id}}'], { encoding: 'utf8' });
+  assert.strictEqual(getResultSucc.status, 0);
+  assert.ok(getResultSucc.stdout.includes('200 OK'), 'Variable substitution in URL failed');
+  
+  // 3. Response chaining (--save)
+  const loginResult = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/posts/1', '--save', 'postId=data.id'], { encoding: 'utf8' });
+  assert.strictEqual(loginResult.status, 0);
+  assert.ok(loginResult.stdout.includes('Saved to env') && loginResult.stdout.includes('postId=1'), 'Response chaining failed');
+  
+  // 4. Verify variable was saved
+  const listResult = spawnSync('node', ['bin/kiroo.js', 'env', 'list'], { encoding: 'utf8' });
+  assert.ok(listResult.stdout.includes('postId') && listResult.stdout.includes('1'), 'Saved variable missing from env list');
+});
+
 test('CLI: snapshot commands work', async () => {
   const { spawnSync } = await import('node:child_process');
   

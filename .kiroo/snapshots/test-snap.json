@@ -1,7 +1,214 @@
 {
   "tag": "test-snap",
-  "timestamp": "2026-03-09T20:33:13.889Z",
+  "timestamp": "2026-03-10T17:15:17.826Z",
   "interactions": [
+    {
+      "id": "2026-03-10T17-15-17-198Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 1132
+      }
+    },
+    {
+      "id": "2026-03-10T17-15-14-758Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 4482
+      }
+    },
+    {
+      "id": "2026-03-10T17-15-09-639Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 2002
+      }
+    },
+    {
+      "id": "2026-03-10T17-15-05-691Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/{{id}}",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/{{id}}",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": {}
+      },
+      "metadata": {
+        "duration_ms": 1308
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-59-459Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/todos/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/todos/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "delectus aut autem",
+          "completed": false
+        }
+      },
+      "metadata": {
+        "duration_ms": 3871
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-53-693Z",
+      "method": "GET",
+      "url": "https://example.com/2",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/2",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 347
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-52-250Z",
+      "method": "GET",
+      "url": "https://example.com/1",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 404,
+        "body": "<!doctype html><html lang=\"en\"><head><title>Example Domain</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href=\"https://iana.org/domains/example\">Learn more</a></p></div></body></html>\n"
+      },
+      "metadata": {
+        "duration_ms": 425
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-50-936Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 565
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-49-445Z",
+      "method": "GET",
+      "url": "https://jsonplaceholder.typicode.com/posts/1",
+      "request": {
+        "method": "GET",
+        "url": "https://jsonplaceholder.typicode.com/posts/1",
+        "headers": {}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "userId": 1,
+          "id": 1,
+          "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+          "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        }
+      },
+      "metadata": {
+        "duration_ms": 5120
+      }
+    },
+    {
+      "id": "2026-03-10T17-14-42-585Z",
+      "method": "GET",
+      "url": "https://example.com",
+      "request": {
+        "method": "GET",
+        "url": "https://example.com",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "foo": "bar"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "success": true
+        }
+      },
+      "metadata": {
+        "duration_ms": 100
+      }
+    },
     {
       "id": "2026-03-09T20-33-13-033Z",
       "method": "GET",

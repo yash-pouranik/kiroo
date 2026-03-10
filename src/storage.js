@@ -4,6 +4,7 @@ import { join } from 'path';
 const KIROO_DIR = '.kiroo';
 const INTERACTIONS_DIR = join(KIROO_DIR, 'interactions');
 const SNAPSHOTS_DIR = join(KIROO_DIR, 'snapshots');
+const ENV_FILE = join(KIROO_DIR, 'env.json');
 
 export function ensureKirooDir() {
   if (!existsSync(KIROO_DIR)) {
@@ -14,6 +15,9 @@ export function ensureKirooDir() {
   }
   if (!existsSync(SNAPSHOTS_DIR)) {
     mkdirSync(SNAPSHOTS_DIR);
+  }
+  if (!existsSync(ENV_FILE)) {
+    writeFileSync(ENV_FILE, JSON.stringify({ current: 'default', environments: { default: {} } }, null, 2));
   }
 }
 
@@ -106,4 +110,15 @@ export function getAllSnapshots() {
   return readdirSync(SNAPSHOTS_DIR)
     .filter(f => f.endsWith('.json'))
     .map(f => f.replace('.json', ''));
+}
+
+export function loadEnv() {
+  ensureKirooDir();
+  const data = readFileSync(ENV_FILE, 'utf8');
+  return JSON.parse(data);
+}
+
+export function saveEnv(data) {
+  ensureKirooDir();
+  writeFileSync(ENV_FILE, JSON.stringify(data, null, 2));
 }

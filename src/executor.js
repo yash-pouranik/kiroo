@@ -1,29 +1,58 @@
 import axios from 'axios';
 import chalk from 'chalk';
 import ora from 'ora';
-import { saveInteraction } from './storage.js';
+import { saveInteraction, loadEnv, saveEnv } from './storage.js';
 import { formatResponse } from './formatter.js';
 
+function applyEnvReplacements(data, envVars) {
+  if (typeof data === 'string') {
+    return data.replace(/\{\{(.+?)\}\}/g, (match, key) => {
+      return envVars[key] !== undefined ? envVars[key] : match;
+    });
+  }
+  if (typeof data === 'object' && data !== null) {
+    const newData = Array.isArray(data) ? [] : {};
+    for (const key in data) {
+      newData[key] = applyEnvReplacements(data[key], envVars);
+    }
+    return newData;
+  }
+  return data;
+}
+
+function getValueByPath(obj, path) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj);
+}
+
 export async function executeRequest(method, url, options = {}) {
+  const env = loadEnv();
+  const currentEnvVars = env.environments[env.current] || {};
+
+  // Apply replacements to URL
+  url = applyEnvReplacements(url, currentEnvVars);
+
   // Parse headers
   const headers = {};
   if (options.header) {
     options.header.forEach(h => {
       const [key, ...valueParts] = h.split(':');
-      headers[key.trim()] = valueParts.join(':').trim();
+      const headerValue = valueParts.join(':').trim();
+      headers[key.trim()] = applyEnvReplacements(headerValue, currentEnvVars);
     });
   }
 
   // Parse body
   let body;
   if (options.data) {
+    let rawData = options.data;
+    // Apply replacements to raw data string before parsing
+    rawData = applyEnvReplacements(rawData, currentEnvVars);
+
     try {
-      // Try parsing as JSON first
-      body = JSON.parse(options.data);
+      body = JSON.parse(rawData);
     } catch {
-      // Otherwise parse as key=value pairs
       body = {};
-      options.data.split(' ').forEach(pair => {
+      rawData.split(' ').forEach(pair => {
         const [key, value] = pair.split('=');
         if (key && value !== undefined) {
           let parsedValue = value;
@@ -51,7 +80,7 @@ export async function executeRequest(method, url, options = {}) {
       url,
       headers,
       data: body,
-      validateStatus: () => true, // Don't throw on any status
+      validateStatus: () => true,
     });
 
     const duration = Date.now() - startTime;
@@ -59,6 +88,24 @@ export async function executeRequest(method, url, options = {}) {
 
     // Format and display response
     console.log(formatResponse(response));
+
+    // Handle --save option
+    if (options.save) {
+      const saves = Array.isArray(options.save) ? options.save : [options.save];
+      saves.forEach(s => {
+        const [envKey, responsePath] = s.split('=');
+        if (envKey && responsePath) {
+          const val = getValueByPath(response, responsePath);
+          if (val !== undefined) {
+            env.environments[env.current][envKey] = val;
+            console.log(chalk.cyan(`  ✨ Saved to env:`), chalk.white(`${envKey}=${val}`));
+          } else {
+            console.log(chalk.yellow(`  ⚠️  Could not find path '${responsePath}' in response`));
+          }
+        }
+      });
+      saveEnv(env);
+    }
 
     // Save interaction
     const interactionId = await saveInteraction({
@@ -83,10 +130,8 @@ export async function executeRequest(method, url, options = {}) {
     
     if (error.code === 'ENOTFOUND') {
       console.error(chalk.red('\n  ✗ Host not found:'), url);
-      console.log(chalk.gray('  Check the URL and try again.\n'));
     } else if (error.code === 'ECONNREFUSED') {
       console.error(chalk.red('\n  ✗ Connection refused:'), url);
-      console.log(chalk.gray('  Is the server running?\n'));
     } else {
       console.error(chalk.red('\n  ✗ Error:'), error.message, '\n');
     }

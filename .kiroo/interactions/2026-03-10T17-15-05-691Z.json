@@ -1,0 +1,42 @@
+{
+  "id": "2026-03-10T17-15-05-691Z",
+  "timestamp": "2026-03-10T17:15:05.691Z",
+  "request": {
+    "method": "GET",
+    "url": "https://jsonplaceholder.typicode.com/todos/{{id}}",
+    "headers": {}
+  },
+  "response": {
+    "status": 404,
+    "statusText": "Not Found",
+    "headers": {
+      "date": "Tue, 10 Mar 2026 17:15:10 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "2",
+      "connection": "keep-alive",
+      "access-control-allow-credentials": "true",
+      "cache-control": "max-age=43200",
+      "etag": "W/\"2-vyGp6PvFo4RvsFtPoIWeCReyIC8\"",
+      "expires": "-1",
+      "nel": "{\"report_to\":\"heroku-nel\",\"response_headers\":[\"Via\"],\"max_age\":3600,\"success_fraction\":0.01,\"failure_fraction\":0.1}",
+      "pragma": "no-cache",
+      "report-to": "{\"group\":\"heroku-nel\",\"endpoints\":[{\"url\":\"https://nel.heroku.com/reports?s=24p0%2B5AZ6nYFZoypY%2Fw0v1L6w8ZMViT4L0ilGejpAcs%3D\\u0026sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d\\u0026ts=1773162909\"}],\"max_age\":3600}",
+      "reporting-endpoints": "heroku-nel=\"https://nel.heroku.com/reports?s=24p0%2B5AZ6nYFZoypY%2Fw0v1L6w8ZMViT4L0ilGejpAcs%3D&sid=e11707d5-02a7-43ef-b45e-2cf4d2036f7d&ts=1773162909\"",
+      "server": "cloudflare",
+      "vary": "Origin, Accept-Encoding",
+      "via": "2.0 heroku-router",
+      "x-content-type-options": "nosniff",
+      "x-powered-by": "Express",
+      "x-ratelimit-limit": "1000",
+      "x-ratelimit-remaining": "999",
+      "x-ratelimit-reset": "1773162912",
+      "cf-cache-status": "MISS",
+      "cf-ray": "9da3f5b6ce60a08f-SIN",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    },
+    "data": {}
+  },
+  "metadata": {
+    "duration_ms": 1308
+  }
+}
