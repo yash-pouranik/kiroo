@@ -1,9 +1,16 @@
 import chalk from 'chalk';
 import { executeRequest } from './executor.js';
 
-export async function handleImport(curlCommand) {
+export async function handleImport(input) {
   try {
-    const parsed = parseCurl(curlCommand);
+    let tokens = [];
+    if (Array.isArray(input)) {
+      tokens = input;
+    } else {
+      tokens = stringToTokens(input);
+    }
+    
+    const parsed = parseCurlTokens(tokens);
     
     console.log(chalk.cyan('\n  📥 Parsed cURL Command:'));
     console.log(chalk.gray(`  Method: `), chalk.white(parsed.method));
@@ -27,18 +34,10 @@ export async function handleImport(curlCommand) {
   }
 }
 
-/**
- * A basic cURL parser that handles:
- * - -X, --request
- * - -H, --header
- * - -d, --data, --data-raw, --data-binary
- * - URL (positional)
- */
-function parseCurl(curlString) {
+function stringToTokens(curlString) {
   // Clean up shell artifacts (Windows ^, backslashes for line continuation)
   let cleanStr = curlString.replace(/\^/g, '').replace(/\\\n/g, ' ').trim();
   
-  // Basic tokenization respecting quotes
   const tokens = [];
   let currentToken = '';
   let inQuotes = false;
@@ -68,7 +67,10 @@ function parseCurl(curlString) {
     }
   }
   if (currentToken) tokens.push(currentToken);
+  return tokens;
+}
 
+function parseCurlTokens(tokens) {
   const result = {
     method: 'GET',
     url: '',
@@ -99,12 +101,10 @@ function parseCurl(curlString) {
     } else if (token === 'curl' || token.startsWith('-')) {
       continue;
     } else {
-      // Possible naked URL
       if (!result.url) result.url = token;
     }
   }
 
-  // Final cleanup of URL (strip any remaining quotes if they leaked)
   if (result.url) {
     result.url = result.url.replace(/^["']|["']$/g, '');
   }
