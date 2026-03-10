@@ -9,13 +9,14 @@ import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
 // import { showGraph } from '../src/graph.js';
 import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
+import { handleImport } from '../src/import.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.2.2');
+  .version('0.3.0');
 
 // Init command
 program
@@ -103,6 +104,27 @@ snapshot
   .description('Compare two snapshots')
   .action(async (tag1, tag2) => {
     await compareSnapshots(tag1, tag2);
+  });
+
+// Import command
+program
+  .command('import [curl]')
+  .description('Import a request from a cURL command (opens editor if curl string is omitted)')
+  .action(async (curlArg) => {
+    let curl = curlArg;
+    if (!curl) {
+      const inquirer = (await import('inquirer')).default;
+      const response = await inquirer.prompt([
+        {
+          type: 'editor',
+          name: 'curl',
+          message: 'Paste your cURL command here (opens your default editor):',
+          validate: (input) => input.trim().length > 0 || 'Please enter a cURL command'
+        }
+      ]);
+      curl = response.curl;
+    }
+    await handleImport(curl);
   });
 
 // Graph command
