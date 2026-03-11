@@ -25,11 +25,24 @@ export async function runBenchmark(url, options) {
     const envData = loadEnv();
     const currentEnv = envData.environments[envData.current] || {};
     if (currentEnv.baseUrl) {
-      if (!currentEnv.baseUrl.endsWith('/') && !url.startsWith('/')) {
-        targetUrl = `${currentEnv.baseUrl}/${url}`;
-      } else {
-        targetUrl = `${currentEnv.baseUrl}${url}`;
+      let pathPart = url;
+      // Windows Git Bash conversion: Detect "C:/..." style paths with no protocol
+      if (process.platform === 'win32' && /^[a-zA-Z]:[/\\]/.test(url) && !url.includes('://')) {
+        const segments = url.split(/[/\\]/);
+        const apiIdx = segments.findIndex(s => s === 'api' || s === 'v1' || s === 'v2');
+        if (apiIdx !== -1) {
+          pathPart = '/' + segments.slice(apiIdx).join('/');
+        } else {
+          pathPart = url.replace(/^[a-zA-Z]:/, '').replace(/\\/g, '/');
+          if (!pathPart.startsWith('/')) pathPart = '/' + pathPart;
+        }
+      } else if (!url.startsWith('/')) {
+        pathPart = '/' + url;
       }
+      
+      const baseUrl = currentEnv.baseUrl;
+      const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+      targetUrl = normalizedBaseUrl + (pathPart.startsWith('/') ? pathPart : '/' + pathPart);
     } else {
       console.log(chalk.red(`\n  ✗ Invalid URL and no baseUrl defined in environment '${envData.current}'\n`));
       process.exit(1);
