@@ -16,48 +16,60 @@
 
 ---
 
-## 📖 Introduction
+## 📖 What is Kiroo?
 
-Kiroo treats your API requests and responses as **first-class versionable artifacts**. 
+Kiroo is **Version Control for API Interactions**. It treats your requests and responses as first-class, versionable artifacts that live right alongside your code in your Git repository.
 
-Ever had a production bug that worked fine on your machine? Ever refactored a backend only to find out you broke a critical field 3 days later? Kiroo solves this by letting you **store API interactions in your repository**.
-
-Every interaction is a structured, reproducibility-focused JSON file that lives in your `.kiroo/` directory.
+Stop copy-pasting JSON into Postman. Stop losing your API history. Start versioning it. 🚀
 
 ---
 
-## ✨ Core Capabilities
+## 🕸️ Visual Dependency Graph (`kiroo graph`)
 
-### 🔴 **Auto-Recording**
-Every request made through Kiroo is automatically saved. No more manual exports from Postman.
+Kiroo doesn't just record requests; it understands the **relationships** between them. 
+- **Auto-Tracking**: Kiroo tracks variables created via `--save` and consumed via `{{key}}`.
+- **Insight**: Instantly see how data flows from your `/login` to your `/profile` and beyond.
+
+---
+
+## 📊 Insights & Performance Dashboard (`kiroo stats`)
+
+Monitor your API's health directly from your terminal.
+- **Success Rates**: Real-time 2xx/4xx/5xx distribution.
+- **Performance**: Average response times across all interactions.
+- **Bottlenecks**: Automatically identifies your top 5 slowest endpoints.
+
+---
+
+## 🔌 Instant cURL Import (`kiroo import`)
+
+Coming from a browser? Don't type a single header.
+- **Copy-Paste Magic**: Just `Copy as cURL` from Chrome/Firefox and run `kiroo import`.
+- **Clean Parsing**: Automatically handles multi-line commands, quotes, and complex flags.
+
+---
+
+## ✨ Features that WOW
+
+### 🟢 **Git-Native Testing**
+Capture a **Snapshot** of your entire API state and compare versions to detect breaking changes instantly.
 ```bash
-kiroo post {{baseUrl}}/users -d "name=Yash email=yash@example.com"
-```
-
-### 🔄 **Replay Engine**
-Re-run any past interaction instantly and see if the backend behavior has changed.
-```bash
-kiroo replay <interaction-id>
-```
-
-### 🌍 **Smart Environments & Variables**
-Stop copy-pasting tokens. Chain requests together dynamically.
-```bash
-# Save a token from login
-kiroo post /login --save token=data.accessToken
-
-# Use it in the next request
-kiroo get /profile -H "Authorization: Bearer {{token}}"
-```
-
-### 📸 **Snapshot System & Diff Engine**
-Capture the "Status Quo" of your API and detect **Breaking Changes** during refactors.
-```bash
-# Before refactor
 kiroo snapshot save v1-stable
-
-# After refactor
+# ... make changes ...
 kiroo snapshot compare v1-stable current
+```
+
+### 🌍 **Variable Chaining**
+Chain requests like a pro. Save a token from one response and inject it into the next.
+```bash
+kiroo post /login --save jwt=data.token
+kiroo get /users -H "Authorization: Bearer {{jwt}}"
+```
+
+### ⌨️ **Shorthand JSON Parser**
+Forget escaping quotes. Type JSON like a human.
+```bash
+kiroo post /api/user -d "name=Yash email=yash@kiroo.io role=admin"
 ```
 
 ---
@@ -66,53 +78,40 @@ kiroo snapshot compare v1-stable current
 
 ### 1. Installation
 ```bash
-# Clone the repo
-git clone https://github.com/yash-pouranik/kiroo.git
-cd kiroo
-
-# Install and link
-npm install
-npm link
+npm install -g kiroo
 ```
 
-### 2. Initialize
+### 2. Initialization
 ```bash
 kiroo init
 ```
 
-### 3. Basic Request
+### 3. Record Your First Request
 ```bash
-kiroo env set baseUrl http://localhost:3000
-kiroo get {{baseUrl}}/health
+kiroo get https://api.github.com/users/yash-pouranik
 ```
 
 ---
 
-## 🛠️ Advanced Workflows
+## 🛠️ Command Reference
 
-### Nested Data Support
-Kiroo's shorthand parser understands nested objects and arrays:
-```bash
-kiroo put /products/1 -d "reviews[0].stars=5 metadata.isFeatured=true"
-```
-
-### Managing Environments
-```bash
-kiroo env use prod
-kiroo env list
-```
+| Command | Description | Example |
+| :--- | :--- | :--- |
+| `kiroo get/post/...` | Execute and record a request | `kiroo get /users` |
+| `kiroo list` | View your interaction history | `kiroo list -n 20` |
+| `kiroo replay <id>` | Re-run a specific interaction | `kiroo replay 2026-03...` |
+| `kiroo graph` | Show visual dependency map | `kiroo graph` |
+| `kiroo stats` | Show performance dashboard | `kiroo stats` |
+| `kiroo import` | Import from cURL command | `kiroo import` |
+| `kiroo snapshot` | Manage API snapshots | `kiroo snapshot save v1` |
+| `kiroo env` | Manage environments & vars | `kiroo env use prod` |
+| `kiroo clear` | Wipe interaction history | `kiroo clear --force` |
 
 ---
 
-## 🎯 Comparison
+## 🤝 Contributing
 
-| Feature | Postman / Insomnia | Bruno | **Kiroo** |
-| :--- | :---: | :---: | :---: |
-| **CLI-First** | ❌ | ⚠️ | ✅ |
-| **Git-Native** | ❌ | ✅ | ✅ |
-| **Auto-Recording** | ❌ | ❌ | ✅ |
-| **Built-in Replay** | ❌ | ❌ | ✅ |
-| **Variable Chaining** | ⚠️ | ⚠️ | ✅ |
+Kiroo is an open-source project and we love contributions! Check out our [Contribution Guidelines](CONTRIBUTING.md).
 
 ---
 
