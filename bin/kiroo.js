@@ -19,7 +19,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.7.3');
+  .version('0.7.4');
 
 // Init command
 program
@@ -123,6 +123,7 @@ program
   .option('-n, --number <number>', 'Number of total requests to send', '10')
   .option('-c, --concurrent <number>', 'Number of concurrent requests', '1')
   .option('-H, --header <header...>', 'Add custom headers')
+  .option('-v, --verbose', 'Show detailed output for every request')
   .option('-d, --data <data>', 'Request body')
   .action(async (url, options) => {
     await runBenchmark(url, options);

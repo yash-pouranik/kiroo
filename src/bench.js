@@ -94,7 +94,14 @@ export async function runBenchmark(url, options) {
     } catch(e) {}
   }
 
-  const spinner = ora(`Benchmarking ${method} ${targetUrl} (Reqs: ${totalRequests}, Workers: ${concurrency})`).start();
+  const isVerbose = options.verbose;
+  let spinner;
+  
+  if (!isVerbose) {
+    spinner = ora(`Benchmarking ${method} ${targetUrl} (Reqs: ${totalRequests}, Workers: ${concurrency})`).start();
+  } else {
+    console.log(chalk.cyan(`\n  Starting Benchmark: ${method} ${targetUrl} (Reqs: ${totalRequests}, Workers: ${concurrency})\n`));
+  }
 
   const results = {
     total: totalRequests,
@@ -117,6 +124,7 @@ export async function runBenchmark(url, options) {
 
       activeWorkers++;
       const reqIndex = completedCount++;
+      const reqId = reqIndex + 1;
       const reqStartTime = Date.now();
 
       try {
@@ -131,20 +139,39 @@ export async function runBenchmark(url, options) {
         const duration = Date.now() - reqStartTime;
         results.times.push(duration);
         
+        let statusColor = response.status >= 400 ? chalk.red : chalk.green;
+        
         if (response.status >= 200 && response.status < 400) {
           results.success++;
         } else {
           results.failures++;
         }
+
+        if (isVerbose) {
+           console.log(chalk.gray(`  [Req ${reqId}/${totalRequests}] `) + statusColor(`${response.status} ${response.statusText}`) + chalk.gray(` - ${duration}ms`));
+           
+           // Print snippet of data if available
+           if (response.data) {
+             let dataStr = typeof response.data === 'object' ? JSON.stringify(response.data) : String(response.data);
+             if (dataStr.length > 200) dataStr = dataStr.substring(0, 197) + '...';
+             console.log(chalk.gray(`  ↳ Data: `) + chalk.white(dataStr));
+           }
+        }
       } catch (error) {
         const duration = Date.now() - reqStartTime;
         results.times.push(duration);
         results.failures++;
+
+        if (isVerbose) {
+           console.log(chalk.gray(`  [Req ${reqId}/${totalRequests}] `) + chalk.red(`ERR: ${error.message}`) + chalk.gray(` - ${duration}ms`));
+        }
       } finally {
         activeWorkers--;
-        // Update spinner
-        const percent = Math.floor((completedCount / totalRequests) * 100);
-        spinner.text = `Benchmarking... ${percent}% [${completedCount}/${totalRequests}]`;
+        // Update spinner if not verbose
+        if (!isVerbose) {
+          const percent = Math.floor((completedCount / totalRequests) * 100);
+          spinner.text = `Benchmarking... ${percent}% [${completedCount}/${totalRequests}]`;
+        }
         
         executeNext();
       }
@@ -152,7 +179,7 @@ export async function runBenchmark(url, options) {
 
     const finalizeBenchmark = () => {
       const totalTime = Date.now() - startTime;
-      spinner.stop();
+      if (!isVerbose) spinner.stop();
       
       const rps = ((results.total / totalTime) * 1000).toFixed(2);
       

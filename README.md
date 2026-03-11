@@ -170,6 +170,7 @@ Local load testing and benchmarking.
   - `-m, --method <method>`: HTTP method (GET, POST, etc. Default: GET).
   - `-n, --number <number>`: Total requests to send (Default: 10).
   - `-c, --concurrent <number>`: Concurrent workers (Default: 1).
+  - `-v, --verbose`: Show the HTTP status, response time, and truncated response body for every individual request instead of a single progress spinner.
   - `-H, --header <key:value>`: Add custom headers.
   - `-d, --data <data>`: Request body.
 - **Example**:
