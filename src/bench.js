@@ -19,15 +19,23 @@ export async function runBenchmark(url, options) {
     });
   }
 
-  // Auto-BaseURL processing
+  // Auto-BaseURL logic (Synced from executor.js)
   let targetUrl = url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     const envData = loadEnv();
-    const currentEnv = envData.environments[envData.current] || {};
-    if (currentEnv.baseUrl) {
+    const currentEnvVars = envData.environments[envData.current] || {};
+    
+    if (currentEnvVars.baseUrl) {
+      let isRelative = false;
       let pathPart = url;
-      // Windows Git Bash conversion: Detect "C:/..." style paths with no protocol
-      if (process.platform === 'win32' && /^[a-zA-Z]:[/\\]/.test(url) && !url.includes('://')) {
+
+      // 1. Direct relative path
+      if (url.startsWith('/')) {
+        isRelative = true;
+      } 
+      // 2. Windows Git Bash conversion: Detect "C:/..." style paths with no protocol
+      else if (process.platform === 'win32' && /^[a-zA-Z]:[/\\]/.test(url) && !url.includes('://')) {
+        isRelative = true;
         const segments = url.split(/[/\\]/);
         const apiIdx = segments.findIndex(s => s === 'api' || s === 'v1' || s === 'v2');
         if (apiIdx !== -1) {
@@ -35,14 +43,25 @@ export async function runBenchmark(url, options) {
         } else {
           pathPart = url.replace(/^[a-zA-Z]:/, '').replace(/\\/g, '/');
           if (!pathPart.startsWith('/')) pathPart = '/' + pathPart;
+          
+          // Hard fix for Git Bash root expansion "C:/Program Files/Git/" -> "/"
+          const lowerPath = pathPart.toLowerCase();
+          if (lowerPath === '/program files/git/' || lowerPath === '/program files/git') {
+             pathPart = '/';
+          }
         }
-      } else if (!url.startsWith('/')) {
+      }
+      // 3. No leading slash but doesn't look like a host
+      else if (!url.includes('://') && !url.includes('.') && !url.includes(':') && !url.startsWith('localhost')) {
+        isRelative = true;
         pathPart = '/' + url;
       }
-      
-      const baseUrl = currentEnv.baseUrl;
-      const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-      targetUrl = normalizedBaseUrl + (pathPart.startsWith('/') ? pathPart : '/' + pathPart);
+
+      if (isRelative) {
+        const baseUrl = currentEnvVars.baseUrl;
+        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+        targetUrl = normalizedBaseUrl + (pathPart.startsWith('/') ? pathPart : '/' + pathPart);
+      }
     } else {
       console.log(chalk.red(`\n  ✗ Invalid URL and no baseUrl defined in environment '${envData.current}'\n`));
       process.exit(1);

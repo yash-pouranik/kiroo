@@ -89,6 +89,12 @@ export async function executeRequest(method, url, options = {}) {
         // Let's at least strip the drive letter root
         pathPart = url.replace(/^[a-zA-Z]:/, '').replace(/\\/g, '/');
         if (!pathPart.startsWith('/')) pathPart = '/' + pathPart;
+        
+        // Hard fix for Git Bash root expansion "C:/Program Files/Git/" -> "/"
+        const lowerPath = pathPart.toLowerCase();
+        if (lowerPath === '/program files/git/' || lowerPath === '/program files/git') {
+             pathPart = '/';
+        }
       }
     }
     // 3. No leading slash but doesn't look like a host (no dots, no protocol)
