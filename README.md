@@ -156,6 +156,16 @@ Re-run a specific interaction.
   kiroo replay 2026-03-10T14-30-05-123Z
   ```
 
+### `kiroo edit <id>`
+Quick Refinement. Edit an interaction on the fly and replay it.
+- **Description**: Opens the stored interaction JSON in your default system editor (VS Code, Nano, Vim, etc.). Edit the headers, body, or URL, save, and close. Kiroo immediately replays the updated request.
+- **Arguments**:
+  - `id`: The timestamp ID of the interaction.
+- **Example**:
+  ```bash
+  kiroo edit 2026-03-10T14-30-05-123Z
+  ```
+
 ### `kiroo check <url>`
 Zero-Code Testing engine.
 - **Description**: Executes a request and runs assertions on the response. Exits with code 1 on failure.
@@ -230,6 +240,16 @@ Snapshot management.
 - **Example**:
   ```bash
   kiroo snapshot compare v1.stable current
+  ```
+
+### `kiroo export`
+Team Compatibility. Export to Postman.
+- **Description**: Converts all stored Kiroo interactions and responses into a standard Postman Collection v2.1.0 format (`.json`) for seamless GUI import.
+- **Options**:
+  - `-o, --out <filename>`: The output filename (Default: `kiroo-collection.json`).
+- **Example**:
+  ```bash
+  kiroo export --out my_api_collection.json
   ```
 
 ### `kiroo env`

@@ -13,13 +13,15 @@ import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
 import { clearAllInteractions } from '../src/storage.js';
 import { runBenchmark } from '../src/bench.js';
+import { editInteraction } from '../src/edit.js';
+import { exportToPostman } from '../src/export.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.7.5')
+  .version('0.8.0')
   .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
 
 // Init command
@@ -114,6 +116,23 @@ program
   .description('Replay a stored interaction')
   .action(async (id) => {
     await replayInteraction(id);
+  });
+
+// Edit interaction
+program
+  .command('edit <id>')
+  .description('Edit an interaction in your text editor and quickly replay it')
+  .action(async (id) => {
+    await editInteraction(id);
+  });
+
+// Export interactions
+program
+  .command('export')
+  .description('Export all stored interactions to a Postman Collection')
+  .option('-o, --out <filename>', 'Output JSON filename', 'kiroo-collection.json')
+  .action((options) => {
+    exportToPostman(options.out);
   });
 
 // Bench command (Load Testing)
