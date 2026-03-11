@@ -6,7 +6,7 @@ import { executeRequest } from '../src/executor.js';
 import { listInteractions, replayInteraction } from '../src/replay.js';
 import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
 import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
-// import { showGraph } from '../src/graph.js';
+import { showGraph } from '../src/graph.js';
 import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
@@ -17,7 +17,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.3.5');
+  .version('0.4.0');
 
 // Init command
 program
@@ -127,6 +127,14 @@ snapshot
   .description('Compare two snapshots')
   .action(async (tag1, tag2) => {
     await compareSnapshots(tag1, tag2);
+  });
+
+// Graph command
+program
+  .command('graph')
+  .description('Show visual dependency graph of API interactions')
+  .action(async () => {
+    await showGraph();
   });
 
 // Import command

@@ -4,16 +4,20 @@ import ora from 'ora';
 import { saveInteraction, loadEnv, saveEnv } from './storage.js';
 import { formatResponse } from './formatter.js';
 
-function applyEnvReplacements(data, envVars) {
+function applyEnvReplacements(data, envVars, usedKeys = null) {
   if (typeof data === 'string') {
     return data.replace(/\{\{(.+?)\}\}/g, (match, key) => {
-      return envVars[key] !== undefined ? envVars[key] : match;
+      if (envVars[key] !== undefined) {
+        if (usedKeys) usedKeys.add(key);
+        return envVars[key];
+      }
+      return match;
     });
   }
   if (typeof data === 'object' && data !== null) {
     const newData = Array.isArray(data) ? [] : {};
     for (const key in data) {
-      newData[key] = applyEnvReplacements(data[key], envVars);
+      newData[key] = applyEnvReplacements(data[key], envVars, usedKeys);
     }
     return newData;
   }
@@ -52,8 +56,11 @@ export async function executeRequest(method, url, options = {}) {
   const env = loadEnv();
   const currentEnvVars = env.environments[env.current] || {};
 
+  const usedKeys = new Set();
+  const savedKeys = [];
+
   // Apply replacements to URL
-  url = applyEnvReplacements(url, currentEnvVars);
+  url = applyEnvReplacements(url, currentEnvVars, usedKeys);
 
   // Auto-BaseURL logic
   if (currentEnvVars.baseUrl) {
@@ -103,7 +110,7 @@ export async function executeRequest(method, url, options = {}) {
     options.header.forEach(h => {
       const [key, ...valueParts] = h.split(':');
       const headerValue = valueParts.join(':').trim();
-      headers[key.trim()] = applyEnvReplacements(headerValue, currentEnvVars);
+      headers[key.trim()] = applyEnvReplacements(headerValue, currentEnvVars, usedKeys);
     });
   }
 
@@ -112,7 +119,7 @@ export async function executeRequest(method, url, options = {}) {
   if (options.data) {
     let rawData = options.data;
     // Apply replacements to raw data string before parsing
-    rawData = applyEnvReplacements(rawData, currentEnvVars);
+    rawData = applyEnvReplacements(rawData, currentEnvVars, usedKeys);
 
     try {
       body = JSON.parse(rawData);
@@ -175,6 +182,7 @@ export async function executeRequest(method, url, options = {}) {
           const val = getDeep(response, responsePath);
           if (val !== undefined) {
             env.environments[env.current][envKey] = val;
+            savedKeys.push(envKey);
             console.log(chalk.cyan(`  ✨ Saved to env:`), chalk.white(`${envKey}=${val}`));
           } else {
             console.log(chalk.yellow(`  ⚠️  Could not find path '${responsePath}' in response`));
@@ -197,6 +205,8 @@ export async function executeRequest(method, url, options = {}) {
         data: response.data,
       },
       duration,
+      saves: savedKeys,
+      uses: Array.from(usedKeys)
     });
 
     console.log(chalk.gray('\n  💾 Interaction saved:'), chalk.white(interactionId));
