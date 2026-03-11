@@ -3,8 +3,14 @@ import Table from 'cli-table3';
 import axios from 'axios';
 import ora from 'ora';
 import { loadEnv } from './storage.js';
+import { applyEnvReplacements } from './executor.js';
 
 export async function runBenchmark(url, options) {
+  const envData = loadEnv();
+  const currentEnvVars = envData.environments[envData.current] || {};
+
+  url = applyEnvReplacements(url, currentEnvVars);
+
   const method = (options.method || 'GET').toUpperCase();
   const totalRequests = parseInt(options.number) || 10;
   const concurrency = parseInt(options.concurrent) || 1;
@@ -14,7 +20,9 @@ export async function runBenchmark(url, options) {
     options.header.forEach(h => {
       const parts = h.split(':');
       if (parts.length >= 2) {
-        headersObj[parts[0].trim()] = parts.slice(1).join(':').trim();
+        let val = parts.slice(1).join(':').trim();
+        val = applyEnvReplacements(val, currentEnvVars);
+        headersObj[parts[0].trim()] = val;
       }
     });
   }
@@ -22,9 +30,6 @@ export async function runBenchmark(url, options) {
   // Auto-BaseURL logic (Synced from executor.js)
   let targetUrl = url;
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    const envData = loadEnv();
-    const currentEnvVars = envData.environments[envData.current] || {};
-    
     if (currentEnvVars.baseUrl) {
       let isRelative = false;
       let pathPart = url;
@@ -70,8 +75,12 @@ export async function runBenchmark(url, options) {
 
   // Parse Body
   let requestData = options.data;
-  if (options.data && !options.data.trim().startsWith('{')) {
-    const pairs = options.data.split(' ');
+  if (options.data) {
+    requestData = applyEnvReplacements(options.data, currentEnvVars);
+  }
+
+  if (requestData && typeof requestData === 'string' && !requestData.trim().startsWith('{')) {
+    const pairs = requestData.split(' ');
     requestData = {};
     pairs.forEach(pair => {
       const [key, value] = pair.split('=');
@@ -79,9 +88,9 @@ export async function runBenchmark(url, options) {
         requestData[key] = value;
       }
     });
-  } else if (options.data) {
+  } else if (requestData && typeof requestData === 'string') {
     try {
-      requestData = JSON.parse(options.data);
+      requestData = JSON.parse(requestData);
     } catch(e) {}
   }
 

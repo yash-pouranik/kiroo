@@ -4,7 +4,7 @@ import ora from 'ora';
 import { saveInteraction, loadEnv, saveEnv } from './storage.js';
 import { formatResponse } from './formatter.js';
 
-function applyEnvReplacements(data, envVars, usedKeys = null) {
+export function applyEnvReplacements(data, envVars, usedKeys = null) {
   if (typeof data === 'string') {
     return data.replace(/\{\{(.+?)\}\}/g, (match, key) => {
       if (envVars[key] !== undefined) {
