@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { getAllInteractions, saveSnapshotData, getAllSnapshots, loadSnapshotData } from './storage.js';
+import { translateText } from './lingo.js';
 
 export async function saveSnapshot(tag) {
   const interactions = getAllInteractions();
@@ -49,12 +50,15 @@ export async function listSnapshots() {
   console.log('');
 }
 
-export async function compareSnapshots(tag1, tag2) {
+export async function compareSnapshots(tag1, tag2, lang) {
   try {
     const s1 = loadSnapshotData(tag1);
     const s2 = loadSnapshotData(tag2);
     
     console.log(chalk.cyan(`\n  🔍 Comparing Snapshots:`), chalk.white(tag1), chalk.gray('vs'), chalk.white(tag2));
+    if (lang) {
+      console.log(chalk.magenta(`  🌍 Translating output to: ${chalk.white(lang.toUpperCase())} using Lingo.dev...`));
+    }
     
     const results = [];
     let breakingChanges = 0;
@@ -93,18 +97,62 @@ export async function compareSnapshots(tag1, tag2) {
         breakingChanges++;
       }
       
-      // Deep field comparison (very basic for MVP)
-      if (typeof int1.response.body === 'object' && typeof int2.response.body === 'object' && int1.response.body !== null && int2.response.body !== null) {
-        const keys1 = Object.keys(int1.response.body);
-        const keys2 = Object.keys(int2.response.body);
+      // Helper for deep structural comparison
+      const deepCompare = (val1, val2, path = '') => {
+        const changes = [];
         
-        const removed = keys1.filter(k => !keys2.includes(k));
-        if (removed.length > 0) {
-          diffs.push(`Fields removed: ${chalk.red(removed.join(', '))}`);
-          breakingChanges++;
+        // Handle nulls
+        if (val1 === null && val2 !== null) return [{ path, msg: `type changed from null to ${typeof val2}`, breaking: false }];
+        if (val1 !== null && val2 === null) return [{ path, msg: `type changed from ${typeof val1} to null`, breaking: false }];
+        if (val1 === null && val2 === null) return changes;
+
+        const type1 = Array.isArray(val1) ? 'array' : typeof val1;
+        const type2 = Array.isArray(val2) ? 'array' : typeof val2;
+
+        if (type1 !== type2) {
+          changes.push({ path, msg: `type changed from ${chalk.yellow(type1)} to ${chalk.yellow(type2)}`, breaking: true });
+          return changes;
         }
-      }
-      
+
+        if (type1 === 'object') {
+          const keys1 = Object.keys(val1);
+          const keys2 = Object.keys(val2);
+
+          // Check for removed keys (Breaking)
+          for (const k of keys1) {
+            const currentPath = path ? `${path}.${k}` : k;
+            if (!keys2.includes(k)) {
+              changes.push({ path: currentPath, msg: `was ${chalk.red('removed')}`, breaking: true });
+            } else {
+              changes.push(...deepCompare(val1[k], val2[k], currentPath));
+            }
+          }
+
+          // Check for added keys (Non-breaking)
+          for (const k of keys2) {
+            const currentPath = path ? `${path}.${k}` : k;
+            if (!keys1.includes(k)) {
+              changes.push({ path: currentPath, msg: `was ${chalk.green('added')}`, breaking: false });
+            }
+          }
+        } else if (type1 === 'array') {
+          // Array structure validation (check first item schema only if exists)
+          if (val1.length > 0 && val2.length > 0) {
+            const itemPath = path ? `${path}[0]` : '[0]';
+            changes.push(...deepCompare(val1[0], val2[0], itemPath));
+          }
+        }
+        
+        return changes;
+      };
+
+      if (int1.response.body !== undefined && int2.response.body !== undefined) {
+        const structuralChanges = deepCompare(int1.response.body, int2.response.body);
+        for (const change of structuralChanges) {
+           diffs.push(`${chalk.cyan(change.path || 'root')} ${change.msg}`);
+           if (change.breaking) breakingChanges++;
+        }
+      }      
       if (diffs.length > 0) {
         results.push({
           type: 'CHANGE',
@@ -116,19 +164,36 @@ export async function compareSnapshots(tag1, tag2) {
     });
 
     if (results.length === 0) {
-      console.log(chalk.green('\n  ✅ No differences detected. Your API is stable!\n'));
+      let finalMsg = 'No differences detected. Your API is stable!';
+      if (lang) finalMsg = await translateText(finalMsg, lang);
+      console.log(chalk.green(`\n  ✅ ${finalMsg}\n`));
     } else {
       console.log('');
-      results.forEach(res => {
+      
+      for (const res of results) {
+        let printMsg = res.msg;
+        if (lang) {
+           // Basic translation hook for individual diff items (stripping ansi)
+           const cleanMsg = printMsg.replace(/\x1B\[[0-9;]*m/g, '');
+           const translatedMsg = await translateText(cleanMsg, lang);
+           printMsg = chalk.yellow('[Translated] ') + translatedMsg;
+        }
+
         const symbol = res.type === 'NEW' ? chalk.blue('+') : chalk.yellow('⚠️');
         console.log(`  ${symbol} ${chalk.white(res.method)} ${chalk.gray(res.url)}`);
-        console.log(`    ${res.msg}`);
-      });
+        console.log(`    ${printMsg}`);
+      }
       
+      let alertMsg = breakingChanges > 0 
+          ? `Detected ${breakingChanges} potential breaking changes!`
+          : `Non-breaking changes detected.`;
+          
+      if (lang) alertMsg = await translateText(alertMsg, lang);
+
       if (breakingChanges > 0) {
-        console.log(chalk.red(`\n  🚨 Detected ${breakingChanges} potential breaking changes!\n`));
+        console.log(chalk.red(`\n  🚨 ${alertMsg}\n`));
       } else {
-        console.log(chalk.blue('\n  ℹ️ Non-breaking changes detected.\n'));
+        console.log(chalk.blue(`\n  ℹ️ ${alertMsg}\n`));
       }
     }
 

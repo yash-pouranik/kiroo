@@ -19,7 +19,8 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.7.4');
+  .version('0.7.5')
+  .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
 
 // Init command
 program
@@ -195,7 +196,8 @@ snapshot
   .command('compare <tag1> <tag2>')
   .description('Compare two snapshots')
   .action(async (tag1, tag2) => {
-    await compareSnapshots(tag1, tag2);
+    const opts = program.opts();
+    await compareSnapshots(tag1, tag2, opts.lang);
   });
 
 // Graph command
