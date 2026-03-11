@@ -1,0 +1,40 @@
+{
+  "id": "2026-03-11T07-41-45-214Z",
+  "timestamp": "2026-03-11T07:41:45.214Z",
+  "request": {
+    "method": "GET",
+    "url": "https://api.urbackend.bitbros.in/api/projects",
+    "headers": {
+      "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTJhMGVmMmRmZGU5NWI4ZmNiZjIzNTkiLCJpc1ZlcmlmaWVkIjp0cnVlLCJtYXhQcm9qZWN0cyI6MywiaWF0IjoxNzczMjE0ODk5LCJleHAiOjE3NzM4MTk2OTl9.TBLGnYC7WvTkkY2DHHVYKVb1N5krnG-Ii--WFdr0Ea8"
+    }
+  },
+  "response": {
+    "status": 401,
+    "statusText": "Unauthorized",
+    "headers": {
+      "date": "Wed, 11 Mar 2026 07:41:51 GMT",
+      "content-type": "text/html; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "speculation-rules": "\"/cdn-cgi/speculation\"",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=CzpzbEOu7oo1wCVXmOWu2XeYKQCx%2BoQ%2FHgO3H5OX3BrrWEGbg%2BZpAkV0itZQWTNY1J2UIqNdOqRhgEput3u3kwCdud6PkW1i%2FsZKvEOeF8oY0IqqMqceng%3D%3D\"}]}",
+      "server": "cloudflare",
+      "access-control-allow-credentials": "true",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "etag": "W/\"25-vkdiG4amYPtYhMV1y5Bk3Zd2D+8\"",
+      "rndr-id": "36316268-77b3-4fad",
+      "vary": "Origin, Accept-Encoding",
+      "x-powered-by": "Express",
+      "x-ratelimit-limit": "1000",
+      "x-ratelimit-remaining": "998",
+      "x-ratelimit-reset": "1773215088",
+      "x-render-origin-server": "Render",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9da8eb491c96f8d3-SIN"
+    },
+    "data": "Access Denied: Malformed Token Format"
+  },
+  "metadata": {
+    "duration_ms": 661
+  }
+}

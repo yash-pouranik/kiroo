@@ -1,0 +1,44 @@
+{
+  "id": "2026-03-11T07-41-33-395Z",
+  "timestamp": "2026-03-11T07:41:33.395Z",
+  "request": {
+    "method": "POST",
+    "url": "https://api.urbackend.bitbros.in/api/auth/login",
+    "headers": {},
+    "body": {
+      "email": "yashpouranik124@gmail.com",
+      "password": "Yassuu88@"
+    }
+  },
+  "response": {
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "date": "Wed, 11 Mar 2026 07:41:39 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "195",
+      "connection": "keep-alive",
+      "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=VwCIM92uEOdm4jl%2F4o65fFl7BWfOOgbfRuyTOi77y%2BdncgXnDDjRzkLOThxbGP1siPmvxoB4NlUm9UUwZbD6Ce5UnXAfKrnb9BTiksJlssS64pwdwzr%2BvQ%3D%3D\"}]}",
+      "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+      "server": "cloudflare",
+      "access-control-allow-credentials": "true",
+      "etag": "W/\"e5-5XRFQgYbnvANc+9xdwaMhhK7YQE\"",
+      "ratelimit-limit": "10",
+      "ratelimit-policy": "10;w=900",
+      "ratelimit-remaining": "9",
+      "ratelimit-reset": "900",
+      "rndr-id": "28a3d700-70cd-47e8",
+      "vary": "Origin, Accept-Encoding",
+      "x-powered-by": "Express",
+      "x-render-origin-server": "Render",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9da8eaf7ce9ac63b-SIN"
+    },
+    "data": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OTJhMGVmMmRmZGU5NWI4ZmNiZjIzNTkiLCJpc1ZlcmlmaWVkIjp0cnVlLCJtYXhQcm9qZWN0cyI6MywiaWF0IjoxNzczMjE0ODk5LCJleHAiOjE3NzM4MTk2OTl9.TBLGnYC7WvTkkY2DHHVYKVb1N5krnG-Ii--WFdr0Ea8"
+    }
+  },
+  "metadata": {
+    "duration_ms": 2697
+  }
+}

@@ -59,15 +59,27 @@ export async function compareSnapshots(tag1, tag2) {
     const results = [];
     let breakingChanges = 0;
     
-    // Simplistic comparison: match by URL and Method
+    // Helper to get path from URL string
+    const getPath = (urlStr) => {
+      try {
+        const urlObj = new URL(urlStr);
+        return urlObj.pathname;
+      } catch (e) {
+        // If it's already a path or invalid full URL, return as is
+        return urlStr.startsWith('http') ? urlStr : (urlStr.startsWith('/') ? urlStr : '/' + urlStr);
+      }
+    };
+
+    // Domain-agnostic comparison: match by Path and Method
     s2.interactions.forEach(int2 => {
-      const int1 = s1.interactions.find(i => i.url === int2.url && i.method === int2.method);
+      const path2 = getPath(int2.url);
+      const int1 = s1.interactions.find(i => getPath(i.url) === path2 && i.method === int2.method);
       
       if (!int1) {
         results.push({
           type: 'NEW',
           method: int2.method,
-          url: int2.url,
+          url: path2,
           msg: chalk.blue('New interaction added')
         });
         return;
@@ -97,7 +109,7 @@ export async function compareSnapshots(tag1, tag2) {
         results.push({
           type: 'CHANGE',
           method: int2.method,
-          url: int2.url,
+          url: path2,
           msg: diffs.join('\n    ')
         });
       }
