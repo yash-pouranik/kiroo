@@ -160,6 +160,24 @@ Zero-Code Testing engine.
   kiroo check /api/login -m POST -d "user=yash pass=123" --status 200 --has token
   ```
 
+### `kiroo bench <url>`
+Local load testing and benchmarking.
+- **Description**: Sends multiple concurrent HTTP requests to measure endpoint performance (Latency, RPS, Error Rate).
+- **Prerequisites**: Access to the URL.
+- **Arguments**:
+  - `url`: The endpoint (supports Auto-BaseURL).
+- **Options**:
+  - `-m, --method <method>`: HTTP method (GET, POST, etc. Default: GET).
+  - `-n, --number <number>`: Total requests to send (Default: 10).
+  - `-c, --concurrent <number>`: Concurrent workers (Default: 1).
+  - `-H, --header <key:value>`: Add custom headers.
+  - `-d, --data <data>`: Request body.
+- **Example**:
+  ```bash
+  # Send 100 requests in batches of 10
+  kiroo bench /api/projects -n 100 -c 10
+  ```
+
 ### `kiroo graph`
 Visualize API dependencies.
 - **Description**: Generates a tree view showing how data flows between endpoints via saved/used variables.

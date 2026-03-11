@@ -12,13 +12,14 @@ import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
 import { clearAllInteractions } from '../src/storage.js';
+import { runBenchmark } from '../src/bench.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.6.1');
+  .version('0.7.0');
 
 // Init command
 program
@@ -112,6 +113,19 @@ program
   .description('Replay a stored interaction')
   .action(async (id) => {
     await replayInteraction(id);
+  });
+
+// Bench command (Load Testing)
+program
+  .command('bench <url>')
+  .description('Run a basic load test against an endpoint')
+  .option('-m, --method <method>', 'HTTP method (GET, POST, etc.)', 'GET')
+  .option('-n, --number <number>', 'Number of total requests to send', '10')
+  .option('-c, --concurrent <number>', 'Number of concurrent requests', '1')
+  .option('-H, --header <header...>', 'Add custom headers')
+  .option('-d, --data <data>', 'Request body')
+  .action(async (url, options) => {
+    await runBenchmark(url, options);
   });
 
 // Clear command
