@@ -19,6 +19,11 @@ export function ensureKirooDir() {
   if (!existsSync(ENV_FILE)) {
     writeFileSync(ENV_FILE, JSON.stringify({ current: 'default', environments: { default: {} } }, null, 2));
   }
+  
+  const GITIGNORE_FILE = join(KIROO_DIR, '.gitignore');
+  if (!existsSync(GITIGNORE_FILE)) {
+    writeFileSync(GITIGNORE_FILE, 'env.json\n');
+  }
 }
 
 export async function saveInteraction(interaction) {

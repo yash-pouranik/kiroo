@@ -141,6 +141,25 @@ Re-run a specific interaction.
   kiroo replay 2026-03-10T14-30-05-123Z
   ```
 
+### `kiroo check <url>`
+Zero-Code Testing engine.
+- **Description**: Executes a request and runs assertions on the response. Exits with code 1 on failure.
+- **Prerequisites**: Access to the URL.
+- **Arguments**:
+  - `url`: The endpoint.
+- **Options**:
+  - `-m, --method <method>`: HTTP method (GET, POST, etc. Default: GET).
+  - `-H, --header <key:value>`: Add custom headers.
+  - `-d, --data <data>`: Request body.
+  - `--status <numbers>`: Expected HTTP status code.
+  - `--has <fields>`: Comma-separated list of expected fields in JSON.
+  - `--match <key=val>`: Exact value matching for JSON fields.
+- **Example**:
+  ```bash
+  # Check if login is successful
+  kiroo check /api/login -m POST -d "user=yash pass=123" --status 200 --has token
+  ```
+
 ### `kiroo graph`
 Visualize API dependencies.
 - **Description**: Generates a tree view showing how data flows between endpoints via saved/used variables.
@@ -216,5 +235,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  Built with ❤️ for Developers by <a href="https://github.com/yash-pouranik">Yash Pouranik</a>
+  Built with ❤️ for Developers
 </div>

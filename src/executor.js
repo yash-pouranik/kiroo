@@ -211,6 +211,7 @@ export async function executeRequest(method, url, options = {}) {
 
     console.log(chalk.gray('\n  💾 Interaction saved:'), chalk.white(interactionId));
 
+    return response;
   } catch (error) {
     const duration = Date.now() - startTime;
     spinner.fail(chalk.red('Request failed'));

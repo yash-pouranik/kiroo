@@ -7,6 +7,7 @@ import { listInteractions, replayInteraction } from '../src/replay.js';
 import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
 import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
 import { showGraph } from '../src/graph.js';
+import { validateResponse, showCheckResult } from '../src/checker.js';
 import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
@@ -17,7 +18,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.4.0');
+  .version('0.6.1');
 
 // Init command
 program
@@ -25,6 +26,56 @@ program
   .description('Initialize Kiroo in current directory')
   .action(async () => {
     await initProject();
+  });
+
+// Check command (Zero-Code Testing)
+program
+  .command('check <url>')
+  .description('Execute a request and validate the response against rules')
+  .option('-m, --method <method>', 'HTTP method (GET, POST, etc.)', 'GET')
+  .option('-H, --header <header...>', 'Add custom headers')
+  .option('-d, --data <data>', 'Request body (JSON or shorthand)')
+  .option('--status <code...>', 'Expected HTTP status code')
+  .option('--has <fields...>', 'Comma-separated list of expected fields in JSON response')
+  .option('--match <matches...>', 'Expected field values (e.g., status=active)')
+  .action(async (url, options) => {
+    // Execute request
+    const response = await executeRequest(options.method || 'GET', url, {
+      header: options.header,
+      data: options.data,
+    });
+
+    if (!response) {
+      console.error(chalk.red('\n  ✗ No response received to validate.'));
+      process.exit(1);
+    }
+
+    // Parse matches: ["key1=val1", "key2=val2"] -> { key1: val1, key2: val2 }
+    const matchObj = {};
+    if (options.match) {
+      options.match.forEach(m => {
+        const [k, ...v] = m.split('=');
+        if (k) matchObj[k] = v.join('=');
+      });
+    }
+
+    // Parse has: ["id,name"] or ["id", "name"] -> ["id", "name"]
+    const hasFields = options.has ? options.has.flatMap(h => h.split(',')).map(f => f.trim()) : [];
+
+    // Construct rules
+    const rules = {
+      status: Array.isArray(options.status) ? options.status[0] : options.status,
+      has: hasFields,
+      match: matchObj
+    };
+
+    // Validate
+    const validation = validateResponse(response, rules);
+    showCheckResult(validation);
+
+    if (!validation.passed) {
+      process.exit(1);
+    }
   });
   // sk_live_p7BWJjsYlKmauBOjiEeiLRuu4DokkBWsgYne_E6osTo
 
@@ -47,7 +98,10 @@ program
   .command('list')
   .description('List all stored interactions')
   .option('-n, --limit <number>', 'Number of interactions to show', '10')
-  .option('-o, --offset <number>', 'Number of interactions to skip', '0')
+  .option('-o, --offset <number>', 'Offset for pagination', '0')
+  .option('--date <date>', 'Filter by date (YYYY-MM-DD)')
+  .option('--url <url>', 'Filter by URL path')
+  .option('--status <status>', 'Filter by HTTP status')
   .action(async (options) => {
     await listInteractions(options);
   });

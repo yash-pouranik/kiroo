@@ -5,13 +5,26 @@ import { getAllInteractions, loadInteraction } from './storage.js';
 import { formatResponse } from './formatter.js';
 
 export async function listInteractions(options) {
-  const interactions = getAllInteractions();
+  let interactions = getAllInteractions();
   const limit = parseInt(options.limit) || 10;
   const offset = parseInt(options.offset) || 0;
   
+  // Apply Filters
+  if (options.date) {
+    interactions = interactions.filter(int => int.id.startsWith(options.date));
+  }
+  if (options.url) {
+    interactions = interactions.filter(int => int.request.url.toLowerCase().includes(options.url.toLowerCase()));
+  }
+  if (options.status) {
+    interactions = interactions.filter(int => String(int.response.status) === String(options.status));
+  }
+
   if (interactions.length === 0) {
-    console.log(chalk.yellow('\n  No interactions found.'));
-    console.log(chalk.gray('  Run a request first: '), chalk.white('kiroo POST https://api.example.com/endpoint\n'));
+    console.log(chalk.yellow('\n  No matching interactions found.'));
+    if (!options.date && !options.url && !options.status) {
+      console.log(chalk.gray('  Run a request first: '), chalk.white('kiroo POST https://api.example.com/endpoint\n'));
+    }
     return;
   }
   
