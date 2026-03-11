@@ -51,12 +51,13 @@ Coming from a browser? Don't type a single header.
 
 ## ✨ Features that WOW
 
-### 🟢 **Git-Native Testing**
-Capture a **Snapshot** of your entire API state and compare versions to detect breaking changes instantly.
+### 🟢 **Git-Native Diffing & Translating**
+Capture a **Snapshot** of your entire API state and compare versions.
+- **Deep Structural Diffs**: Recursively tracks nested schema changes and silent datatype overrides.
+- **Lingo.dev Translation**: Instantly localize breaking change alerts natively in your terminal.
 ```bash
 kiroo snapshot save v1-stable
-# ... make changes ...
-kiroo snapshot compare v1-stable current
+kiroo --lang hi snapshot compare v1-stable current
 ```
 
 ### 🌍 **Variable Chaining**
@@ -70,6 +71,20 @@ kiroo get /users -H "Authorization: Bearer {{jwt}}"
 Forget escaping quotes. Type JSON like a human.
 ```bash
 kiroo post /api/user -d "name=Yash email=yash@kiroo.io role=admin"
+```
+
+---
+
+### 🧪 **Zero-Code Testing Framework**
+Turn your terminal into an automated test runner. Validate responses on the fly without writing a single line of JS.
+```bash
+kiroo check /api/login -m POST -d "user=yash pass=123" --status 200 --has token
+```
+
+### 🚀 **Local Load Benchmarking**
+Stress test endpoints instantly. Simulates massive concurrency and environment-variable-injected workloads to locate latency limits.
+```bash
+kiroo bench /api/reports -n 1000 -c 50 -v
 ```
 
 ---
