@@ -343,6 +343,17 @@ test('CLI: export supports postman and openapi formats', async () => {
 
   const prep = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
   assert.strictEqual(prep.status, 0);
+  await storage.saveInteraction({
+    method: 'GET',
+    url: 'https://demo.example.com/api/projects/69abf7e5296d54a72b85171f?limit=10',
+    headers: { Authorization: 'Bearer test-token' },
+    response: {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+      body: { id: '69abf7e5296d54a72b85171f', name: 'Demo Project' }
+    },
+    duration: 5
+  });
 
   const postmanResult = spawnSync(
     'node',
@@ -356,7 +367,7 @@ test('CLI: export supports postman and openapi formats', async () => {
 
   const openapiResult = spawnSync(
     'node',
-    ['bin/kiroo.js', 'export', '--format', 'openapi', '--out', openapiOut, '--title', 'Kiroo Test API', '--api-version', '1.0.0'],
+    ['bin/kiroo.js', 'export', '--format', 'openapi', '--out', openapiOut, '--title', 'Kiroo Test API', '--api-version', '1.0.0', '--path-prefix', '/api'],
     { encoding: 'utf8' }
   );
   assert.strictEqual(openapiResult.status, 0);
@@ -364,6 +375,10 @@ test('CLI: export supports postman and openapi formats', async () => {
   const openapiData = JSON.parse(readFileSync(openapiOut, 'utf8'));
   assert.strictEqual(openapiData.openapi, '3.0.3');
   assert.ok(openapiData.paths && Object.keys(openapiData.paths).length > 0);
+  assert.ok(openapiData.paths['/api/projects/{projectId}']);
+  assert.ok(openapiData.paths['/api/projects/{projectId}'].get);
+  assert.ok((openapiData.paths['/api/projects/{projectId}'].get.parameters || []).some((p) => p.in === 'path' && p.name === 'projectId'));
+  assert.ok(openapiData.components?.securitySchemes?.bearerAuth);
 
   rmSync(postmanOut, { force: true });
   rmSync(openapiOut, { force: true });

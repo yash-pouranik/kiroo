@@ -178,32 +178,125 @@ function contentTypeFromHeaders(headers, fallback = 'application/json') {
   return raw.split(';')[0].trim() || fallback;
 }
 
+function isLikelyIdSegment(segment) {
+  if (!segment) return false;
+  if (/^\d+$/.test(segment)) return true;
+  if (/^[0-9a-f]{24}$/i.test(segment)) return true;
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(segment)) return true;
+  if (/^[A-Za-z0-9_-]{10,}$/.test(segment) && /[A-Za-z]/.test(segment) && /\d/.test(segment)) return true;
+  return false;
+}
+
+function singularize(word) {
+  if (!word) return 'id';
+  if (word.endsWith('ies')) return `${word.slice(0, -3)}y`;
+  if (word.endsWith('s') && word.length > 1) return word.slice(0, -1);
+  return word;
+}
+
+function normalizePathForOpenApi(path) {
+  const rawSegments = String(path || '/').split('/').filter(Boolean);
+  if (rawSegments.length === 0) {
+    return { path: '/', params: [] };
+  }
+
+  const params = [];
+  const usedNames = new Set();
+  const normalizedSegments = rawSegments.map((segment, index) => {
+    if (!isLikelyIdSegment(segment)) {
+      return segment;
+    }
+
+    const prev = rawSegments[index - 1] || 'id';
+    let baseName = singularize(prev).replace(/[^a-zA-Z0-9]/g, '');
+    if (!baseName) baseName = 'id';
+    let paramName = `${baseName.charAt(0).toLowerCase()}${baseName.slice(1)}Id`;
+
+    let i = 2;
+    while (usedNames.has(paramName)) {
+      paramName = `${baseName.charAt(0).toLowerCase()}${baseName.slice(1)}Id${i}`;
+      i += 1;
+    }
+    usedNames.add(paramName);
+    params.push({ name: paramName, example: segment });
+    return `{${paramName}}`;
+  });
+
+  return { path: `/${normalizedSegments.join('/')}`, params };
+}
+
+function getTagFromPath(path) {
+  const segments = String(path || '/').split('/').filter(Boolean);
+  if (segments.length === 0) return 'general';
+  if (segments[0].toLowerCase() === 'api' && segments.length > 1) {
+    return segments[1];
+  }
+  return segments[0];
+}
+
+function toOperationId(method, path) {
+  const methodPart = String(method || 'get').toLowerCase();
+  const segments = String(path || '/')
+    .split('/')
+    .filter(Boolean)
+    .map((s) => {
+      if (s.startsWith('{') && s.endsWith('}')) {
+        const p = s.slice(1, -1);
+        return `by${p.charAt(0).toUpperCase()}${p.slice(1)}`;
+      }
+      return s.replace(/[^a-zA-Z0-9]/g, '');
+    });
+  return [methodPart, ...segments].join('_') || `${methodPart}_root`;
+}
+
+function hasHeader(headers, name) {
+  return Object.keys(headers || {}).some((k) => k.toLowerCase() === name.toLowerCase());
+}
+
 function buildOpenApiSpec(interactions, options = {}) {
   const title = options.title || 'Kiroo Traffic API';
   const version = options.apiVersion || '1.0.0';
   const operations = new Map();
   const origins = new Set();
+  const includeBearer = { value: false };
+  const includeApiKey = { value: false };
 
   interactions.forEach((int) => {
     const method = String(int.request.method || 'get').toLowerCase();
     const { path, origin, query } = getPathAndOrigin(int.request.url || '/');
+    const normalized = normalizePathForOpenApi(path);
     if (origin) origins.add(origin);
 
-    const key = `${method} ${path}`;
+    const key = `${method} ${normalized.path}`;
     if (!operations.has(key)) {
       operations.set(key, {
         method,
-        path,
+        path: normalized.path,
+        pathParams: new Map(),
         queryParams: new Set(),
         requestBodies: [],
         requestMimeTypes: new Set(),
-        responses: new Map()
+        responses: new Map(),
+        hasBearerAuth: false,
+        hasApiKeyAuth: false
       });
     }
 
     const op = operations.get(key);
+    normalized.params.forEach((p) => {
+      if (!op.pathParams.has(p.name)) op.pathParams.set(p.name, p.example);
+    });
     for (const queryKey of Array.from(query.keys())) {
       op.queryParams.add(queryKey);
+    }
+
+    if (hasHeader(int.request.headers, 'authorization')) {
+      op.hasBearerAuth = true;
+      includeBearer.value = true;
+    }
+    if (hasHeader(int.request.headers, 'x-api-key') || hasHeader(int.request.headers, 'api-key')) {
+      op.hasApiKeyAuth = true;
+      includeApiKey.value = true;
     }
 
     if (int.request.body !== undefined) {
@@ -237,27 +330,41 @@ function buildOpenApiSpec(interactions, options = {}) {
   sortedOps.forEach((op) => {
     if (!paths[op.path]) paths[op.path] = {};
 
+    const pathParamEntries = Array.from(op.pathParams.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, example]) => ({
+        name,
+        in: 'path',
+        required: true,
+        schema: { type: 'string' },
+        example
+      }));
+
+    const queryParamEntries = Array.from(op.queryParams)
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({
+        name,
+        in: 'query',
+        required: false,
+        schema: { type: 'string' }
+      }));
+
     const operation = {
       summary: `${op.method.toUpperCase()} ${op.path}`,
+      operationId: toOperationId(op.method, op.path),
+      tags: [getTagFromPath(op.path)],
       responses: {}
     };
 
-    if (op.queryParams.size > 0) {
-      operation.parameters = Array.from(op.queryParams)
-        .sort((a, b) => a.localeCompare(b))
-        .map((name) => ({
-          name,
-          in: 'query',
-          required: false,
-          schema: { type: 'string' }
-        }));
+    if (pathParamEntries.length || queryParamEntries.length) {
+      operation.parameters = [...pathParamEntries, ...queryParamEntries];
     }
 
     if (op.requestBodies.length > 0) {
       const mergedBodySchema = op.requestBodies.map((b) => inferSchema(b)).reduce(mergeSchemas, {});
       const mimeType = Array.from(op.requestMimeTypes)[0] || 'application/json';
       operation.requestBody = {
-        required: true,
+        required: op.method !== 'get' && op.method !== 'delete',
         content: {
           [mimeType]: {
             schema: mergedBodySchema,
@@ -286,6 +393,12 @@ function buildOpenApiSpec(interactions, options = {}) {
       };
     });
 
+    if (op.hasBearerAuth || op.hasApiKeyAuth) {
+      operation.security = [];
+      if (op.hasBearerAuth) operation.security.push({ bearerAuth: [] });
+      if (op.hasApiKeyAuth) operation.security.push({ apiKeyAuth: [] });
+    }
+
     paths[op.path][op.method] = operation;
   });
 
@@ -293,19 +406,48 @@ function buildOpenApiSpec(interactions, options = {}) {
     ? [{ url: options.server }]
     : Array.from(origins).sort((a, b) => a.localeCompare(b)).map((url) => ({ url }));
 
-  return {
+  const spec = {
     openapi: '3.0.3',
     info: { title, version },
     ...(serverList.length ? { servers: serverList } : {}),
     paths
   };
+
+  if (includeBearer.value || includeApiKey.value) {
+    spec.components = { securitySchemes: {} };
+    if (includeBearer.value) {
+      spec.components.securitySchemes.bearerAuth = {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT'
+      };
+    }
+    if (includeApiKey.value) {
+      spec.components.securitySchemes.apiKeyAuth = {
+        type: 'apiKey',
+        in: 'header',
+        name: 'x-api-key'
+      };
+    }
+  }
+
+  return spec;
 }
 
 export function exportInteractions(options = {}) {
   try {
     const config = loadKirooConfig();
     const sortKeys = config.settings?.determinism?.sortKeys !== false;
-    const interactions = normalizeInteractions();
+    let interactions = normalizeInteractions();
+    const pathPrefix = options.pathPrefix ? String(options.pathPrefix) : '';
+    const minSamples = Number.parseInt(options.minSamples, 10);
+
+    if (pathPrefix) {
+      interactions = interactions.filter((int) => {
+        const { path } = getPathAndOrigin(int.request.url || '/');
+        return path.startsWith(pathPrefix);
+      });
+    }
 
     if (interactions.length === 0) {
       console.log(chalk.yellow('\n  ⚠️ No interactions found to export.'));
@@ -321,6 +463,23 @@ export function exportInteractions(options = {}) {
     if (format === 'postman') {
       payloadObject = buildPostmanCollection(interactions);
     } else if (format === 'openapi') {
+      if (!Number.isNaN(minSamples) && minSamples > 1) {
+        const counts = new Map();
+        interactions.forEach((int) => {
+          const method = String(int.request.method || '').toLowerCase();
+          const { path } = getPathAndOrigin(int.request.url || '/');
+          const normalizedPath = normalizePathForOpenApi(path).path;
+          const key = `${method} ${normalizedPath}`;
+          counts.set(key, (counts.get(key) || 0) + 1);
+        });
+        interactions = interactions.filter((int) => {
+          const method = String(int.request.method || '').toLowerCase();
+          const { path } = getPathAndOrigin(int.request.url || '/');
+          const normalizedPath = normalizePathForOpenApi(path).path;
+          const key = `${method} ${normalizedPath}`;
+          return (counts.get(key) || 0) >= minSamples;
+        });
+      }
       payloadObject = buildOpenApiSpec(interactions, options);
     } else {
       console.error(chalk.red(`\n  ✗ Unsupported export format: ${format}`));

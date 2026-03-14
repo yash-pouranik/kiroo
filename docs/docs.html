@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — Kiroo</title>
+  <meta name="description" content="Complete command reference for Kiroo CLI — Version Control for API Interactions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <nav class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="topbar-logo">Kiroo</a>
+      <div class="topbar-links">
+        <a href="index.html">Home</a>
+        <a href="docs.html" class="active">Docs</a>
+        <a href="https://github.com/yash-pouranik/kiroo" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Getting Started</div>
+        <a href="#installation" class="sidebar-item active">Installation</a>
+        <a href="#init" class="sidebar-item">kiroo init</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Request & Record</div>
+        <a href="#http" class="sidebar-item">HTTP Methods</a>
+        <a href="#list" class="sidebar-item">kiroo list</a>
+        <a href="#replay" class="sidebar-item">kiroo replay</a>
+        <a href="#edit" class="sidebar-item">kiroo edit</a>
+        <a href="#import" class="sidebar-item">kiroo import</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Proxy & Traffic</div>
+        <a href="#proxy" class="sidebar-item">kiroo proxy</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Versioning</div>
+        <a href="#snapshot" class="sidebar-item">kiroo snapshot</a>
+        <a href="#analyze" class="sidebar-item">kiroo analyze</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Testing & Performance</div>
+        <a href="#check" class="sidebar-item">kiroo check</a>
+        <a href="#bench" class="sidebar-item">kiroo bench</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading">Utilities</div>
+        <a href="#export" class="sidebar-item">kiroo export</a>
+        <a href="#graph" class="sidebar-item">kiroo graph</a>
+        <a href="#stats" class="sidebar-item">kiroo stats</a>
+        <a href="#scrub" class="sidebar-item">kiroo scrub</a>
+        <a href="#env" class="sidebar-item">kiroo env</a>
+        <a href="#clear" class="sidebar-item">kiroo clear</a>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <h1 id="installation">Installation</h1>
+      <p>Kiroo requires <strong>Node.js 18 or later</strong>.</p>
+      <pre><code>npm install -g kiroo</code></pre>
+      <p>Verify the installation:</p>
+      <pre><code>kiroo --version</code></pre>
+
+      <hr>
+
+      <h1 id="init">kiroo init</h1>
+      <p>Initialize Kiroo in the current project directory. This creates the <code>.kiroo/</code> directory with default configuration.</p>
+      <pre><code>kiroo init</code></pre>
+      <p>During setup, you'll be prompted to optionally store:</p>
+      <ul>
+        <li><code>baseUrl</code> — default server URL for all requests</li>
+        <li><code>GROQ_API_KEY</code> — for AI-powered analysis</li>
+        <li><code>LINGODOTDEV_API_KEY</code> — for translation features</li>
+      </ul>
+      <p>Configuration is saved to <code>.kiroo/config.json</code> and environment variables to <code>.kiroo/env.json</code>.</p>
+
+      <hr>
+
+      <h1 id="http">HTTP Methods</h1>
+      <p>Execute an HTTP request, display the response, and save the full interaction to your local history.</p>
+      <pre><code>kiroo get &lt;url&gt;
+kiroo post &lt;url&gt; [options]
+kiroo put &lt;url&gt; [options]
+kiroo delete &lt;url&gt; [options]
+kiroo patch &lt;url&gt; [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>-H, --header &lt;key:value&gt;</code></td><td>Add a custom request header</td></tr>
+          <tr><td><code>-d, --data &lt;data&gt;</code></td><td>Request body. Accepts JSON or shorthand <code>key=value</code> pairs</td></tr>
+          <tr><td><code>-s, --save &lt;key=path&gt;</code></td><td>Extract a value from the response and save it as a variable</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Examples</h3>
+      <pre><code><span class="c"># Login and capture the JWT token</span>
+kiroo post /api/auth/login -d "email=user@test.com password=secret" --save token=data.token
+
+<span class="c"># Use the saved token in subsequent requests</span>
+kiroo get /api/users -H "Authorization: Bearer {{token}}"
+
+<span class="c"># Send raw JSON body</span>
+kiroo post /api/projects -d '{"name":"kiroo","public":true}'</code></pre>
+
+      <hr>
+
+      <h1 id="list">kiroo list</h1>
+      <p>Display a paginated table of all recorded interactions.</p>
+      <pre><code>kiroo list [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td><code>-n, --limit &lt;number&gt;</code></td><td>Number of records to show</td><td>10</td></tr>
+          <tr><td><code>-o, --offset &lt;number&gt;</code></td><td>Number of records to skip</td><td>0</td></tr>
+          <tr><td><code>--date &lt;YYYY-MM-DD&gt;</code></td><td>Filter by date</td><td>—</td></tr>
+          <tr><td><code>--url &lt;path&gt;</code></td><td>Filter by URL path</td><td>—</td></tr>
+          <tr><td><code>--status &lt;code&gt;</code></td><td>Filter by HTTP status code</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example</h3>
+      <pre><code>kiroo list -n 20 --status 200</code></pre>
+
+      <hr>
+
+      <h1 id="replay">kiroo replay</h1>
+      <p>Re-execute a recorded interaction and display a diff between the original and new response.</p>
+      <pre><code>kiroo replay &lt;interaction-id&gt;</code></pre>
+      <p>The interaction ID is shown in <code>kiroo list</code> output.</p>
+
+      <h3>Example</h3>
+      <pre><code>kiroo replay 2026-03-10T14-30-05-123Z</code></pre>
+
+      <hr>
+
+      <h1 id="edit">kiroo edit</h1>
+      <p>Open a recorded interaction in your default editor. Modify the request (URL, headers, body), save and close — Kiroo will immediately re-execute the updated request.</p>
+      <pre><code>kiroo edit &lt;interaction-id&gt;</code></pre>
+      <p>Uses <code>$EDITOR</code>, falls back to VS Code, then nano.</p>
+
+      <hr>
+
+      <h1 id="import">kiroo import</h1>
+      <p>Import a request from a cURL command. Useful for copying requests from browser DevTools.</p>
+      <pre><code>kiroo import "&lt;curl command&gt;"</code></pre>
+
+      <h3>Example</h3>
+      <pre><code>kiroo import "curl https://api.example.com/users -H 'Authorization: Bearer tok123'"</code></pre>
+
+      <hr>
+
+      <h1 id="proxy">kiroo proxy</h1>
+      <p>Start a transparent proxy between your frontend and backend. All API traffic flowing through the proxy is automatically recorded — no manual CLI commands needed.</p>
+      <pre><code>kiroo proxy --target &lt;backend-url&gt; [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td><code>-t, --target &lt;url&gt;</code></td><td>Backend server URL <strong>(required)</strong></td><td>—</td></tr>
+          <tr><td><code>-p, --port &lt;port&gt;</code></td><td>Port for the proxy to listen on</td><td>8080</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example</h3>
+      <pre><code><span class="c"># Point your frontend to localhost:8080 instead of 3000</span>
+kiroo proxy --target http://localhost:3000 --port 8080</code></pre>
+
+      <hr>
+
+      <h1 id="snapshot">kiroo snapshot</h1>
+      <p>Save, list, and compare versioned snapshots of your current interaction history.</p>
+
+      <h3>Subcommands</h3>
+      <table>
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>snapshot save &lt;tag&gt;</code></td><td>Save current interactions as a named snapshot</td></tr>
+          <tr><td><code>snapshot list</code></td><td>List all saved snapshots</td></tr>
+          <tr><td><code>snapshot compare &lt;tag1&gt; &lt;tag2&gt;</code></td><td>Structural diff between two snapshots</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Options for <code>compare</code></h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>--analyze</code></td><td>Include semantic severity analysis</td></tr>
+          <tr><td><code>--ai</code></td><td>Add AI-generated impact summary</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Examples</h3>
+      <pre><code>kiroo snapshot save v1-stable
+kiroo snapshot list
+kiroo snapshot compare v1-stable v2-refactor --analyze --ai</code></pre>
+
+      <hr>
+
+      <h1 id="analyze">kiroo analyze</h1>
+      <p>Run semantic blast-radius analysis between two snapshots. Produces an endpoint-by-endpoint severity report detecting field renames, removed endpoints, type changes, and status code shifts.</p>
+      <pre><code>kiroo analyze &lt;tag1&gt; &lt;tag2&gt; [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>--json</code></td><td>Output machine-readable JSON (for CI)</td></tr>
+          <tr><td><code>--fail-on &lt;severity&gt;</code></td><td>Exit non-zero if max severity ≥ threshold. Values: <code>low</code>, <code>medium</code>, <code>high</code>, <code>critical</code></td></tr>
+          <tr><td><code>--ai</code></td><td>Generate Groq-powered impact summary</td></tr>
+          <tr><td><code>--model &lt;model&gt;</code></td><td>Override the default AI model</td></tr>
+          <tr><td><code>--max-tokens &lt;n&gt;</code></td><td>Max completion tokens for AI summary</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Prerequisites</h3>
+      <p>Set your API key before using <code>--ai</code>:</p>
+      <pre><code>kiroo env set GROQ_API_KEY gsk_your_key_here</code></pre>
+
+      <h3>Examples</h3>
+      <pre><code><span class="c"># CI gate — fail the pipeline on high-severity changes</span>
+kiroo analyze v1 v2 --fail-on high --json
+
+<span class="c"># Developer review — get AI explanation</span>
+kiroo analyze before-refactor after-refactor --ai</code></pre>
+
+      <hr>
+
+      <h1 id="check">kiroo check</h1>
+      <p>Execute a request and validate the response against rules. Exits with code 1 on failure — designed for CI pipelines and quick smoke tests.</p>
+      <pre><code>kiroo check &lt;url&gt; [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>-m, --method &lt;method&gt;</code></td><td>HTTP method (default: GET)</td></tr>
+          <tr><td><code>-H, --header &lt;key:value&gt;</code></td><td>Custom headers</td></tr>
+          <tr><td><code>-d, --data &lt;data&gt;</code></td><td>Request body</td></tr>
+          <tr><td><code>--status &lt;code&gt;</code></td><td>Assert HTTP status code</td></tr>
+          <tr><td><code>--has &lt;fields&gt;</code></td><td>Assert response contains these JSON fields (comma-separated)</td></tr>
+          <tr><td><code>--match &lt;key=val&gt;</code></td><td>Assert exact value for a JSON field</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example</h3>
+      <pre><code>kiroo check /api/login -m POST -d "user=yash pass=123" --status 200 --has token,userId</code></pre>
+
+      <hr>
+
+      <h1 id="bench">kiroo bench</h1>
+      <p>Load-test an endpoint with configurable concurrency. Reports latency percentiles, throughput, and error rates.</p>
+      <pre><code>kiroo bench &lt;url&gt; [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td><code>-m, --method &lt;method&gt;</code></td><td>HTTP method</td><td>GET</td></tr>
+          <tr><td><code>-n, --number &lt;n&gt;</code></td><td>Total requests</td><td>10</td></tr>
+          <tr><td><code>-c, --concurrent &lt;n&gt;</code></td><td>Concurrent workers</td><td>1</td></tr>
+          <tr><td><code>-v, --verbose</code></td><td>Show individual request details</td><td>—</td></tr>
+          <tr><td><code>-H, --header &lt;key:value&gt;</code></td><td>Custom headers</td><td>—</td></tr>
+          <tr><td><code>-d, --data &lt;data&gt;</code></td><td>Request body</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Example</h3>
+      <pre><code>kiroo bench /api/projects -n 100 -c 10 -v</code></pre>
+
+      <hr>
+
+      <h1 id="export">kiroo export</h1>
+      <p>Export recorded interactions as a Postman Collection (v2.1) or OpenAPI 3.0.3 specification. Schemas, examples, and server URLs are automatically inferred from recorded traffic.</p>
+      <pre><code>kiroo export [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th><th>Default</th></tr></thead>
+        <tbody>
+          <tr><td><code>-f, --format &lt;fmt&gt;</code></td><td><code>postman</code> or <code>openapi</code></td><td>postman</td></tr>
+          <tr><td><code>-o, --out &lt;file&gt;</code></td><td>Output filename</td><td>—</td></tr>
+          <tr><td><code>--title &lt;title&gt;</code></td><td>API title (OpenAPI)</td><td>—</td></tr>
+          <tr><td><code>--api-version &lt;ver&gt;</code></td><td>API version (OpenAPI)</td><td>—</td></tr>
+          <tr><td><code>--server &lt;url&gt;</code></td><td>Server URL (OpenAPI)</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Examples</h3>
+      <pre><code>kiroo export --format postman --out my_collection.json
+kiroo export --format openapi --out swagger.json --title "My API" --api-version 1.0.0</code></pre>
+
+      <hr>
+
+      <h1 id="graph">kiroo graph</h1>
+      <p>Print a dependency tree showing how data flows between endpoints via <code>--save</code> and <code>{{variable}}</code> references.</p>
+      <pre><code>kiroo graph</code></pre>
+
+      <hr>
+
+      <h1 id="stats">kiroo stats</h1>
+      <p>Display summary statistics: total requests, success/failure rates, average latency, and the top 5 slowest endpoints.</p>
+      <pre><code>kiroo stats</code></pre>
+
+      <hr>
+
+      <h1 id="scrub">kiroo scrub</h1>
+      <p>Retroactively redact sensitive values (auth headers, tokens, passwords, API keys) from all stored interactions and snapshots.</p>
+      <pre><code>kiroo scrub [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>--dry-run</code></td><td>Preview what would change without writing</td></tr>
+        </tbody>
+      </table>
+      <blockquote>New interactions are redacted automatically at save time. Use <code>scrub</code> to clean data recorded before redaction was enabled.</blockquote>
+
+      <hr>
+
+      <h1 id="env">kiroo env</h1>
+      <p>Manage environments and variables. Sensitive values are masked when listing.</p>
+
+      <h3>Subcommands</h3>
+      <table>
+        <thead><tr><th>Command</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>env list</code></td><td>List all variables (secrets masked)</td></tr>
+          <tr><td><code>env use &lt;name&gt;</code></td><td>Switch active environment</td></tr>
+          <tr><td><code>env set &lt;key&gt; &lt;value&gt;</code></td><td>Set a variable</td></tr>
+          <tr><td><code>env rm &lt;key&gt;</code></td><td>Remove a variable</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Examples</h3>
+      <pre><code>kiroo env set baseUrl https://api.myapp.com
+kiroo env set GROQ_API_KEY gsk_your_key_here
+kiroo env use production
+kiroo env list</code></pre>
+
+      <hr>
+
+      <h1 id="clear">kiroo clear</h1>
+      <p>Delete all recorded interactions.</p>
+      <pre><code>kiroo clear [options]</code></pre>
+
+      <h3>Options</h3>
+      <table>
+        <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><code>-f, --force</code></td><td>Skip confirmation prompt</td></tr>
+        </tbody>
+      </table>
+
+    </main>
+  </div>
+
+  <script>
+    // Active sidebar tracking on scroll
+    const headings = document.querySelectorAll('h1[id]');
+    const items = document.querySelectorAll('.sidebar-item');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          items.forEach(i => i.classList.remove('active'));
+          const match = document.querySelector(`.sidebar-item[href="#${entry.target.id}"]`);
+          if (match) match.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-80px 0px -70% 0px' });
+    headings.forEach(h => observer.observe(h));
+
+    // Smooth scroll
+    items.forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelector(link.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>

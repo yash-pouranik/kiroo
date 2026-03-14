@@ -138,6 +138,8 @@ program
   .option('--title <title>', 'OpenAPI title (openapi format only)')
   .option('--api-version <version>', 'OpenAPI version (openapi format only)')
   .option('--server <url>', 'OpenAPI server URL override')
+  .option('--path-prefix <prefix>', 'Only include endpoints that start with this path')
+  .option('--min-samples <number>', 'Only include operations seen at least N times')
   .action((options) => {
     exportInteractions(options);
   });

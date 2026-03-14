@@ -303,10 +303,13 @@ Team Compatibility. Export to Postman or OpenAPI.
   - `--title <title>`: OpenAPI title override.
   - `--api-version <version>`: OpenAPI version override.
   - `--server <url>`: OpenAPI server URL override.
+  - `--path-prefix <prefix>`: Include only matching API paths (e.g. `/api`).
+  - `--min-samples <number>`: Include only operations observed at least N times.
 - **Example**:
   ```bash
   kiroo export --format postman --out my_api_collection.json
   kiroo export --format openapi --out openapi.json --title "My API" --api-version 1.0.0
+  kiroo export --format openapi --path-prefix /api --min-samples 2 --out openapi.json
   ```
 
 ### `kiroo scrub`

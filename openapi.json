@@ -1,0 +1,84 @@
+{
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Kiroo API Traffic",
+    "version": "0.9.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/projects/{projectId}": {
+      "get": {
+        "operationId": "get_api_projects_byProjectId",
+        "parameters": [
+          {
+            "example": "69abf7e5296d54a72b85171f",
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": "69abf7e5296d54a72b85171f",
+                  "name": "Demo Project"
+                },
+                "schema": {
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Observed response"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "GET /api/projects/{projectId}",
+        "tags": [
+          "projects"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://demo.example.com"
+    }
+  ]
+}
