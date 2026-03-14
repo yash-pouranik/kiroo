@@ -49,6 +49,14 @@ Coming from a browser? Don't type a single header.
 
 ---
 
+## 🕰️ Time-Travel Proxy (`kiroo proxy`) 
+
+Stop typing CLI commands manually.
+- **Auto-Capture**: Start the Kiroo Proxy between your frontend and backend. Every click in your app is automatically captured and versioned.
+- **Zero Effort**: `kiroo proxy --target http://localhost:3000`. Perfect for instantly recording broken frontend flows to reproduce later.
+
+---
+
 ## ✨ Features that WOW
 
 ### 🟢 **Git-Native Diffing & Translating**
@@ -60,11 +68,25 @@ kiroo snapshot save v1-stable
 kiroo --lang hi snapshot compare v1-stable current
 ```
 
+### 🧠 **AI Blast Radius Analysis**
+Understand impact, not just raw diffs.
+```bash
+kiroo analyze v1-stable current --fail-on high
+kiroo analyze v1-stable current --ai
+```
+
 ### 🌍 **Variable Chaining**
 Chain requests like a pro. Save a token from one response and inject it into the next.
 ```bash
 kiroo post /login --save jwt=data.token
 kiroo get /users -H "Authorization: Bearer {{jwt}}"
+```
+
+### 🔐 **Git-Safe Recording (Secret Redaction)**
+Kiroo redacts sensitive values before writing interaction files, so `.kiroo/` can be safely shared in Git.
+```bash
+kiroo scrub --dry-run
+kiroo scrub
 ```
 
 ### ⌨️ **Shorthand JSON Parser**
@@ -112,7 +134,7 @@ kiroo get https://api.github.com/users/yash-pouranik
 
 ### `kiroo init`
 Initialize Kiroo in your current project.
-- **Description**: Creates the `.kiroo/` directory structure and a default `env.json`.
+- **Description**: Creates the `.kiroo/` directory structure, a default `env.json`, and `.kiroo/config.json` with deterministic/redaction-safe defaults. During setup, you can store `baseUrl`, `GROQ_API_KEY`, and `LINGODOTDEV_API_KEY` into `.kiroo/env.json`.
 - **Prerequisites**: None. Run once per project.
 - **Example**:
   ```bash
@@ -164,6 +186,17 @@ Quick Refinement. Edit an interaction on the fly and replay it.
 - **Example**:
   ```bash
   kiroo edit 2026-03-10T14-30-05-123Z
+  ```
+
+### `kiroo proxy`
+Start a time-travel proxy.
+- **Description**: Acts as a middleware between the frontend and backend, automatically capturing HTTP traffic and saving it as interactions without typing CLI commands.
+- **Options**:
+  - `-t, --target <url>`: Target URL of the backend.
+  - `-p, --port <port>`: Port for the proxy to listen on (Default: 8080).
+- **Example**:
+  ```bash
+  kiroo proxy --target http://localhost:3000 --port 8080
   ```
 
 ### `kiroo check <url>`
@@ -236,20 +269,55 @@ Snapshot management.
 - **Commands**:
   - `save <tag>`: Save current history as a versioned state.
   - `list`: List all saved snapshots.
-  - `compare <tag1> <tag2>`: Detect breaking changes between two states.
+  - `compare <tag1> <tag2>`: Detect structural changes between two states.
+  - `compare <tag1> <tag2> --analyze`: Structural compare + semantic severity in one run.
 - **Example**:
   ```bash
   kiroo snapshot compare v1.stable current
   ```
 
-### `kiroo export`
-Team Compatibility. Export to Postman.
-- **Description**: Converts all stored Kiroo interactions and responses into a standard Postman Collection v2.1.0 format (`.json`) for seamless GUI import.
+### `kiroo analyze <tag1> <tag2>`
+Semantic blast-radius analysis between snapshots.
+- **Description**: Generates endpoint-wise severity report for contract drift (`low|medium|high|critical`) and can optionally generate AI impact summary via Groq.
 - **Options**:
-  - `-o, --out <filename>`: The output filename (Default: `kiroo-collection.json`).
+  - `--json`: Output machine-readable JSON report.
+  - `--fail-on <severity>`: Exit non-zero if max severity meets threshold.
+  - `--ai`: Add Groq-powered impact summary.
+  - `--model <model>`: Override default model priority.
+  - `--max-tokens <number>`: Max completion tokens for AI summary.
+- **Environment**:
+  - `GROQ_API_KEY` in `.kiroo/env.json`: Required when `--ai` is used.
 - **Example**:
   ```bash
-  kiroo export --out my_api_collection.json
+  kiroo analyze before-refactor after-refactor --fail-on high
+  kiroo analyze before-refactor after-refactor --ai --model qwen/qwen3-32b
+  kiroo snapshot compare before-refactor after-refactor --analyze --ai
+  ```
+
+### `kiroo export`
+Team Compatibility. Export to Postman or OpenAPI.
+- **Description**: Converts stored Kiroo interactions into Postman Collection or OpenAPI/Swagger JSON for team sharing and docs.
+- **Options**:
+  - `-f, --format <format>`: `postman` or `openapi` (Default: `postman`).
+  - `-o, --out <filename>`: Output file name (Default: `kiroo-collection.json` for postman, `openapi.json` for openapi).
+  - `--title <title>`: OpenAPI title override.
+  - `--api-version <version>`: OpenAPI version override.
+  - `--server <url>`: OpenAPI server URL override.
+- **Example**:
+  ```bash
+  kiroo export --format postman --out my_api_collection.json
+  kiroo export --format openapi --out openapi.json --title "My API" --api-version 1.0.0
+  ```
+
+### `kiroo scrub`
+Redact sensitive values in already stored data.
+- **Description**: Scans `.kiroo/interactions` and `.kiroo/snapshots`, then masks secrets like auth headers, cookies, tokens, passwords, and API keys.
+- **Options**:
+  - `--dry-run`: Show what would change without modifying files.
+- **Example**:
+  ```bash
+  kiroo scrub --dry-run
+  kiroo scrub
   ```
 
 ### `kiroo env`
@@ -259,9 +327,13 @@ Environment & Variable management.
   - `use <name>`: Switch active environment (e.g., `prod`, `local`).
   - `set <key> <value>`: Set a variable in the active environment.
   - `rm <key>`: Remove a variable.
+- **Note**:
+  - Sensitive keys (tokens/passwords/API keys) are masked in `kiroo env list`.
 - **Example**:
   ```bash
   kiroo env set baseUrl https://api.myapp.com
+  kiroo env set GROQ_API_KEY your_key
+  kiroo env set LINGODOTDEV_API_KEY your_key
   ```
 
 ### `kiroo clear`

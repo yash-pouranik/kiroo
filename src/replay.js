@@ -11,7 +11,7 @@ export async function listInteractions(options) {
   
   // Apply Filters
   if (options.date) {
-    interactions = interactions.filter(int => int.id.startsWith(options.date));
+  interactions = interactions.filter(int => int.id.startsWith(options.date));
   }
   if (options.url) {
     interactions = interactions.filter(int => int.request.url.toLowerCase().includes(options.url.toLowerCase()));
@@ -42,12 +42,13 @@ export async function listInteractions(options) {
       ? chalk.red 
       : chalk.yellow;
     
+    const url = int.request.url || 'N/A';
     table.push([
       chalk.white(int.id),
-      chalk.white(int.request.method),
-      chalk.gray(int.request.url.substring(0, 42) + (int.request.url.length > 42 ? '...' : '')),
+      chalk.white(int.request.method || '???'),
+      chalk.gray(url.substring(0, 42) + (url.length > 42 ? '...' : '')),
       statusColor(int.response.status),
-      chalk.gray(int.metadata.duration_ms + 'ms'),
+      chalk.gray((int.metadata.duration_ms || 0) + 'ms'),
     ]);
   });
   

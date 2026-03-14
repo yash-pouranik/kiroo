@@ -1,6 +1,33 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { loadEnv, saveEnv } from './storage.js';
+import { isSensitiveKey } from './sanitizer.js';
+
+function maskEnvValue(key, value) {
+  if (!isSensitiveKey(key)) {
+    return String(value);
+  }
+
+  const raw = String(value || '');
+  if (raw.length <= 4) {
+    return '<REDACTED>';
+  }
+  return `${raw.slice(0, 2)}***${raw.slice(-2)}`;
+}
+
+export function getCurrentEnvVars() {
+  const env = loadEnv();
+  if (!env.environments[env.current]) {
+    env.environments[env.current] = {};
+    saveEnv(env);
+  }
+  return env.environments[env.current];
+}
+
+export function getEnvVar(key) {
+  const vars = getCurrentEnvVars();
+  return vars[key];
+}
 
 export function listEnv() {
   const env = loadEnv();
@@ -19,8 +46,8 @@ export function listEnv() {
       colWidths: [20, 40]
     });
     
-    Object.entries(currentVars).forEach(([k, v]) => {
-      table.push([chalk.white(k), chalk.gray(String(v))]);
+    Object.entries(currentVars).sort(([a], [b]) => a.localeCompare(b)).forEach(([k, v]) => {
+      table.push([chalk.white(k), chalk.gray(maskEnvValue(k, v))]);
     });
     console.log(table.toString());
   } else {
@@ -49,7 +76,8 @@ export function setVar(key, value) {
   const env = loadEnv();
   env.environments[env.current][key] = value;
   saveEnv(env);
-  console.log(chalk.green(`  ✅ Set ${key}=${value} in`), chalk.white(env.current));
+  const printValue = isSensitiveKey(key) ? '<REDACTED>' : value;
+  console.log(chalk.green(`  ✅ Set ${key}=${printValue} in`), chalk.white(env.current));
 }
 
 export function deleteVar(key) {

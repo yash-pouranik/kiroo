@@ -60,7 +60,7 @@ export async function compareSnapshots(tag1, tag2, lang) {
       console.log(chalk.magenta(`  🌍 Translating output to: ${chalk.white(lang.toUpperCase())} using Lingo.dev...`));
     }
     
-    const results = [];
+    const resultMap = new Map();
     let breakingChanges = 0;
     
     // Helper to get path from URL string
@@ -74,27 +74,66 @@ export async function compareSnapshots(tag1, tag2, lang) {
       }
     };
 
+    const compareByMethodAndPath = (a, b) => {
+      const pathA = getPath(a.url || '');
+      const pathB = getPath(b.url || '');
+      const methodA = String(a.method || '').toUpperCase();
+      const methodB = String(b.method || '').toUpperCase();
+      if (methodA !== methodB) return methodA.localeCompare(methodB);
+      return pathA.localeCompare(pathB);
+    };
+
+    const s1Interactions = [...s1.interactions].sort(compareByMethodAndPath);
+    const s2Interactions = [...s2.interactions].sort(compareByMethodAndPath);
+    const consumedS1Indexes = new Set();
+
+    const isBreakingStatusChange = (beforeStatus, afterStatus) => {
+      const before2xx = beforeStatus >= 200 && beforeStatus < 300;
+      const after3xx = afterStatus >= 300 && afterStatus < 400;
+      const after4xx5xx = afterStatus >= 400;
+
+      if (before2xx && afterStatus === 304) return false;
+      if (before2xx && after3xx) return false;
+      if (before2xx && after4xx5xx) return true;
+      return beforeStatus !== afterStatus;
+    };
+
+    const addResult = (type, method, url, msg) => {
+      const cleanMethod = String(method || '').toUpperCase();
+      const key = `${type}|${cleanMethod}|${url}`;
+      if (!resultMap.has(key)) {
+        resultMap.set(key, { type, method: cleanMethod, url, messages: [], occurrences: 0 });
+      }
+      const row = resultMap.get(key);
+      row.occurrences += 1;
+      if (msg && !row.messages.includes(msg)) {
+        row.messages.push(msg);
+      }
+    };
+
     // Domain-agnostic comparison: match by Path and Method
-    s2.interactions.forEach(int2 => {
+    s2Interactions.forEach(int2 => {
       const path2 = getPath(int2.url);
-      const int1 = s1.interactions.find(i => getPath(i.url) === path2 && i.method === int2.method);
+      const candidates = s1Interactions
+        .map((item, index) => ({ item, index }))
+        .filter(({ item, index }) => !consumedS1Indexes.has(index) && getPath(item.url) === path2 && item.method === int2.method);
+      const match = candidates.find(({ item }) => item.id && int2.id && item.id === int2.id) || candidates[0];
+      const int1 = match?.item;
       
       if (!int1) {
-        results.push({
-          type: 'NEW',
-          method: int2.method,
-          url: path2,
-          msg: chalk.blue('New interaction added')
-        });
+        addResult('NEW', int2.method, path2, 'New interaction added');
         return;
       }
+      consumedS1Indexes.add(match.index);
       
       const diffs = [];
       
       // Compare status
       if (int1.response.status !== int2.response.status) {
         diffs.push(`Status: ${chalk.gray(int1.response.status)} → ${chalk.red(int2.response.status)}`);
-        breakingChanges++;
+        if (isBreakingStatusChange(int1.response.status, int2.response.status)) {
+          breakingChanges++;
+        }
       }
       
       // Helper for deep structural comparison
@@ -154,14 +193,18 @@ export async function compareSnapshots(tag1, tag2, lang) {
         }
       }      
       if (diffs.length > 0) {
-        results.push({
-          type: 'CHANGE',
-          method: int2.method,
-          url: path2,
-          msg: diffs.join('\n    ')
-        });
+        addResult('CHANGE', int2.method, path2, diffs.join('\n    '));
       }
     });
+
+    s1Interactions.forEach((int1, index) => {
+      if (consumedS1Indexes.has(index)) return;
+      const path1 = getPath(int1.url);
+      addResult('REMOVED', int1.method, path1, 'Interaction removed in target snapshot');
+      breakingChanges++;
+    });
+
+    const results = [...resultMap.values()];
 
     if (results.length === 0) {
       let finalMsg = 'No differences detected. Your API is stable!';
@@ -170,8 +213,18 @@ export async function compareSnapshots(tag1, tag2, lang) {
     } else {
       console.log('');
       
-      for (const res of results) {
-        let printMsg = res.msg;
+      const sortedResults = [...results].sort((a, b) => {
+        const methodA = String(a.method || '').toUpperCase();
+        const methodB = String(b.method || '').toUpperCase();
+        if (methodA !== methodB) return methodA.localeCompare(methodB);
+        return String(a.url || '').localeCompare(String(b.url || ''));
+      });
+
+      for (const res of sortedResults) {
+        let printMsg = res.messages.join('\n    ');
+        if (res.occurrences > 1 && (res.type === 'NEW' || res.type === 'REMOVED')) {
+          printMsg += `\n    (${res.occurrences} occurrences)`;
+        }
         if (lang) {
            // Basic translation hook for individual diff items (stripping ansi)
            const cleanMsg = printMsg.replace(/\x1B\[[0-9;]*m/g, '');
@@ -179,7 +232,11 @@ export async function compareSnapshots(tag1, tag2, lang) {
            printMsg = chalk.yellow('[Translated] ') + translatedMsg;
         }
 
-        const symbol = res.type === 'NEW' ? chalk.blue('+') : chalk.yellow('⚠️');
+        const symbol = res.type === 'NEW'
+          ? chalk.blue('+')
+          : res.type === 'REMOVED'
+          ? chalk.red('-')
+          : chalk.yellow('⚠️');
         console.log(`  ${symbol} ${chalk.white(res.method)} ${chalk.gray(res.url)}`);
         console.log(`    ${printMsg}`);
       }

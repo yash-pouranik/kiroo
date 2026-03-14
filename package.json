@@ -1,6 +1,6 @@
 {
   "name": "kiroo",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Git for API interactions. Record, replay, snapshot, and diff your APIs.",
   "type": "module",
   "bin": {
@@ -42,6 +42,7 @@
     "cli-table3": "^0.6.3",
     "commander": "^12.0.0",
     "dotenv": "^17.3.1",
+    "http-proxy": "^1.18.1",
     "inquirer": "^9.2.15",
     "js-yaml": "^4.1.0",
     "lingo.dev": "^0.133.1",

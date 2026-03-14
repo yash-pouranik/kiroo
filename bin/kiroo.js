@@ -11,10 +11,12 @@ import { validateResponse, showCheckResult } from '../src/checker.js';
 import { initProject } from '../src/init.js';
 import { showStats } from '../src/stats.js';
 import { handleImport } from '../src/import.js';
-import { clearAllInteractions } from '../src/storage.js';
+import { clearAllInteractions, scrubStoredData } from '../src/storage.js';
 import { runBenchmark } from '../src/bench.js';
 import { editInteraction } from '../src/edit.js';
-import { exportToPostman } from '../src/export.js';
+import { exportInteractions } from '../src/export.js';
+import { runProxy } from '../src/proxy.js';
+import { analyzeSnapshots } from '../src/analyze.js';
 
 const program = new Command();
 
@@ -31,6 +33,7 @@ program
   .action(async () => {
     await initProject();
   });
+
 
 // Check command (Zero-Code Testing)
 program
@@ -129,10 +132,14 @@ program
 // Export interactions
 program
   .command('export')
-  .description('Export all stored interactions to a Postman Collection')
-  .option('-o, --out <filename>', 'Output JSON filename', 'kiroo-collection.json')
+  .description('Export stored interactions to Postman or OpenAPI')
+  .option('-f, --format <format>', 'Export format: postman|openapi', 'postman')
+  .option('-o, --out <filename>', 'Output JSON filename')
+  .option('--title <title>', 'OpenAPI title (openapi format only)')
+  .option('--api-version <version>', 'OpenAPI version (openapi format only)')
+  .option('--server <url>', 'OpenAPI server URL override')
   .action((options) => {
-    exportToPostman(options.out);
+    exportInteractions(options);
   });
 
 // Bench command (Load Testing)
@@ -169,6 +176,30 @@ program
     }
     clearAllInteractions();
     console.log(chalk.green('\n  ✨ History cleared successfully.\n'));
+  });
+
+program
+  .command('scrub')
+  .description('Redact sensitive data in stored interactions and snapshots')
+  .option('--dry-run', 'Show what would be changed without modifying files')
+  .action((options) => {
+    const summary = scrubStoredData({ dryRun: !!options.dryRun });
+
+    console.log(chalk.cyan('\n  🧼 Scrub summary'));
+    console.log(chalk.gray(`  Interactions: ${summary.interactions.updated}/${summary.interactions.scanned} updated`));
+    console.log(chalk.gray(`  Snapshots:    ${summary.snapshots.updated}/${summary.snapshots.scanned} updated`));
+
+    if (summary.totalUpdated === 0) {
+      console.log(chalk.green('\n  ✅ No sensitive changes needed.\n'));
+      return;
+    }
+
+    if (summary.dryRun) {
+      console.log(chalk.yellow('\n  ⚠️ Dry run only. Re-run without --dry-run to apply changes.\n'));
+      return;
+    }
+
+    console.log(chalk.green('\n  ✅ Sensitive fields were redacted successfully.\n'));
   });
 
 // Environment commands
@@ -214,9 +245,39 @@ snapshot
 snapshot
   .command('compare <tag1> <tag2>')
   .description('Compare two snapshots')
-  .action(async (tag1, tag2) => {
+  .option('--analyze', 'Run semantic analysis right after structural compare')
+  .option('--ai', 'When used with --analyze, include AI summary')
+  .option('--model <model>', 'Model override for analyze --ai mode')
+  .option('--max-tokens <number>', 'Max completion tokens for analyze --ai mode')
+  .option('--fail-on <severity>', 'Severity threshold for analyze mode (low|medium|high|critical)')
+  .action(async (tag1, tag2, options) => {
     const opts = program.opts();
     await compareSnapshots(tag1, tag2, opts.lang);
+    if (options.analyze) {
+      await analyzeSnapshots(tag1, tag2, {
+        ai: !!options.ai,
+        model: options.model,
+        maxTokens: options.maxTokens,
+        failOn: options.failOn,
+        lang: opts.lang,
+      });
+    }
+  });
+
+program
+  .command('analyze <tag1> <tag2>')
+  .description('Semantic blast-radius analysis between two snapshots')
+  .option('--json', 'Output structured JSON report')
+  .option('--ai', 'Generate Groq-powered impact summary (uses GROQ_API_KEY)')
+  .option('--model <model>', 'Groq model override')
+  .option('--max-tokens <number>', 'Max completion tokens for AI summary')
+  .option('--fail-on <severity>', 'Exit non-zero when severity >= threshold (low|medium|high|critical)')
+  .action(async (tag1, tag2, options) => {
+    const opts = program.opts();
+    await analyzeSnapshots(tag1, tag2, {
+      ...options,
+      lang: opts.lang
+    });
   });
 
 // Graph command
@@ -259,6 +320,16 @@ program
     await showGraph();
   });
 */
+
+// Proxy command
+program
+  .command('proxy')
+  .description('Start a time-travel proxy to automatically record interactions')
+  .requiredOption('-t, --target <url>', 'Target URL to proxy requests to')
+  .option('-p, --port <port>', 'Port to listen on', '8080')
+  .action(async (options) => {
+    await runProxy(options.target, options);
+  });
 
 // Stats command
 program

@@ -230,6 +230,23 @@ export async function executeRequest(method, url, options = {}) {
       console.error(chalk.red('\n  ✗ Error:'), error.message, '\n');
     }
     
+    // Save failed interaction
+    await saveInteraction({
+      method,
+      url,
+      headers,
+      body,
+      response: {
+        status: 0,
+        statusText: error.code || 'FAILED',
+        headers: {},
+        data: { error: error.message, code: error.code }
+      },
+      duration,
+      saves: [],
+      uses: Array.from(usedKeys)
+    });
+
     process.exit(1);
   }
 }

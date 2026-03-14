@@ -1,10 +1,32 @@
 import { existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync } from 'fs';
 import { join } from 'path';
+import { sanitizeInteractionRecord } from './sanitizer.js';
+import { loadKirooConfig } from './config.js';
+import { stableJSONStringify } from './deterministic.js';
 
 const KIROO_DIR = '.kiroo';
 const INTERACTIONS_DIR = join(KIROO_DIR, 'interactions');
 const SNAPSHOTS_DIR = join(KIROO_DIR, 'snapshots');
 const ENV_FILE = join(KIROO_DIR, 'env.json');
+
+function getPersistenceSettings() {
+  const config = loadKirooConfig();
+  const redaction = config.settings?.redaction || {};
+  const determinism = config.settings?.determinism || {};
+
+  return {
+    redactEnabled: redaction.enabled !== false,
+    redactedValue: redaction.redactedValue || '<REDACTED>',
+    sortKeys: determinism.sortKeys !== false
+  };
+}
+
+function stringifyForPersistence(value, sortKeysEnabled) {
+  if (sortKeysEnabled) {
+    return stableJSONStringify(value, 2);
+  }
+  return JSON.stringify(value, null, 2);
+}
 
 export function ensureKirooDir() {
   if (!existsSync(KIROO_DIR)) {
@@ -28,6 +50,7 @@ export function ensureKirooDir() {
 
 export async function saveInteraction(interaction) {
   ensureKirooDir();
+  const settings = getPersistenceSettings();
   
   const timestamp = new Date().toISOString();
   const id = timestamp.replace(/[:.]/g, '-');
@@ -49,10 +72,15 @@ export async function saveInteraction(interaction) {
     },
   };
 
+  const sanitizedInteractionData = sanitizeInteractionRecord(interactionData, {
+    enabled: settings.redactEnabled,
+    redactedValue: settings.redactedValue
+  });
+
   const filename = `${id}.json`;
   const filepath = join(INTERACTIONS_DIR, filename);
   
-  writeFileSync(filepath, JSON.stringify(interactionData, null, 2));
+  writeFileSync(filepath, stringifyForPersistence(sanitizedInteractionData, settings.sortKeys));
   
   return id;
 }
@@ -89,11 +117,16 @@ export function getAllInteractions() {
 
 export function saveSnapshotData(tag, data) {
   ensureKirooDir();
+  const settings = getPersistenceSettings();
   
   const filename = `${tag}.json`;
   const filepath = join(SNAPSHOTS_DIR, filename);
+  const sanitizedSnapshot = sanitizeInteractionRecord(data, {
+    enabled: settings.redactEnabled,
+    redactedValue: settings.redactedValue
+  });
   
-  writeFileSync(filepath, JSON.stringify(data, null, 2));
+  writeFileSync(filepath, stringifyForPersistence(sanitizedSnapshot, settings.sortKeys));
 }
 
 export function loadSnapshotData(tag) {
@@ -116,6 +149,7 @@ export function getAllSnapshots() {
   
   return readdirSync(SNAPSHOTS_DIR)
     .filter(f => f.endsWith('.json'))
+    .sort((a, b) => a.localeCompare(b))
     .map(f => f.replace('.json', ''));
 }
 
@@ -130,6 +164,52 @@ export function clearAllInteractions() {
   }
 }
 
+function scrubDirectory(directoryPath, { dryRun = false } = {}) {
+  const settings = getPersistenceSettings();
+
+  if (!existsSync(directoryPath)) {
+    return { scanned: 0, updated: 0 };
+  }
+
+  const files = readdirSync(directoryPath).filter((f) => f.endsWith('.json'));
+  let updated = 0;
+
+  for (const fileName of files) {
+    const filePath = join(directoryPath, fileName);
+    const originalRaw = readFileSync(filePath, 'utf8');
+    const originalData = JSON.parse(originalRaw);
+    const sanitizedData = sanitizeInteractionRecord(originalData, {
+      enabled: settings.redactEnabled,
+      redactedValue: settings.redactedValue
+    });
+    const sanitizedRaw = stringifyForPersistence(sanitizedData, settings.sortKeys);
+
+    if (originalRaw !== sanitizedRaw) {
+      updated += 1;
+      if (!dryRun) {
+        writeFileSync(filePath, sanitizedRaw);
+      }
+    }
+  }
+
+  return { scanned: files.length, updated };
+}
+
+export function scrubStoredData(options = {}) {
+  ensureKirooDir();
+  const { dryRun = false } = options;
+
+  const interactions = scrubDirectory(INTERACTIONS_DIR, { dryRun });
+  const snapshots = scrubDirectory(SNAPSHOTS_DIR, { dryRun });
+
+  return {
+    interactions,
+    snapshots,
+    totalUpdated: interactions.updated + snapshots.updated,
+    dryRun,
+  };
+}
+
 export function loadEnv() {
   ensureKirooDir();
   const data = readFileSync(ENV_FILE, 'utf8');
@@ -138,5 +218,6 @@ export function loadEnv() {
 
 export function saveEnv(data) {
   ensureKirooDir();
-  writeFileSync(ENV_FILE, JSON.stringify(data, null, 2));
+  const settings = getPersistenceSettings();
+  writeFileSync(ENV_FILE, stringifyForPersistence(data, settings.sortKeys));
 }

@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { existsSync, rmSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
+import { existsSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import * as storage from './src/storage.js';
+import { loadKirooConfig, saveKirooConfig } from './src/config.js';
+import { stableJSONStringify } from './src/deterministic.js';
+import { analyzeSnapshotData, resolveGroqApiKey } from './src/analyze.js';
 
 const TEST_DIR = '.kiroo_test';
 
@@ -48,8 +51,322 @@ test('Storage: saveInteraction and getAllInteractions', async () => {
 
   const interactions = storage.getAllInteractions();
   assert.strictEqual(interactions.length > 0, true, 'Should have at least one interaction');
-  assert.strictEqual(interactions[0].id, id);
-  assert.strictEqual(interactions[0].request.url, 'https://example.com');
+  const saved = interactions.find((int) => int.id === id);
+  assert.ok(saved, 'Saved interaction should be present');
+  assert.strictEqual(saved.request.url, 'https://example.com');
+});
+
+test('Storage: saveInteraction redacts sensitive fields', async () => {
+  const id = await storage.saveInteraction({
+    method: 'POST',
+    url: 'https://api.example.com/login?apiKey=super-secret&ok=1',
+    headers: {
+      Authorization: 'Bearer abc123',
+      Cookie: 'sessionId=very-secret-cookie',
+      'Content-Type': 'application/json'
+    },
+    body: {
+      email: 'user@example.com',
+      password: 'plain-password',
+      nested: {
+        refresh_token: 'refresh-secret'
+      }
+    },
+    response: {
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        'set-cookie': 'session=abc'
+      },
+      data: {
+        token: 'jwt-token-value',
+        profile: { id: 1, name: 'user' }
+      }
+    },
+    duration: 42
+  });
+
+  const saved = storage.loadInteraction(id);
+  assert.match(saved.request.url, /apiKey=%3CREDACTED%3E/);
+  assert.match(saved.request.headers.Authorization, /REDACTED/);
+  assert.match(saved.request.headers.Cookie, /REDACTED/);
+  assert.strictEqual(saved.request.body.email, 'user@example.com');
+  assert.match(saved.request.body.password, /REDACTED/);
+  assert.match(saved.request.body.nested.refresh_token, /REDACTED/);
+  assert.match(saved.response.headers['set-cookie'], /REDACTED/);
+  assert.match(saved.response.data.token, /REDACTED/);
+});
+
+test('Storage: scrubStoredData redacts existing legacy files', () => {
+  storage.ensureKirooDir();
+
+  const legacyInteractionPath = join('.kiroo', 'interactions', '000_legacy_scrub.json');
+  const legacySnapshotPath = join('.kiroo', 'snapshots', '000_legacy_scrub.json');
+  const oldLegacyInteractionPath = join('.kiroo', 'interactions', 'zz_legacy_scrub.json');
+  const oldLegacySnapshotPath = join('.kiroo', 'snapshots', 'zz_legacy_scrub.json');
+
+  rmSync(oldLegacyInteractionPath, { force: true });
+  rmSync(oldLegacySnapshotPath, { force: true });
+
+  writeFileSync(legacyInteractionPath, JSON.stringify({
+    id: '000_legacy_scrub',
+    request: {
+      method: 'GET',
+      url: 'https://api.example.com/profile?token=abc',
+      headers: { Authorization: 'Bearer unsafe-token' },
+      body: null
+    },
+    response: {
+      status: 200,
+      data: { access_token: 'unsafe-value' }
+    },
+    metadata: { duration_ms: 1 }
+  }, null, 2));
+
+  writeFileSync(legacySnapshotPath, JSON.stringify({
+    tag: '000_legacy_scrub',
+    interactions: [
+      {
+        method: 'GET',
+        url: 'https://api.example.com/profile?api_key=abc123',
+        response: { body: { password: 'unsafe-password' } }
+      }
+    ]
+  }, null, 2));
+
+  const preview = storage.scrubStoredData({ dryRun: true });
+  assert.ok(preview.totalUpdated >= 2, 'Dry run should detect legacy secrets');
+
+  const untouched = JSON.parse(readFileSync(legacyInteractionPath, 'utf8'));
+  assert.strictEqual(untouched.request.headers.Authorization, 'Bearer unsafe-token');
+
+  const applied = storage.scrubStoredData();
+  assert.ok(applied.totalUpdated >= 2, 'Scrub should update legacy files');
+
+  const scrubbedInteraction = JSON.parse(readFileSync(legacyInteractionPath, 'utf8'));
+  const scrubbedSnapshot = JSON.parse(readFileSync(legacySnapshotPath, 'utf8'));
+  assert.match(scrubbedInteraction.request.headers.Authorization, /REDACTED/);
+  assert.match(scrubbedInteraction.request.url, /token=%3CREDACTED%3E/);
+  assert.match(scrubbedInteraction.response.data.access_token, /REDACTED/);
+  assert.match(scrubbedSnapshot.interactions[0].url, /api_key=%3CREDACTED%3E/);
+  assert.match(scrubbedSnapshot.interactions[0].response.body.password, /REDACTED/);
+
+  rmSync(legacyInteractionPath, { force: true });
+  rmSync(legacySnapshotPath, { force: true });
+});
+
+test('Config: loadKirooConfig exposes deterministic and redaction defaults', () => {
+  const config = loadKirooConfig();
+  assert.strictEqual(config.settings.determinism.sortKeys, true);
+  assert.strictEqual(config.settings.redaction.enabled, true);
+  assert.ok(config.settings.redaction.redactedValue);
+});
+
+test('Config: saveKirooConfig can disable redaction deterministically', async () => {
+  saveKirooConfig({
+    settings: {
+      redaction: {
+        enabled: false
+      }
+    }
+  });
+
+  const id = await storage.saveInteraction({
+    method: 'POST',
+    url: 'https://api.example.com/login?token=plain-token',
+    headers: {
+      Authorization: 'Bearer plain-token'
+    },
+    body: {
+      password: 'plain-password'
+    },
+    response: {
+      status: 200,
+      headers: {},
+      data: {
+        access_token: 'plain-token'
+      }
+    },
+    duration: 10
+  });
+
+  const saved = storage.loadInteraction(id);
+  assert.strictEqual(saved.request.headers.Authorization, 'Bearer plain-token');
+  assert.strictEqual(saved.request.body.password, 'plain-password');
+  assert.strictEqual(saved.response.data.access_token, 'plain-token');
+
+  saveKirooConfig({
+    settings: {
+      redaction: {
+        enabled: true
+      }
+    }
+  });
+});
+
+test('Deterministic: stableJSONStringify keeps sorted key order', () => {
+  const unordered = {
+    b: 1,
+    a: { z: true, m: false },
+    c: [{ d: 1, b: 2 }]
+  };
+  const json = stableJSONStringify(unordered);
+
+  assert.ok(json.indexOf('"a"') < json.indexOf('"b"'));
+  assert.ok(json.indexOf('"m"') < json.indexOf('"z"'));
+});
+
+test('Analyze: resolves GROQ key from env.json instead of process env', () => {
+  const envData = storage.loadEnv();
+  const current = envData.current;
+  const previousGroq = envData.environments[current].GROQ_API_KEY;
+  const previousProcess = process.env.GROQ_API_KEY;
+
+  envData.environments[current].GROQ_API_KEY = 'from-env-json-key';
+  storage.saveEnv(envData);
+  process.env.GROQ_API_KEY = 'from-process-env-key';
+
+  assert.strictEqual(resolveGroqApiKey(), 'from-env-json-key');
+
+  if (previousGroq === undefined) {
+    delete envData.environments[current].GROQ_API_KEY;
+  } else {
+    envData.environments[current].GROQ_API_KEY = previousGroq;
+  }
+  storage.saveEnv(envData);
+
+  if (previousProcess === undefined) {
+    delete process.env.GROQ_API_KEY;
+  } else {
+    process.env.GROQ_API_KEY = previousProcess;
+  }
+});
+
+test('Analyze: detects rename candidate and severity', () => {
+  const source = {
+    tag: 'before',
+    interactions: [
+      {
+        id: 'a1',
+        method: 'GET',
+        url: 'https://api.example.com/users',
+        response: {
+          status: 200,
+          body: {
+            user_id: '1',
+            email: 'a@example.com'
+          }
+        }
+      }
+    ]
+  };
+
+  const target = {
+    tag: 'after',
+    interactions: [
+      {
+        id: 'a1',
+        method: 'GET',
+        url: 'https://api.example.com/users',
+        response: {
+          status: 200,
+          body: {
+            userId: '1',
+            email: 'a@example.com'
+          }
+        }
+      }
+    ]
+  };
+
+  const report = analyzeSnapshotData(source, target);
+  assert.strictEqual(report.highestSeverity, 'medium');
+  assert.strictEqual(report.summary.byType.field_rename_candidate, 1);
+});
+
+test('Analyze: detects removed endpoint as high severity', () => {
+  const source = {
+    tag: 'before',
+    interactions: [
+      {
+        id: 'a1',
+        method: 'POST',
+        url: 'https://api.example.com/checkout',
+        response: {
+          status: 200,
+          body: { ok: true }
+        }
+      }
+    ]
+  };
+
+  const target = {
+    tag: 'after',
+    interactions: []
+  };
+
+  const report = analyzeSnapshotData(source, target);
+  assert.strictEqual(report.highestSeverity, 'high');
+  assert.strictEqual(report.summary.byType.endpoint_removed, 1);
+});
+
+test('CLI: env list masks sensitive values', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const envData = storage.loadEnv();
+  const current = envData.current;
+  const previousValue = envData.environments[current].GROQ_API_KEY;
+
+  const setResult = spawnSync('node', ['bin/kiroo.js', 'env', 'set', 'GROQ_API_KEY', 'super-secret-token'], { encoding: 'utf8' });
+  assert.strictEqual(setResult.status, 0);
+
+  const listResult = spawnSync('node', ['bin/kiroo.js', 'env', 'list'], { encoding: 'utf8' });
+  assert.strictEqual(listResult.status, 0);
+  assert.ok(!listResult.stdout.includes('super-secret-token'));
+  assert.ok(listResult.stdout.includes('***'));
+
+  const restoreEnv = storage.loadEnv();
+  if (previousValue === undefined) {
+    delete restoreEnv.environments[current].GROQ_API_KEY;
+  } else {
+    restoreEnv.environments[current].GROQ_API_KEY = previousValue;
+  }
+  storage.saveEnv(restoreEnv);
+});
+
+test('CLI: export supports postman and openapi formats', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const postmanOut = 'kiroo-test-postman.json';
+  const openapiOut = 'kiroo-test-openapi.json';
+
+  rmSync(postmanOut, { force: true });
+  rmSync(openapiOut, { force: true });
+
+  const prep = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
+  assert.strictEqual(prep.status, 0);
+
+  const postmanResult = spawnSync(
+    'node',
+    ['bin/kiroo.js', 'export', '--format', 'postman', '--out', postmanOut],
+    { encoding: 'utf8' }
+  );
+  assert.strictEqual(postmanResult.status, 0);
+  assert.strictEqual(existsSync(postmanOut), true);
+  const postmanData = JSON.parse(readFileSync(postmanOut, 'utf8'));
+  assert.ok(postmanData.info?.schema?.includes('postman'));
+
+  const openapiResult = spawnSync(
+    'node',
+    ['bin/kiroo.js', 'export', '--format', 'openapi', '--out', openapiOut, '--title', 'Kiroo Test API', '--api-version', '1.0.0'],
+    { encoding: 'utf8' }
+  );
+  assert.strictEqual(openapiResult.status, 0);
+  assert.strictEqual(existsSync(openapiOut), true);
+  const openapiData = JSON.parse(readFileSync(openapiOut, 'utf8'));
+  assert.strictEqual(openapiData.openapi, '3.0.3');
+  assert.ok(openapiData.paths && Object.keys(openapiData.paths).length > 0);
+
+  rmSync(postmanOut, { force: true });
+  rmSync(openapiOut, { force: true });
 });
 
 test('CLI: node bin/kiroo.js --help runs without error', async () => {
@@ -85,13 +402,14 @@ test('CLI: list pagination works', async () => {
 
 test('CLI: replay command works', async () => {
   const { spawnSync } = await import('node:child_process');
+  const beforeIds = new Set(storage.getAllInteractions().map((int) => int.id));
+  const createResult = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
+  assert.strictEqual(createResult.status, 0);
+
+  const created = storage.getAllInteractions().find((int) => !beforeIds.has(int.id));
+  assert.ok(created, 'Should capture newly created interaction for replay');
   
-  // Create an interaction to replay
-  spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
-  const interactions = storage.getAllInteractions();
-  const id = interactions[0].id;
-  
-  const result = spawnSync('node', ['bin/kiroo.js', 'replay', id], { encoding: 'utf8' });
+  const result = spawnSync('node', ['bin/kiroo.js', 'replay', created.id], { encoding: 'utf8' });
   assert.strictEqual(result.status, 0);
   assert.match(result.stdout, /Replaying interaction/);
   assert.match(result.stdout, /Comparison with stored response/);
@@ -165,7 +483,9 @@ test('CLI: Auto-BaseURL prepends baseUrl for paths starting with /', async () =>
   const interactionsDir = join('.kiroo', 'interactions');
   const files = fs.readdirSync(interactionsDir);
   const latest = files.sort().pop();
-  const data = JSON.parse(fs.readFileSync(join(interactionsDir, latest), 'utf8'));
   
-  assert.strictEqual(data.request.url, 'http://localhost:1234/auto-test-path');
+  assert.ok(latest, 'Auto-BaseURL test should create a new interaction');
+  
+  const data = JSON.parse(fs.readFileSync(join(interactionsDir, latest), 'utf8'));
+  assert.strictEqual(data.request.url, 'http://localhost:1234/auto-test-path', 'URL should have baseUrl prepended');
 });
