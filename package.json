@@ -1,5 +1,5 @@
 {
-  "name": "kiroo",
+  "name": "@kiroo/cli",
   "version": "0.9.5",
   "description": "Git for API interactions. Record, replay, snapshot, and diff your APIs.",
   "type": "module",
@@ -37,6 +37,7 @@
   "author": "Yash Pouranik",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.1",
     "axios": "^1.6.7",
     "chalk": "^5.3.0",
     "cli-table3": "^0.6.3",

@@ -1,0 +1,27 @@
+{
+  "name": "@kiroo/sdk",
+  "version": "0.1.0",
+  "description": "Production API traffic capture for Kiroo with Time-Travel Replay support",
+  "main": "index.js",
+  "type": "commonjs",
+  "files": [
+    "index.js",
+    "storage.js",
+    "sanitizer.js",
+    "README.md"
+  ],
+  "dependencies": {
+    "@supabase/supabase-js": "^2.99.1"
+  },
+  "keywords": [
+    "api",
+    "debugging",
+    "capture",
+    "replay",
+    "express",
+    "middleware",
+    "supabase"
+  ],
+  "author": "Yash Pouranik",
+  "license": "MIT"
+}

@@ -32,75 +32,74 @@
       <div class="hero-backdrop" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Version control for API interactions</p>
-          <h1>Your API changed.<br>Know exactly what breaks <span class="accent">before deployment.</span></h1>
-          <p class="hero-sub">Kiroo records real HTTP traffic, snapshots API behavior, and highlights contract drift with severity-based reports so teams can ship confidently.</p>
+          <p class="eyebrow">Production Time-Travel Debugging</p>
+          <h1>Replay production bugs in <span class="accent">10 seconds.</span></h1>
+          <p class="hero-sub">Kiroo captures real production traffic with zero overhead and lets you replay exact interactions locally. Stop guessing, start replaying.</p>
           <div class="hero-actions">
-            <button class="btn btn-primary copy-btn" data-copy="npm install -g kiroo">npm install -g kiroo</button>
+            <button class="btn btn-primary copy-btn" data-copy="npm install @kiroo/cli">npm install @kiroo/cli</button>
             <a class="btn btn-ghost" href="docs.html">Read full docs</a>
           </div>
           <ul class="hero-points">
-            <li>Capture via CLI, proxy, or cURL import</li>
-            <li>Diff snapshots with semantic severity</li>
-            <li>Export Postman and OpenAPI from real traffic</li>
+            <li>High-performance Capture SDK for Node.js</li>
+            <li>Secure batch-upload to Supabase Storage</li>
+            <li>Recursive PII scrubbing and secret redaction</li>
           </ul>
         </div>
         <aside class="hero-panel" aria-label="Kiroo terminal output">
           <div class="terminal-head">
             <span></span><span></span><span></span>
-            <p>kiroo-session</p>
+            <p>kiroo-debug</p>
           </div>
           <div class="terminal-body">
-            <p><span class="prompt">$</span> kiroo proxy --target http://localhost:3000</p>
-            <p class="dim">Proxy listening on http://localhost:8080</p>
-            <p class="dim"><span class="ok">POST</span> /api/login 200 142ms</p>
-            <p class="dim"><span class="ok">GET</span> /api/profile 200 88ms</p>
-            <p class="dim"><span class="warn">PUT</span> /api/profile 422 55ms</p>
+            <p><span class="prompt">$</span> kiroo fetch kiroo-174205-abc123</p>
+            <p class="dim">🔍 Searching production captures...</p>
+            <p class="dim">✓ Downloaded: <span class="ok">GET /api/checkout (500)</span></p>
             <br>
-            <p><span class="prompt">$</span> kiroo snapshot compare v1 v2 --analyze</p>
-            <p class="dim"><span class="warn">HIGH</span> GET /api/profile</p>
-            <p class="dim">field removed: <code>user_id</code> -> <code>userId</code></p>
+            <p><span class="prompt">$</span> kiroo replay kiroo-174205-abc123 --target localhost:3000</p>
+            <p class="dim">🔄 Replaying interaction with production payload...</p>
+            <p class="dim">Redirected to: <span class="warn">http://localhost:3000/api/checkout</span></p>
+            <p class="ok">✓ Replay successful. Debugger hit!</p>
           </div>
         </aside>
       </div>
       <div class="container metric-strip">
-        <div><strong>Node 18+</strong><span>runtime support</span></div>
-        <div><strong>OpenAPI 3.0</strong><span>export format</span></div>
-        <div><strong>AI summary</strong><span>impact explanation</span></div>
-        <div><strong>Secret scrub</strong><span>Git-safe recordings</span></div>
+        <div><strong>SDK Capture</strong><span>High-performance batching</span></div>
+        <div><strong>Zero Overhead</strong><span>Async Supabase uploads</span></div>
+        <div><strong>Recursive Scrub</strong><span>GDPR/SOC2 compliant logs</span></div>
+        <div><strong>One-Line Replay</strong><span>Local bug reproduction</span></div>
       </div>
     </section>
 
     <section class="workflow" id="workflow">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">Developer workflow</p>
-          <h2>From local debugging to CI gates in four steps</h2>
+          <p class="eyebrow">How it works</p>
+          <h2>The Time-Travel Debugging Cycle</h2>
         </div>
         <div class="steps">
           <article class="step">
             <span>01</span>
-            <h3>Capture traffic</h3>
-            <p>Record interactions using HTTP commands, <code>kiroo proxy</code>, or browser cURL import.</p>
-            <code>kiroo proxy --target http://localhost:3000</code>
+            <h3>Capture (SDK)</h3>
+            <p>The <code>@kiroo/sdk</code> captures interactions in production and batch-uploads them securely to Supabase.</p>
+            <code>npm install @kiroo/sdk</code>
           </article>
           <article class="step">
             <span>02</span>
-            <h3>Snapshot a baseline</h3>
-            <p>Save a contract baseline before large refactors or backend releases.</p>
-            <code>kiroo snapshot save v1-stable</code>
+            <h3>Report (ID)</h3>
+            <p>Every capture gets a unique <strong>Replay ID</strong>. Help your users by returning it in error responses.</p>
+            <code>res.get('X-Kiroo-Replay-ID')</code>
           </article>
           <article class="step">
             <span>03</span>
-            <h3>Analyze drift</h3>
-            <p>Compare versions and rank impact from low to critical severity.</p>
-            <code>kiroo analyze v1-stable current --fail-on high</code>
+            <h3>Fetch (CLI)</h3>
+            <p>Download the exact production payload locally using the CLI and your Supabase credentials.</p>
+            <code>kiroo fetch &lt;replay-id&gt;</code>
           </article>
           <article class="step">
             <span>04</span>
-            <h3>Share artifacts</h3>
-            <p>Generate OpenAPI and Postman outputs from real interactions for teammates and documentation.</p>
-            <code>kiroo export --format openapi --out openapi.json</code>
+            <h3>Replay (Dev)</h3>
+            <p>Replay the production bug against your local server. Debug the bug, don't guess the bug.</p>
+            <code>kiroo replay &lt;id&gt; --target localhost:3000</code>
           </article>
         </div>
       </div>
@@ -113,14 +112,14 @@
           <h2>Built for serious API teams</h2>
         </div>
         <div class="feature-grid">
-          <article><h3>Time-travel proxy</h3><p>Capture frontend flows with no manual command entry.</p></article>
-          <article><h3>Snapshot diffing</h3><p>Track structural API drift between named versions.</p></article>
-          <article><h3>AI blast radius</h3><p>Explain likely downstream breakage before shipping.</p></article>
-          <article><h3>Zero-code checks</h3><p>Assert status codes and response fields from CLI.</p></article>
-          <article><h3>Load benchmarking</h3><p>Quickly measure latency, throughput, and error ratios.</p></article>
-          <article><h3>Secret redaction</h3><p>Mask tokens, keys, and passwords in saved artifacts.</p></article>
-          <article><h3>Dependency graph</h3><p>Visualize variable flow across chained API calls.</p></article>
-          <article><h3>Portable export</h3><p>Emit Postman or OpenAPI specs from observed traffic.</p></article>
+          <article><h3>Production Capture</h3><p>Lightweight SDK to record real-world interactions securely.</p></article>
+          <article><h3>Time-Travel Replay</h3><p>Re-run production payloads against your local host in seconds.</p></article>
+          <article><h3>Supabase Integration</h3><p>Persist captures in your own cloud with batch-upload performance.</p></article>
+          <article><h3>Privacy Guard</h3><p>Recursive PII scrubbing ensures internal data stays internal.</p></article>
+          <article><h3>AI Blast Radius</h3><p>Explain likely downstream breakage before shipping changes.</p></article>
+          <article><h3>Snapshot Diffing</h3><p>Track structural API drift between named versions.</p></article>
+          <article><h3>Zero-code Checks</h3><p>Assert status codes and response fields from terminal.</p></article>
+          <article><h3>Portable spec</h3><p>Emit Postman or OpenAPI 3.0 specs from observed traffic.</p></article>
         </div>
       </div>
     </section>
@@ -132,14 +131,14 @@
           <h2>Daily-use commands at a glance</h2>
         </div>
         <div class="command-list">
-          <div><code>kiroo get|post|put|delete &lt;url&gt;</code><p>Execute and record API interactions</p><button class="cmd-copy" data-copy="kiroo get https://api.example.com">Copy</button></div>
-          <div><code>kiroo replay &lt;id&gt; / kiroo edit &lt;id&gt;</code><p>Re-run or tweak historical calls quickly</p><button class="cmd-copy" data-copy="kiroo replay 1">Copy</button></div>
+          <div><code>kiroo fetch &lt;replay-id&gt;</code><p>Download a production capture from Supabase</p><button class="cmd-copy" data-copy="kiroo fetch kiroo-174205-abc123">Copy</button></div>
+          <div><code>kiroo replay &lt;id&gt; --target &lt;url&gt;</code><p>Replay interaction against a local environment</p><button class="cmd-copy" data-copy="kiroo replay 1 --target localhost:3000">Copy</button></div>
+          <div><code>kiroo get|post|put|delete &lt;url&gt;</code><p>Execute and record API interactions manually</p><button class="cmd-copy" data-copy="kiroo get https://api.example.com">Copy</button></div>
           <div><code>kiroo snapshot save|compare</code><p>Version contract states and inspect drift</p><button class="cmd-copy" data-copy="kiroo snapshot save v1">Copy</button></div>
           <div><code>kiroo analyze &lt;tag1&gt; &lt;tag2&gt;</code><p>Semantic severity analysis with optional AI</p><button class="cmd-copy" data-copy="kiroo analyze v1 v2 --ai">Copy</button></div>
-          <div><code>kiroo check &lt;url&gt; --status 200 --has token</code><p>CI-friendly zero-code endpoint assertions</p><button class="cmd-copy" data-copy="kiroo check /api/login --status 200">Copy</button></div>
-          <div><code>kiroo bench &lt;url&gt; -n 100 -c 10</code><p>Concurrent load tests from terminal</p><button class="cmd-copy" data-copy="kiroo bench /api/products -n 100 -c 10">Copy</button></div>
-          <div><code>kiroo export --format openapi</code><p>Generate OpenAPI 3.0 from interactions</p><button class="cmd-copy" data-copy="kiroo export --format openapi">Copy</button></div>
-          <div><code>kiroo env / scrub / graph / stats</code><p>Manage envs, sanitize data, and inspect health</p><button class="cmd-copy" data-copy="kiroo stats">Copy</button></div>
+          <div><code>kiroo check &lt;url&gt; --status 200</code><p>CI-friendly zero-code endpoint assertions</p><button class="cmd-copy" data-copy="kiroo check /api/login --status 200">Copy</button></div>
+          <div><code>kiroo export --format openapi</code><p>Generate OpenAPI 3.0 from real interactions</p><button class="cmd-copy" data-copy="kiroo export --format openapi">Copy</button></div>
+          <div><code>kiroo env set SUPABASE_URL &lt;url&gt;</code><p>Configure CLI environment variables</p><button class="cmd-copy" data-copy="kiroo env set SUPABASE_URL https://xxx.supabase.co">Copy</button></div>
         </div>
         <div class="commands-actions">
           <a class="btn btn-primary" href="docs.html">Browse complete documentation</a>

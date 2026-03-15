@@ -26,11 +26,13 @@
     <aside class="sidebar">
       <p class="sidebar-title">Getting started</p>
       <a class="sidebar-link active" href="#install">Installation</a>
+      <a class="sidebar-link" href="#sdk">Production SDK</a>
       <a class="sidebar-link" href="#init">kiroo init</a>
 
       <p class="sidebar-title">Core flow</p>
       <a class="sidebar-link" href="#http">HTTP methods</a>
       <a class="sidebar-link" href="#list">kiroo list</a>
+      <a class="sidebar-link" href="#fetch">kiroo fetch</a>
       <a class="sidebar-link" href="#replay">kiroo replay</a>
       <a class="sidebar-link" href="#edit">kiroo edit</a>
       <a class="sidebar-link" href="#import">kiroo import</a>
@@ -68,9 +70,58 @@
 
       <section id="install" class="doc-block">
         <h2>Installation</h2>
-        <p>Kiroo requires Node.js 18 or later.</p>
-        <pre><code>npm install -g kiroo
+        <p>Kiroo CLI is available as a scoped package on npm.</p>
+        <pre><code>npm install -g @kiroo/cli
 kiroo --version</code></pre>
+      </section>
+
+      <section id="sdk" class="doc-block">
+        <h2>Production SDK</h2>
+        <p>Capture real-world traffic with the <code>@kiroo/sdk</code> middleware.</p>
+        <pre><code>npm install @kiroo/sdk</code></pre>
+        <h3>Usage</h3>
+        <p>Add the middleware <strong>before</strong> your route handlers. It is designed to be lightweight and non-blocking.</p>
+        <pre><code>const { capture } = require('@kiroo/sdk');
+
+// Best practice: Add early in the middleware stack
+app.use(capture({
+  supabaseUrl: process.env.SUPABASE_URL,
+  supabaseKey: process.env.SUPABASE_SERVICE_KEY,
+  bucket: 'kiroo-captures',
+  sampleRate: 0.1 // Capture 10% of 2xx traffic, 100% of errors
+}));</code></pre>
+
+        <h3>The Full Time-Travel Workflow</h3>
+        <p>Once the SDK is installed, follow these steps to debug production issues:</p>
+        
+        <p><strong>Step 1: Expose the Replay ID</strong></p>
+        <p>The SDK adds a unique <code>X-Kiroo-Replay-ID</code> header to every response. You should expose this to your users or logs when an error occurs:</p>
+        <pre><code>app.use((err, req, res, next) => {
+  const replayId = res.get('X-Kiroo-Replay-ID');
+  console.log(`Bug captured! Replay ID: ${replayId}`);
+  
+  res.status(500).json({ 
+    error: 'Internal Error', 
+    replayId: replayId 
+  });
+});</code></pre>
+
+        <p><strong>Step 2: Initialize CLI Environment</strong></p>
+        <p>On your local machine, tell the Kiroo CLI how to find your captures:</p>
+        <pre><code>kiroo env set SUPABASE_URL &lt;your-url&gt;
+kiroo env set SUPABASE_KEY &lt;your-key&gt;</code></pre>
+
+        <p><strong>Step 3: Fetch & Replay</strong></p>
+        <p>Use the Replay ID from the error report to pull the exact production data and replay it against your local server:</p>
+        <pre><code>kiroo fetch &lt;replay-id&gt;
+kiroo replay &lt;replay-id&gt; --target localhost:3000</code></pre>
+
+        <h3>Performance & Sampling</h3>
+        <ul>
+          <li><strong>Error Priority</strong>: The SDK always captures 4xx and 5xx errors regardless of <code>sampleRate</code>.</li>
+          <li><strong>Sampling</strong>: Set <code>sampleRate</code> (0.0 to 1.0) to control how much "healthy" traffic is stored.</li>
+          <li><strong>Background Uploads</strong>: Interactions are buffered in memory and uploaded every 30s in batches, ensuring near-zero latency impact.</li>
+        </ul>
       </section>
 
       <section id="init" class="doc-block">
@@ -115,10 +166,23 @@ kiroo get /api/users -H "Authorization: Bearer {{jwt}}"</code></pre>
         </table>
       </section>
 
+      <section id="fetch" class="doc-block">
+        <h2>kiroo fetch</h2>
+        <p>Download a production capture from Supabase using its Replay ID.</p>
+        <pre><code>kiroo fetch &lt;replay-id&gt;</code></pre>
+        <p>This command uses Kiroo's internal environment variables for Supabase credentials. Ensure you have set <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code> using <code>kiroo env set</code>.</p>
+      </section>
+
       <section id="replay" class="doc-block">
         <h2>kiroo replay</h2>
-        <p>Re-execute a saved interaction using its ID from <code>kiroo list</code>.</p>
-        <pre><code>kiroo replay &lt;interaction-id&gt;</code></pre>
+        <p>Re-execute a saved interaction. Use <code>--target</code> to redirect production traffic to a local server.</p>
+        <pre><code>kiroo replay &lt;interaction-id&gt; [options]</code></pre>
+        <table>
+          <thead><tr><th>Flag</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>-t, --target &lt;url&gt;</code></td><td>Override target host (e.g., <code>localhost:3000</code>)</td></tr>
+          </tbody>
+        </table>
       </section>
 
       <section id="edit" class="doc-block">

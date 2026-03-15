@@ -18,6 +18,7 @@ import { exportInteractions } from '../src/export.js';
 import { runProxy } from '../src/proxy.js';
 import { analyzeSnapshots } from '../src/analyze.js';
 import { runSnapshot } from '../src/run.js';
+import { fetchCapture } from '../src/fetch.js';
 
 const banner = `
 ${chalk.magenta.bold(`
@@ -151,8 +152,17 @@ program
 program
   .command('replay <id>')
   .description('Replay a stored interaction')
+  .option('-t, --target <url>', 'Override target URL for replaying (e.g., http://localhost:3000)')
+  .action(async (id, options) => {
+    await replayInteraction(id, options);
+  });
+
+// Fetch production capture
+program
+  .command('fetch <id>')
+  .description('Download a production capture from Supabase')
   .action(async (id) => {
-    await replayInteraction(id);
+    await fetchCapture(id);
   });
 
 // Edit interaction

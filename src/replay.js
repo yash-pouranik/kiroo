@@ -11,7 +11,7 @@ export async function listInteractions(options) {
   
   // Apply Filters
   if (options.date) {
-  interactions = interactions.filter(int => int.id.startsWith(options.date));
+    interactions = interactions.filter(int => (int.timestamp || '').startsWith(options.date));
   }
   if (options.url) {
     interactions = interactions.filter(int => int.request.url.toLowerCase().includes(options.url.toLowerCase()));
@@ -30,7 +30,7 @@ export async function listInteractions(options) {
   
   const table = new Table({
     head: ['ID', 'Method', 'URL', 'Status', 'Duration'].map(h => chalk.cyan(h)),
-    colWidths: [26, 8, 45, 8, 12],
+    colWidths: [44, 8, 27, 8, 12],
   });
   
   const page = interactions.slice(offset, offset + limit);
@@ -46,7 +46,7 @@ export async function listInteractions(options) {
     table.push([
       chalk.white(int.id),
       chalk.white(int.request.method || '???'),
-      chalk.gray(url.substring(0, 42) + (url.length > 42 ? '...' : '')),
+      chalk.gray(url.substring(0, 24) + (url.length > 24 ? '...' : '')),
       statusColor(int.response.status),
       chalk.gray((int.metadata.duration_ms || 0) + 'ms'),
     ]);
@@ -68,24 +68,42 @@ export async function listInteractions(options) {
   console.log(chalk.gray('  Replay: '), chalk.white('kiroo replay <id>\n'));
 }
 
-export async function replayInteraction(id) {
+export async function replayInteraction(id, options = {}) {
   try {
     const interaction = loadInteraction(id);
     
+    let url = interaction.request.url;
+    if (options.target) {
+      try {
+        const originalUrl = new URL(interaction.request.url);
+        const targetBase = options.target.startsWith('http') ? options.target : `http://${options.target}`;
+        const targetUrl = new URL(targetBase);
+        // Replace origin but keep path and query
+        url = `${targetUrl.origin}${originalUrl.pathname}${originalUrl.search}`;
+      } catch (e) {
+        console.error(chalk.red('\n  ✗ Invalid target URL:'), options.target);
+        process.exit(1);
+      }
+    }
+
     console.log(chalk.cyan(`\n  🔄 Replaying interaction:`), chalk.white(id));
-    console.log(chalk.gray(`  ${interaction.request.method} ${interaction.request.url}\n`));
+    if (options.target) {
+      console.log(chalk.gray(`  Redirected to: ${chalk.yellow(url)}`));
+    } else {
+      console.log(chalk.gray(`  ${interaction.request.method} ${interaction.request.url}\n`));
+    }
     
     const startTime = Date.now();
     const response = await axios({
       method: interaction.request.method.toLowerCase(),
-      url: interaction.request.url,
+      url: url,
       headers: interaction.request.headers,
       data: interaction.request.body,
       validateStatus: () => true,
     });
     const duration = Date.now() - startTime;
     
-    console.log(formatResponse(response));
+    console.log(await formatResponse(response));
     
     // Simple comparison
     console.log(chalk.cyan('  📊 Comparison with stored response:'));

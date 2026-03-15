@@ -9,6 +9,47 @@ const INTERACTIONS_DIR = join(KIROO_DIR, 'interactions');
 const SNAPSHOTS_DIR = join(KIROO_DIR, 'snapshots');
 const ENV_FILE = join(KIROO_DIR, 'env.json');
 
+function buildEndpointSlug(rawUrl) {
+  let candidate = String(rawUrl || '');
+
+  try {
+    const parsed = new URL(candidate);
+    candidate = parsed.pathname || 'root';
+  } catch {
+    candidate = candidate.replace(/^https?:\/\/[^/]+/i, '');
+    candidate = candidate.split('?')[0];
+  }
+
+  if (!candidate || candidate === '/') {
+    candidate = 'root';
+  }
+
+  const slug = candidate
+    .replace(/^\/+/, '')
+    .replace(/\/+/g, '-')
+    .replace(/\{|\}/g, '')
+    .replace(/[^a-zA-Z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40);
+
+  return slug || 'root';
+}
+
+function buildInteractionId(method, url, timestamp) {
+  const timestampId = timestamp.replace(/[:.]/g, '-');
+  const methodSlug = String(method || 'REQ').toUpperCase().replace(/[^A-Z]/g, '') || 'REQ';
+  const endpointSlug = buildEndpointSlug(url);
+  return `${methodSlug}__${endpointSlug}__${timestampId}`;
+}
+
+function buildInteractionFilename(method, url, timestamp) {
+  const timestampId = timestamp.replace(/[:.]/g, '-');
+  const methodSlug = String(method || 'REQ').toUpperCase().replace(/[^A-Z]/g, '') || 'REQ';
+  const endpointSlug = buildEndpointSlug(url);
+  return `~${timestampId}__${methodSlug}__${endpointSlug}.json`;
+}
+
 function getPersistenceSettings() {
   const config = loadKirooConfig();
   const redaction = config.settings?.redaction || {};
@@ -53,7 +94,7 @@ export async function saveInteraction(interaction) {
   const settings = getPersistenceSettings();
   
   const timestamp = new Date().toISOString();
-  const id = timestamp.replace(/[:.]/g, '-');
+  const id = buildInteractionId(interaction.method, interaction.url, timestamp);
   
   const interactionData = {
     id,
@@ -77,7 +118,7 @@ export async function saveInteraction(interaction) {
     redactedValue: settings.redactedValue
   });
 
-  const filename = `${id}.json`;
+  const filename = buildInteractionFilename(interaction.method, interaction.url, timestamp);
   const filepath = join(INTERACTIONS_DIR, filename);
   
   writeFileSync(filepath, stringifyForPersistence(sanitizedInteractionData, settings.sortKeys));
@@ -86,14 +127,23 @@ export async function saveInteraction(interaction) {
 }
 
 export function loadInteraction(id) {
-  const filepath = join(INTERACTIONS_DIR, `${id}.json`);
+  const directPath = join(INTERACTIONS_DIR, `${id}.json`);
   
-  if (!existsSync(filepath)) {
-    throw new Error(`Interaction not found: ${id}`);
+  if (existsSync(directPath)) {
+    const data = readFileSync(directPath, 'utf8');
+    return JSON.parse(data);
   }
-  
-  const data = readFileSync(filepath, 'utf8');
-  return JSON.parse(data);
+
+  const files = readdirSync(INTERACTIONS_DIR).filter((f) => f.endsWith('.json'));
+  for (const file of files) {
+    const filepath = join(INTERACTIONS_DIR, file);
+    const parsed = JSON.parse(readFileSync(filepath, 'utf8'));
+    if (parsed.id === id) {
+      return parsed;
+    }
+  }
+
+  throw new Error(`Interaction not found: ${id}`);
 }
 
 export function getAllInteractions() {
@@ -103,15 +153,22 @@ export function getAllInteractions() {
     return [];
   }
   
-  const files = readdirSync(INTERACTIONS_DIR)
-    .filter(f => f.endsWith('.json'))
-    .sort()
-    .reverse(); // Most recent first
-  
-  return files.map(f => {
+  const files = readdirSync(INTERACTIONS_DIR).filter(f => f.endsWith('.json'));
+  const interactions = files.map(f => {
     const filepath = join(INTERACTIONS_DIR, f);
     const data = readFileSync(filepath, 'utf8');
     return JSON.parse(data);
+  });
+
+  return interactions.sort((a, b) => {
+    const timeA = Date.parse(a.timestamp || '');
+    const timeB = Date.parse(b.timestamp || '');
+
+    if (!Number.isNaN(timeA) && !Number.isNaN(timeB) && timeA !== timeB) {
+      return timeB - timeA; // Most recent first
+    }
+
+    return String(b.id || '').localeCompare(String(a.id || ''));
   });
 }
 
