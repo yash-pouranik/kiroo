@@ -37,6 +37,11 @@ a {
   text-decoration: none;
 }
 
+.container {
+  width: min(1100px, calc(100% - 100px));
+  margin: 0 auto;
+}
+
 /* TOPBAR (Notion Style) */
 .topbar {
   position: sticky;
