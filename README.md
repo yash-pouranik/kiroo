@@ -33,7 +33,31 @@ If your API changes frequently, Kiroo answers:
   <img src="./image.png" alt="Kiroo demo preview" width="100%">
 </div>
 
-- Quick judge flow: [`DEMO.md`](./DEMO.md)
+### 🔥 Start Here (Judge Demo)
+
+If you test only one thing, test this:
+- **Production Time-Travel Debugging** (`kiroo fetch + kiroo replay`)
+- **AI Blast Radius Analysis** (`--analyze --ai`)
+- **Git-native API snapshots** (`v1` vs `v2`)
+
+Use the full walkthrough: **[`DEMO.md`](./DEMO.md)**
+
+Quick launch:
+
+```bash
+cd examples/judge-sdk-cli
+npm install
+npm start
+```
+
+Then from repo root:
+
+```bash
+kiroo get http://localhost:3311/api/fail
+# copy X-Kiroo-Replay-ID from headers
+kiroo fetch <replay-id>
+kiroo replay <replay-id> --target http://localhost:3311
+```
 
 ---
 

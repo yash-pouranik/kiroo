@@ -140,7 +140,7 @@ kiroo export --format openapi --out judge-openapi.json
 
 ---
 
-## Judge checklist (fast)
+## checklist
 
 - Replay ID captured and replayed locally
 - AI analyze command runs with severity output
