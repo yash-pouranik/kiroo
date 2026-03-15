@@ -8,9 +8,9 @@
   [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18-green.svg)](https://nodejs.org/)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-  **Record, Replay, Snapshot, and Diff your APIs just like Git handles code.**
+  **Record, Replay, Snapshot, Analyze, and Export your APIs — like Git for HTTP workflows.**
 
-  [Installation](#-installation) • [Quick Start](#-quick-start) • [Key Features](#-core-capabilities) • [Why Kiroo?](#-why-kiroo)
+  [Demo](#-demo) • [Feature Grid](#-feature-grid) • [Use Cases](#-real-world-use-cases) • [Install](#-installation) • [Docs](#-full-command-documentation)
 
 </div>
 
@@ -18,114 +18,79 @@
 
 ## 📖 What is Kiroo?
 
-Kiroo is **Version Control for API Interactions**. It treats your requests and responses as first-class, versionable artifacts that live right alongside your code in your Git repository.
+Kiroo is **version control for API interactions**. It records real HTTP traffic, stores it locally in your repo, lets you replay history, compare snapshots, run semantic drift analysis, and export machine-readable artifacts like OpenAPI.
 
-Stop copy-pasting JSON into Postman. Stop losing your API history. Start versioning it. 🚀
-
----
-
-## 🕸️ Visual Dependency Graph (`kiroo graph`)
-
-Kiroo doesn't just record requests; it understands the **relationships** between them. 
-- **Auto-Tracking**: Kiroo tracks variables created via `--save` and consumed via `{{key}}`.
-- **Insight**: Instantly see how data flows from your `/login` to your `/profile` and beyond.
+If your API changes frequently, Kiroo answers:
+- What changed?
+- What broke?
+- Which consumers are impacted?
 
 ---
 
-## 📊 Insights & Performance Dashboard (`kiroo stats`)
+## 🎬 Demo
 
-Monitor your API's health directly from your terminal.
-- **Success Rates**: Real-time 2xx/4xx/5xx distribution.
-- **Performance**: Average response times across all interactions.
-- **Bottlenecks**: Automatically identifies your top 5 slowest endpoints.
+> Tip: Replace the preview below with your product GIF file (for example `./docs/demo.gif`) when ready.
 
----
-
-## 🔌 Instant cURL Import (`kiroo import`)
-
-Coming from a browser? Don't type a single header.
-- **Copy-Paste Magic**: Just `Copy as cURL` from Chrome/Firefox and run `kiroo import`.
-- **Clean Parsing**: Automatically handles multi-line commands, quotes, and complex flags.
+<div align="center">
+  <img src="./image.png" alt="Kiroo demo preview" width="100%">
+</div>
 
 ---
 
-## 🕰️ Time-Travel Proxy (`kiroo proxy`) 
+## 🌐 Product Landing Page
 
-Stop typing CLI commands manually.
-- **Auto-Capture**: Start the Kiroo Proxy between your frontend and backend. Every click in your app is automatically captured and versioned.
-- **Zero Effort**: `kiroo proxy --target http://localhost:3000`. Perfect for instantly recording broken frontend flows to reproduce later.
-
----
-
-## ✨ Features that WOW
-
-### 🟢 **Git-Native Diffing & Translating**
-Capture a **Snapshot** of your entire API state and compare versions.
-- **Deep Structural Diffs**: Recursively tracks nested schema changes and silent datatype overrides.
-- **Lingo.dev Translation**: Instantly localize breaking change alerts natively in your terminal.
-```bash
-kiroo snapshot save v1-stable
-kiroo --lang hi snapshot compare v1-stable current
-```
-
-### 🧠 **AI Blast Radius Analysis**
-Understand impact, not just raw diffs.
-```bash
-kiroo analyze v1-stable current --fail-on high
-kiroo analyze v1-stable current --ai
-```
-
-### 🌍 **Variable Chaining**
-Chain requests like a pro. Save a token from one response and inject it into the next.
-```bash
-kiroo post /login --save jwt=data.token
-kiroo get /users -H "Authorization: Bearer {{jwt}}"
-```
-
-### 🔐 **Git-Safe Recording (Secret Redaction)**
-Kiroo redacts sensitive values before writing interaction files, so `.kiroo/` can be safely shared in Git.
-```bash
-kiroo scrub --dry-run
-kiroo scrub
-```
-
-### ⌨️ **Shorthand JSON Parser**
-Forget escaping quotes. Type JSON like a human.
-```bash
-kiroo post /api/user -d "name=Yash email=yash@kiroo.io role=admin"
-```
+- Local landing page source: [`docs/index.html`](./docs/index.html)
+- Full documentation page source: [`docs/docs.html`](./docs/docs.html)
 
 ---
 
-### 🧪 **Zero-Code Testing Framework**
-Turn your terminal into an automated test runner. Validate responses on the fly without writing a single line of JS.
-```bash
-kiroo check /api/login -m POST -d "user=yash pass=123" --status 200 --has token
-```
+## ✨ Feature Grid
 
-### 🚀 **Local Load Benchmarking**
-Stress test endpoints instantly. Simulates massive concurrency and environment-variable-injected workloads to locate latency limits.
-```bash
-kiroo bench /api/reports -n 1000 -c 50 -v
-```
+| Capability | What it gives you |
+|---|---|
+| **Request Recording** | Store request/response history in `.kiroo/` for replay and auditability |
+| **Snapshot Versioning** | Save versioned API states and compare contract drift |
+| **AI Blast Radius Analysis** | Get severity scoring and impact summaries before deployment |
+| **Time-Travel Proxy** | Auto-capture frontend traffic without manually typing requests |
+| **Zero-Code API Checks** | CI-friendly assertions for status, fields, and exact matches |
+| **Load Benchmarking** | Concurrency and throughput testing from CLI |
+| **OpenAPI/Postman Export** | Generate shareable artifacts from observed traffic |
+| **Secret Redaction** | Mask sensitive data so interaction files stay Git-safe |
+| **Dependency Graph + Stats** | Understand variable flow and performance bottlenecks |
 
 ---
 
-## 🚀 Quick Start
+## 🎯 Real-World Use Cases
 
-### 1. Installation
+- **Pre-release contract safety:** Compare `v1` vs `v2` snapshots and fail CI on high-severity changes.
+- **Frontend debugging:** Capture browser flows with `kiroo proxy` and replay problematic requests instantly.
+- **Regression protection:** Convert critical endpoints into `kiroo check` assertions.
+- **API docs bootstrap:** Export real-world interactions as OpenAPI for partner teams.
+- **Performance guardrails:** Benchmark hot endpoints after backend changes.
+
+---
+
+## 🚀 Installation
+
+### 1) Install globally
 ```bash
 npm install -g kiroo
 ```
 
-### 2. Initialization
+### 2) Initialize in your repo
 ```bash
 kiroo init
 ```
 
-### 3. Record Your First Request
+### 3) Run a first request
 ```bash
 kiroo get https://api.github.com/users/yash-pouranik
+```
+
+### 4) Snapshot + analyze
+```bash
+kiroo snapshot save v1
+kiroo snapshot compare v1 current --analyze
 ```
 
 ---
