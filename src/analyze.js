@@ -658,7 +658,8 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
     }
 
     if (failOnSeverity && shouldFail(report, failOnSeverity)) {
-      console.error(chalk.red(`\n  ✗ Analysis failed threshold (${failOnSeverity}). Highest severity is ${report.highestSeverity}.`));
+      console.error(chalk.red(`\n  ✗ Severity gate blocked: threshold=${failOnSeverity}, highest=${report.highestSeverity}.`));
+      console.log(chalk.gray('  ℹ Analysis completed successfully; only the fail-on policy returned non-zero exit.\n'));
       process.exit(1);
     }
 
