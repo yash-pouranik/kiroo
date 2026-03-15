@@ -357,13 +357,6 @@ Get command-level help directly in CLI.
   kiroo help bench
   ```
 
----
-
-## 🤝 Contributing
-
-Kiroo is an open-source project and we love contributions! Check out our [Contribution Guidelines](CONTRIBUTING.md).
-
----
 
 ## 📜 License
 
