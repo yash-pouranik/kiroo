@@ -1,0 +1,11 @@
+{
+  "name": "kiroo-demo-backend",
+  "version": "1.0.0",
+  "description": "Demo API for Kiroo CLI",
+  "main": "server.js",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}

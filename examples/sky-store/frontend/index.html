@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyStore API Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --border-width: 2px;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier Prime', monospace;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .header {
+            border: var(--border-width) solid var(--text);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .section-box {
+            border: var(--border-width) solid var(--text);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-header {
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .section-content {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+
+        button {
+            background: var(--bg);
+            border: var(--border-width) solid var(--text);
+            color: var(--text);
+            padding: 0.75rem;
+            font-family: inherit;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.1s;
+        }
+
+        button:hover {
+            box-shadow: 4px 4px 0px var(--text);
+            transform: translate(-2px, -2px);
+        }
+
+        button:active {
+            box-shadow: 0px 0px 0px var(--text);
+            transform: translate(0, 0);
+        }
+
+        .search-row {
+            display: flex;
+            border-top: var(--border-width) solid var(--text);
+        }
+
+        input {
+            flex: 1;
+            border: none;
+            padding: 0.75rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .search-btn {
+            border-left: var(--border-width) solid var(--text);
+            border-right: none;
+            border-top: none;
+            border-bottom: none;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            border: var(--border-width) solid var(--text);
+        }
+
+        .inspector-header {
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        #output {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.85rem;
+            background: #fff;
+        }
+
+        .res-log {
+            border-bottom: 1px dashed var(--text);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SkyStore API Lab</h1>
+        <div style="font-weight: 700;">PROX: 8080</div>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <!-- Catalog Section -->
+            <div class="section-box">
+                <div class="section-header">01. Catalog & Products</div>
+                <div class="section-content">
+                    <button onclick="hitApi('/api/v1/products')">Catalog v1 (Stable)</button>
+                    <button onclick="hitApi('/api/v2/products')">Catalog v2 (Structural Drift)</button>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="section-box">
+                <div class="section-header">02. Profiles & Preferences</div>
+                <div class="section-content">
+                    <button onclick="hitApi('/api/v1/user')">User v1 (Flat Mapping)</button>
+                    <button onclick="hitApi('/api/v2/user')">User v2 (Nested Mapping)</button>
+                </div>
+            </div>
+
+            <!-- Logic Section -->
+            <div class="section-box">
+                <div class="section-header">03. Checkout Logic</div>
+                <div class="section-content">
+                    <button onclick="hitApi('/api/v1/checkout', 'POST', {productId: 'sky-1'})">Checkout v1 (200 OK)</button>
+                    <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-1'})">Checkout v2 (202 ACCEPTED)</button>
+                    <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-3'})">Trigger Exception (v2)</button>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="section-box">
+                <div class="section-header">04. Search Drift</div>
+                <div class="search-row">
+                    <input type="text" id="sq" placeholder="SEARCH QUERY...">
+                    <button class="search-btn" style="border-bottom:none; border-top:none;" onclick="hitApi('/api/v1/search?q=' + document.getElementById('sq').value)">v1</button>
+                    <button class="search-btn" style="border-bottom:none; border-top:none; border-right:none;" onclick="hitApi('/api/v2/search?q=' + document.getElementById('sq').value)">v2</button>
+                </div>
+            </div>
+
+            <!-- Meta Section -->
+            <div class="section-box">
+                <div class="section-header">05. Collections</div>
+                <div class="section-content">
+                    <button onclick="hitApi('/api/v1/wishlist')">Wishlist v1 (Array)</button>
+                    <button onclick="hitApi('/api/v2/wishlist')">Wishlist v2 (Object)</button>
+                    <button onclick="hitApi('/api/v2/notifications')">NOTIFICATIONS (v2-ONLY)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="inspector-header">
+                <span>INSPECTOR</span>
+                <span id="p-status">READY</span>
+            </div>
+            <pre id="output">WAITING_FOR_INTERACTION...</pre>
+        </div>
+    </div>
+
+    <script>
+        async function hitApi(path, method = 'GET', body = null) {
+            const out = document.getElementById('output');
+            const status = document.getElementById('p-status');
+            const port = 3000;
+            
+            out.innerHTML = `> EXECUTING ${method} ${path}\n> PENDING...`;
+            status.innerHTML = 'BUSY';
+            
+            try {
+                const start = performance.now();
+                const response = await fetch(`http://localhost:${port}${path}`, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body ? JSON.stringify(body) : null
+                });
+                const data = await response.json();
+                const end = performance.now();
+                
+                status.innerHTML = 'DONE';
+                out.innerHTML = `
+<div class="res-log">
+METHOD: ${method}
+PATH:   ${path}
+STATUS: ${response.status} ${response.statusText}
+TIME:   ${(end - start).toFixed(0)}MS
+</div>
+${JSON.stringify(data, null, 2)}
+                `;
+            } catch (err) {
+                status.innerHTML = 'ERROR';
+                out.innerHTML = `> CONNECTION_FAILED: ${err.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 
-export function formatResponse(response) {
+import { translateText, translateResponseData } from './lingo.js';
+
+export async function formatResponse(response, lang) {
   const lines = [];
   
   // Status
@@ -21,7 +23,10 @@ export function formatResponse(response) {
     .slice(0, 3);
   
   if (headers.length > 0) {
-    lines.push(chalk.gray('  Headers:'));
+    let headersLabel = '  Headers:';
+    if (lang) headersLabel = await translateText(headersLabel, lang);
+    lines.push(chalk.gray(headersLabel));
+    
     headers.forEach(([key, value]) => {
       const displayValue = typeof value === 'string' && value.length > 50 
         ? value.substring(0, 50) + '...' 
@@ -33,17 +38,24 @@ export function formatResponse(response) {
   
   // Body
   if (response.data) {
-    lines.push(chalk.gray('  Response:'));
+    let responseLabel = '  Response:';
+    if (lang) responseLabel = await translateText(responseLabel, lang);
+    lines.push(chalk.gray(responseLabel));
     
-    if (typeof response.data === 'object') {
+    let displayData = response.data;
+    if (lang) {
+      displayData = await translateResponseData(response.data, lang);
+    }
+    
+    if (typeof displayData === 'object') {
       // Pretty print JSON
-      const json = JSON.stringify(response.data, null, 2);
+      const json = JSON.stringify(displayData, null, 2);
       json.split('\n').forEach(line => {
         lines.push(chalk.cyan(`    ${line}`));
       });
     } else {
       // Plain text
-      const text = String(response.data);
+      const text = String(displayData);
       const preview = text.length > 500 ? text.substring(0, 500) + '...' : text;
       lines.push(chalk.white(`    ${preview}`));
     }

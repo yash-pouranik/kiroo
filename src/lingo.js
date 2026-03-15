@@ -15,6 +15,7 @@ function getLingoEngine() {
 }
 
 export async function translateText(text, targetLang) {
+  if (!text || typeof text !== 'string' || text.trim() === '') return text;
   const engine = getLingoEngine();
   if (!engine) return text;
 
@@ -26,7 +27,29 @@ export async function translateText(text, targetLang) {
     });
     return result;
   } catch (error) {
-    console.log(chalk.red(`\n  ⚠️  Translation failed: ${error.message}`));
+    // console.log(chalk.red(`\n  ⚠️  Translation failed: ${error.message}`));
     return text; 
   }
+}
+
+/**
+ * Recursively translates strings within an object or array
+ */
+export async function translateResponseData(data, targetLang) {
+  if (!data) return data;
+  if (typeof data === 'string') {
+    return await translateText(data, targetLang);
+  }
+  if (Array.isArray(data)) {
+    return await Promise.all(data.map(item => translateResponseData(item, targetLang)));
+  }
+  if (typeof data === 'object') {
+    const translated = {};
+    for (const [key, value] of Object.entries(data)) {
+      // Don't translate keys, just values
+      translated[key] = await translateResponseData(value, targetLang);
+    }
+    return translated;
+  }
+  return data;
 }

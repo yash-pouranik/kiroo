@@ -76,24 +76,41 @@ function getDeep(obj, path) {
   return keys.reduce((acc, key) => acc && acc[key], obj);
 }
 
-export function showCheckResult(validation) {
-  console.log(chalk.cyan('\n  🧪 Test Results:'));
+import { translateText } from './lingo.js';
+
+export async function showCheckResult(validation, lang) {
+  let title = '🧪 Test Results:';
+  if (lang) title = await translateText(title, lang);
+  console.log(chalk.cyan(`\n  ${title}`));
   
-  validation.results.forEach(res => {
+  for (const res of validation.results) {
     const icon = res.passed ? chalk.green('✓') : chalk.red('✗');
     const color = res.passed ? chalk.white : chalk.red;
     
-    console.log(`  ${icon} ${res.label}`);
+    let label = res.label;
+    if (lang) label = await translateText(label, lang);
+    console.log(`  ${icon} ${label}`);
+    
     if (!res.passed) {
-      console.log(chalk.gray(`     Expected: ${res.expected}`));
-      console.log(chalk.gray(`     Actual:   ${res.actual}`));
+      let expectedLabel = 'Expected:';
+      let actualLabel = 'Actual:';
+      if (lang) {
+        expectedLabel = await translateText(expectedLabel, lang);
+        actualLabel = await translateText(actualLabel, lang);
+      }
+      console.log(chalk.gray(`     ${expectedLabel} ${res.expected}`));
+      console.log(chalk.gray(`     ${actualLabel}   ${res.actual}`));
     }
-  });
+  }
 
   if (validation.passed) {
-    console.log(chalk.green.bold('\n  ✨ ALL TESTS PASSED! \n'));
+    let msg = '✨ ALL TESTS PASSED!';
+    if (lang) msg = await translateText(msg, lang);
+    console.log(chalk.green.bold(`\n  ${msg} \n`));
   } else {
-    console.log(chalk.red.bold('\n  ❌ SOME TESTS FAILED \n'));
+    let msg = '❌ SOME TESTS FAILED';
+    if (lang) msg = await translateText(msg, lang);
+    console.log(chalk.red.bold(`\n  ${msg} \n`));
     process.exit(1);
   }
 }

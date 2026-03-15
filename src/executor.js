@@ -177,7 +177,7 @@ export async function executeRequest(method, url, options = {}) {
     spinner.succeed(chalk.green(`${response.status} ${response.statusText}`) + chalk.gray(` (${duration}ms)`));
 
     // Format and display response
-    console.log(formatResponse(response));
+    console.log(await formatResponse(response, options.lang));
 
     // Handle --save option
     if (options.save) {

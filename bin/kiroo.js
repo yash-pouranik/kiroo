@@ -24,7 +24,7 @@ const program = new Command();
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.9.1')
+  .version('0.9.5')
   .showSuggestionAfterError()
   .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
 
@@ -58,9 +58,11 @@ Examples:
   .action(async (url, options) => {
     // ...
     // Execute request
+    const opts = program.opts();
     const response = await executeRequest(options.method || 'GET', url, {
       header: options.header,
       data: options.data,
+      lang: opts.lang
     });
 
     if (!response) {
@@ -89,7 +91,7 @@ Examples:
 
     // Validate
     const validation = validateResponse(response, rules);
-    showCheckResult(validation);
+    await showCheckResult(validation, opts.lang);
 
     if (!validation.passed) {
       process.exit(1);
@@ -106,7 +108,8 @@ Examples:
     .option('-d, --data <data>', 'Request body (JSON string or key=value pairs)')
     .option('-s, --save <pairs...>', 'Extract values from response to env (key=path.to.data)')
     .action(async (url, options) => {
-      await executeRequest(method, url, options);
+      const opts = program.opts();
+      await executeRequest(method, url, { ...options, lang: opts.lang });
     });
 });
 

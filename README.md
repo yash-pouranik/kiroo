@@ -141,7 +141,7 @@ Initialize Kiroo in your current project.
   kiroo init
   ```
 
-### `kiroo get/post/put/delete <url>`
+### `kiroo get/post/put/delete/patch <url>`
 Execute and record an API interaction.
 - **Description**: Performs an HTTP request, displays the response, and saves it to history.
 - **Prerequisites**: Access to the URL (or a `baseUrl` set in the environment).
@@ -154,6 +154,7 @@ Execute and record an API interaction.
 - **Example**:
   ```bash
   kiroo post /api/auth/login -d "email=user@test.com password=123" --save token=data.token
+  kiroo patch /api/profile -d "name=UpdatedName"
   ```
 
 ### `kiroo list`
@@ -271,9 +272,15 @@ Snapshot management.
   - `list`: List all saved snapshots.
   - `compare <tag1> <tag2>`: Detect structural changes between two states.
   - `compare <tag1> <tag2> --analyze`: Structural compare + semantic severity in one run.
+  - `run <tag>`: Execute all interactions in a snapshot sequentially (supports auth token chaining).
+- **Options for `run`**:
+  - `-v, --verbose`: Show response preview for each request.
+  - `--fail-fast`: Stop immediately on first failed interaction.
+  - `--timeout <ms>`: Request timeout in milliseconds (Default: 30000).
 - **Example**:
   ```bash
   kiroo snapshot compare v1.stable current
+  kiroo snapshot run v1.stable --fail-fast
   ```
 
 ### `kiroo analyze <tag1> <tag2>`
@@ -347,6 +354,17 @@ Wipe history.
 - **Example**:
   ```bash
   kiroo clear --force
+  ```
+
+### `kiroo help [command]`
+Get command-level help directly in CLI.
+- **Description**: Shows global help or detailed help for a specific command.
+- **Arguments**:
+  - `command`: (Optional) Command name to inspect.
+- **Example**:
+  ```bash
+  kiroo help
+  kiroo help bench
   ```
 
 ---
