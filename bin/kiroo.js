@@ -19,7 +19,28 @@ import { runProxy } from '../src/proxy.js';
 import { analyzeSnapshots } from '../src/analyze.js';
 import { runSnapshot } from '../src/run.js';
 
+const banner = `
+${chalk.magenta.bold(`
+  ██╗  ██╗██╗██████╗  ██████╗  ██████╗ 
+  ██║ ██╔╝██║██╔══██╗██╔═══██╗██╔═══██╗
+  █████╔╝ ██║██████╔╝██║   ██║██║   ██║
+  ██╔═██╗ ██║██╔══██╗██║   ██║██║   ██║
+  ██║  ██╗██║██║  ██║╚██████╔╝╚██████╔╝
+  ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ 
+`)}
+  ${chalk.gray('Git for API Interactions')}
+  ${chalk.magenta('v0.9.5')}
+`;
+
 const program = new Command();
+
+// Show intro if no arguments or help is requested
+if (process.argv.length <= 2 || process.argv.includes('--help') || process.argv.includes('-h')) {
+  process.stdout.write('\x1Bc'); // Clear terminal
+  console.log(banner);
+  // Small delay to let the user admire the logo
+  await new Promise(resolve => setTimeout(resolve, 600));
+}
 
 program
   .name('kiroo')
