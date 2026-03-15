@@ -13,7 +13,9 @@
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a href="index.html" class="logo">🦏 Kiroo</a>
+      <a href="index.html" class="logo">
+        <img src="media/logo.png" alt="Kiroo Logo" class="nav-logo">
+      </a>
       <nav>
         <a href="index.html">Home</a>
         <a href="docs.html" class="active">Docs</a>
@@ -24,115 +26,132 @@
 
   <div class="layout">
     <aside class="sidebar">
-      <p class="sidebar-title">Getting started</p>
-      <a class="sidebar-link active" href="#install">Installation</a>
-      <a class="sidebar-link" href="#sdk">Production SDK</a>
-      <a class="sidebar-link" href="#init">kiroo init</a>
+      <p class="sidebar-title">Core superpower</p>
+      <a class="sidebar-link active" href="#sdk">Time-Travel SDK</a>
+      <a class="sidebar-link" href="#workflow">The Magic Loop</a>
 
-      <p class="sidebar-title">Core flow</p>
+      <p class="sidebar-title">Setup & Req</p>
+      <a class="sidebar-link" href="#prereq">Prerequisites</a>
+      <a class="sidebar-link" href="#install">Installation</a>
+      <a class="sidebar-link" href="#init">kiroo init</a>
+      <a class="sidebar-link" href="#env">kiroo env</a>
+
+      <p class="sidebar-title">CLI Reference</p>
       <a class="sidebar-link" href="#http">HTTP methods</a>
       <a class="sidebar-link" href="#list">kiroo list</a>
       <a class="sidebar-link" href="#fetch">kiroo fetch</a>
       <a class="sidebar-link" href="#replay">kiroo replay</a>
       <a class="sidebar-link" href="#edit">kiroo edit</a>
-      <a class="sidebar-link" href="#import">kiroo import</a>
       <a class="sidebar-link" href="#proxy">kiroo proxy</a>
 
-      <p class="sidebar-title">Versioning</p>
+      <p class="sidebar-title">Versioning & Ops</p>
       <a class="sidebar-link" href="#snapshot">kiroo snapshot</a>
       <a class="sidebar-link" href="#analyze">kiroo analyze</a>
-
-      <p class="sidebar-title">Validation</p>
       <a class="sidebar-link" href="#check">kiroo check</a>
       <a class="sidebar-link" href="#bench">kiroo bench</a>
-
-      <p class="sidebar-title">Utilities</p>
       <a class="sidebar-link" href="#export">kiroo export</a>
-      <a class="sidebar-link" href="#graph">kiroo graph</a>
-      <a class="sidebar-link" href="#stats">kiroo stats</a>
-      <a class="sidebar-link" href="#scrub">kiroo scrub</a>
-      <a class="sidebar-link" href="#env">kiroo env</a>
-      <a class="sidebar-link" href="#clear">kiroo clear</a>
     </aside>
 
     <main class="content">
       <section class="intro">
-        <p class="eyebrow">Command reference</p>
-        <h1>Kiroo documentation</h1>
-        <p>Everything you need to capture, version, validate, and export API interactions directly from the terminal.</p>
+        <p class="eyebrow">The Developer's Superpower</p>
+        <h1>Capture once. Replay anywhere.</h1>
+        <p>Kiroo consists of two components: a high-performance **SDK** for production capture and a powerful **CLI** for local debugging and version control.</p>
         <div class="quick-links">
-          <a href="#http">Request commands</a>
-          <a href="#snapshot">Versioning</a>
-          <a href="#check">Testing</a>
-          <a href="#export">Exports</a>
+          <a href="#sdk">Start with SDK</a>
+          <a href="#install">Install CLI</a>
+          <a href="#workflow">Time-Travel Flow</a>
         </div>
       </section>
 
-      <section id="install" class="doc-block">
-        <h2>Installation</h2>
-        <p>Kiroo CLI is available as a scoped package on npm.</p>
-        <pre><code>npm install -g @kiroo/cli
-kiroo --version</code></pre>
+      <section id="prereq" class="doc-block">
+        <h2>Prerequisites</h2>
+        <p>Before you begin your time-travel journey, you need a private storage vault to store your API traces. Kiroo uses <strong>Supabase</strong> for secure, encrypted storage.</p>
+        
+        <div class="callout callout-info">
+            <strong>What you need</strong>
+            <ul>
+                <li><strong>Supabase Project</strong>: A standard Supabase project URL (e.g., <code>https://xyz.supabase.co</code>).</li>
+                <li><strong>Service Role Key</strong>: Required for backend SDK to upload traces. Do not use the Anon key.</li>
+                <li><strong>Bucket Name</strong>: A storage bucket named <code>kiroo-captures</code> (optional, defaults to this).</li>
+            </ul>
+        </div>
       </section>
 
       <section id="sdk" class="doc-block">
         <h2>Production SDK</h2>
-        <p>Capture real-world traffic with the <code>@kiroo/sdk</code> middleware.</p>
+        <p>The <code>@kiroo/sdk</code> is our heart. It captures production API traffic with zero overhead and syncs it securely to your storage (Supabase).</p>
+        
         <pre><code>npm install @kiroo/sdk</code></pre>
-        <h3>Usage</h3>
-        <p>Add the middleware <strong>before</strong> your route handlers. It is designed to be lightweight and non-blocking.</p>
+        
+        <h3>1. Integration</h3>
+        <p>Add the <code>capture</code> middleware early in your application stack. It handles sanitization, buffering, and batch-upload in the background.</p>
+        
         <pre><code>const { capture } = require('@kiroo/sdk');
 
-// Best practice: Add early in the middleware stack
 app.use(capture({
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_SERVICE_KEY,
-  bucket: 'kiroo-captures',
-  sampleRate: 0.1 // Capture 10% of 2xx traffic, 100% of errors
+  supabaseUrl: 'your-project.supabase.co',
+  supabaseKey: 'production-service-role-key',
+  sampleRate: 0.1 // 100% of errors are always captured
 }));</code></pre>
 
-        <h3>The Full Time-Travel Workflow</h3>
-        <p>Once the SDK is installed, follow these steps to debug production issues:</p>
-        
-        <p><strong>Step 1: Expose the Replay ID</strong></p>
-        <p>The SDK adds a unique <code>X-Kiroo-Replay-ID</code> header to every response. You should expose this to your users or logs when an error occurs:</p>
+        <div class="callout callout-info">
+            <strong>Non-Blocking</strong>
+            <p>The SDK uses in-memory buffering and uploads batches every 30 seconds. It will never block your primary API response.</p>
+        </div>
+
+        <h3>2. Exposing Replay IDs</h3>
+        <p>The SDK injects a unique <code>X-Kiroo-Replay-ID</code> into every response. Expose this in your error responses so developers can fetch the exact trace.</p>
         <pre><code>app.use((err, req, res, next) => {
-  const replayId = res.get('X-Kiroo-Replay-ID');
-  console.log(`Bug captured! Replay ID: ${replayId}`);
-  
-  res.status(500).json({ 
-    error: 'Internal Error', 
-    replayId: replayId 
-  });
+  const id = res.get('X-Kiroo-Replay-ID');
+  res.status(500).json({ error: 'Failed', replayId: id });
 });</code></pre>
+      </section>
 
-        <p><strong>Step 2: Initialize CLI Environment</strong></p>
-        <p>On your local machine, tell the Kiroo CLI how to find your captures:</p>
-        <pre><code>kiroo env set SUPABASE_URL &lt;your-url&gt;
-kiroo env set SUPABASE_KEY &lt;your-key&gt;</code></pre>
+      <section id="workflow" class="doc-block">
+        <h2>The Magic Loop (Time-Travel)</h2>
+        <p>Once your SDK is capturing data, the CLI becomes your time-machine to debug production bugs locally.</p>
+        
+        <div class="workflow-steps">
+            <p><strong>Step A: Fetch</strong> - Pull the production interaction using the Replay ID.</p>
+            <pre><code>kiroo fetch kiroo-177359-9f3eb9</code></pre>
+            
+            <p><strong>Step B: Replay</strong> - Re-run that exact production payload against your local server.</p>
+            <pre><code>kiroo replay kiroo-177359-9f3eb9 --target localhost:3000</code></pre>
+        </div>
 
-        <p><strong>Step 3: Fetch & Replay</strong></p>
-        <p>Use the Replay ID from the error report to pull the exact production data and replay it against your local server:</p>
-        <pre><code>kiroo fetch &lt;replay-id&gt;
-kiroo replay &lt;replay-id&gt; --target localhost:3000</code></pre>
+        <div class="callout callout-tip">
+            <strong>Local Debugging</strong>
+            <p>Since the CLI is hitting your <code>localhost</code>, you can set breakpoints in your IDE and stop the "production" traffic in its tracks.</p>
+        </div>
+      </section>
 
-        <h3>Performance & Sampling</h3>
-        <ul>
-          <li><strong>Error Priority</strong>: The SDK always captures 4xx and 5xx errors regardless of <code>sampleRate</code>.</li>
-          <li><strong>Sampling</strong>: Set <code>sampleRate</code> (0.0 to 1.0) to control how much "healthy" traffic is stored.</li>
-          <li><strong>Background Uploads</strong>: Interactions are buffered in memory and uploaded every 30s in batches, ensuring near-zero latency impact.</li>
-        </ul>
+      <section id="install" class="doc-block">
+        <h2>CLI Installation</h2>
+        <p>Install the Kiroo CLI globally to manage interactions, snapshots, and replay traffic.</p>
+        <pre><code>npm install -g @kiroo/cli</code></pre>
+
+        <div class="callout callout-info">
+            <strong>Pro Tip</strong>
+            <p>You can also use <code>npx @kiroo/cli</code> for a zero-installation experience.</p>
+        </div>
       </section>
 
       <section id="init" class="doc-block">
         <h2>kiroo init</h2>
-        <p>Initialize Kiroo in your project and create the default <code>.kiroo/</code> structure.</p>
+        <p>Initialize Kiroo in your local project to create the <code>.kiroo/</code> directory for snapshots and logs.</p>
         <pre><code>kiroo init</code></pre>
         <ul>
-          <li>Creates <code>.kiroo/config.json</code> and <code>.kiroo/env.json</code>.</li>
-          <li>You can set <code>baseUrl</code>, <code>GROQ_API_KEY</code>, and <code>LINGODOTDEV_API_KEY</code>.</li>
+            <li>Creates <code>.kiroo/config.json</code> and <code>.kiroo/env.json</code>.</li>
+            <li>You can set <code>baseUrl</code>, <code>GROQ_API_KEY</code>, and <code>LINGODOTDEV_API_KEY</code>.</li>
         </ul>
       </section>
+
+      <div class="reference-header">
+          <p class="eyebrow">CLI Reference</p>
+          <h2>Manual Commands</h2>
+          <p>The following commands are for manual interaction, CI/CD assertions, and data management.</p>
+      </div>
 
       <section id="http" class="doc-block">
         <h2>HTTP methods</h2>

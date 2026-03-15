@@ -14,8 +14,7 @@
   <header class="topbar" id="topbar">
     <div class="container topbar-inner">
       <a class="brand" href="index.html">
-        <span class="brand-mark">🦏</span>
-        <span class="brand-text">Kiroo</span>
+        <img src="media/logo.png" alt="Kiroo Logo" class="nav-logo">
       </a>
       <nav class="topbar-nav">
         <a href="#workflow">Workflow</a>
@@ -32,74 +31,89 @@
       <div class="hero-backdrop" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Production Time-Travel Debugging</p>
-          <h1>Replay production bugs in <span class="accent">10 seconds.</span></h1>
-          <p class="hero-sub">Kiroo captures real production traffic with zero overhead and lets you replay exact interactions locally. Stop guessing, start replaying.</p>
+          <p class="eyebrow">The Developer's Superpower</p>
+          <h1>Stop guessing. Start <span class="accent">Time-Traveling.</span></h1>
+          <p class="hero-sub">Kiroo captures the "unreproducible" production bugs and brings them to your terminal. Replay exact interactions locally in seconds.</p>
           <div class="hero-actions">
             <button class="btn btn-primary copy-btn" data-copy="npm install @kiroo/cli">npm install @kiroo/cli</button>
-            <a class="btn btn-ghost" href="docs.html">Read full docs</a>
+            <a class="btn btn-ghost" href="docs.html">Explore the SDK</a>
           </div>
-          <ul class="hero-points">
-            <li>High-performance Capture SDK for Node.js</li>
-            <li>Secure batch-upload to Supabase Storage</li>
-            <li>Recursive PII scrubbing and secret redaction</li>
-          </ul>
         </div>
-        <aside class="hero-panel" aria-label="Kiroo terminal output">
+        <aside class="hero-panel glass floating" aria-label="Kiroo terminal output">
           <div class="terminal-head">
             <span></span><span></span><span></span>
             <p>kiroo-debug</p>
           </div>
           <div class="terminal-body">
-            <p><span class="prompt">$</span> kiroo fetch kiroo-174205-abc123</p>
-            <p class="dim">🔍 Searching production captures...</p>
-            <p class="dim">✓ Downloaded: <span class="ok">GET /api/checkout (500)</span></p>
+            <p><span class="prompt">$</span> kiroo fetch kiroo-177359-9f3eb9</p>
+            <p class="dim">🔍 Finding production capture in partition 2026-03-15...</p>
+            <p class="dim">✓ Successfully downloaded: <span class="ok">GET /api/checkout (500)</span></p>
             <br>
-            <p><span class="prompt">$</span> kiroo replay kiroo-174205-abc123 --target localhost:3000</p>
-            <p class="dim">🔄 Replaying interaction with production payload...</p>
-            <p class="dim">Redirected to: <span class="warn">http://localhost:3000/api/checkout</span></p>
-            <p class="ok">✓ Replay successful. Debugger hit!</p>
+            <p><span class="prompt">$</span> kiroo replay kiroo-177359-9f3eb9 --target localhost:3000</p>
+            <p class="dim">🔄 Replaying against local environment...</p>
+            <p class="ok">✓ 500 Reproduced locally. Debugger hit!</p>
           </div>
         </aside>
       </div>
-      <div class="container metric-strip">
-        <div><strong>SDK Capture</strong><span>High-performance batching</span></div>
-        <div><strong>Zero Overhead</strong><span>Async Supabase uploads</span></div>
-        <div><strong>Recursive Scrub</strong><span>GDPR/SOC2 compliant logs</span></div>
-        <div><strong>One-Line Replay</strong><span>Local bug reproduction</span></div>
-      </div>
+    </section>
+
+    <!-- THE PROBLEM (PS) -->
+    <section class="story-section bg-nightmare">
+        <div class="container story-grid">
+            <div class="story-visual">
+                <img src="media/nightmare.png" alt="The production nightmare">
+            </div>
+            <div class="story-content">
+                <p class="eyebrow">The Pain</p>
+                <h2>Production is a black box.</h2>
+                <p>You see a "500 Internal Server Error" in your logs. You try to reproduce it with manual Postman requests for hours. You check the headers, the body, the state. But you keep failing to see what the user saw.</p>
+                <p><strong>This is the "It works on my machine" nightmare.</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE SUPERPOWER (USP) -->
+    <section class="story-section bg-magic">
+        <div class="container story-grid">
+            <div class="story-content">
+                <p class="eyebrow">The Solution</p>
+                <h2>Teleport production traffic to your machine.</h2>
+                <p>Kiroo's SDK records every detail of a failed interaction—recursive headers, sanitized bodies, and durations—and syncs them to your private storage vault.</p>
+                <p>One command later, that exact interaction is replaying against your local source code. No more guessing. Just debugging.</p>
+                <a href="#workflow" class="btn btn-ghost">See how it works →</a>
+            </div>
+            <div class="story-visual">
+                <img src="media/magic.png" alt="The magic of time-travel debugging">
+            </div>
+        </div>
     </section>
 
     <section class="workflow" id="workflow">
       <div class="container">
         <div class="section-head">
-          <p class="eyebrow">How it works</p>
-          <h2>The Time-Travel Debugging Cycle</h2>
+          <p class="eyebrow">Seamless Workflow</p>
+          <h2>The 4-Step Magic Loop</h2>
         </div>
         <div class="steps">
-          <article class="step">
+          <article class="step glass">
             <span>01</span>
             <h3>Capture (SDK)</h3>
-            <p>The <code>@kiroo/sdk</code> captures interactions in production and batch-uploads them securely to Supabase.</p>
-            <code>npm install @kiroo/sdk</code>
+            <p>Add 1 line of middleware. It samples traffic and batch-uploads to your Supabase with zero latency.</p>
           </article>
-          <article class="step">
+          <article class="step glass">
             <span>02</span>
-            <h3>Report (ID)</h3>
-            <p>Every capture gets a unique <strong>Replay ID</strong>. Help your users by returning it in error responses.</p>
-            <code>res.get('X-Kiroo-Replay-ID')</code>
+            <h3>Tag (X-ID)</h3>
+            <p>Every interaction gets a unique Replay ID. Return it in your headers so users can report bugs with precision.</p>
           </article>
-          <article class="step">
+          <article class="step glass">
             <span>03</span>
             <h3>Fetch (CLI)</h3>
-            <p>Download the exact production payload locally using the CLI and your Supabase credentials.</p>
-            <code>kiroo fetch &lt;replay-id&gt;</code>
+            <p>Run <code>kiroo fetch <id></code>. The CLI pulls the encrypted payload directly from your vault.</p>
           </article>
-          <article class="step">
+          <article class="step glass">
             <span>04</span>
-            <h3>Replay (Dev)</h3>
-            <p>Replay the production bug against your local server. Debug the bug, don't guess the bug.</p>
-            <code>kiroo replay &lt;id&gt; --target localhost:3000</code>
+            <h3>Fix (Replay)</h3>
+            <p>Replay it! Fix your code while the "production" traffic hits your local breakpoints.</p>
           </article>
         </div>
       </div>
@@ -109,17 +123,13 @@
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">Core capabilities</p>
-          <h2>Built for serious API teams</h2>
+          <h2>Why Kiroo?</h2>
         </div>
         <div class="feature-grid">
-          <article><h3>Production Capture</h3><p>Lightweight SDK to record real-world interactions securely.</p></article>
-          <article><h3>Time-Travel Replay</h3><p>Re-run production payloads against your local host in seconds.</p></article>
-          <article><h3>Supabase Integration</h3><p>Persist captures in your own cloud with batch-upload performance.</p></article>
-          <article><h3>Privacy Guard</h3><p>Recursive PII scrubbing ensures internal data stays internal.</p></article>
-          <article><h3>AI Blast Radius</h3><p>Explain likely downstream breakage before shipping changes.</p></article>
-          <article><h3>Snapshot Diffing</h3><p>Track structural API drift between named versions.</p></article>
-          <article><h3>Zero-code Checks</h3><p>Assert status codes and response fields from terminal.</p></article>
-          <article><h3>Portable spec</h3><p>Emit Postman or OpenAPI 3.0 specs from observed traffic.</p></article>
+          <article class="glass"><h3>Privacy First</h3><p>Local PII scrubbing. Data never leaves your storage (Supabase).</p></article>
+          <article class="glass"><h3>Git for APIs</h3><p>Version your API states. Diff responses between v1 and v2.</p></article>
+          <article class="glass"><h3>Zero Overhead</h3><p>Async batching won't slow down your production users.</p></article>
+          <article class="glass"><h3>AI Bridge</h3><p>Explain blast radius of your changes before you ship.</p></article>
         </div>
       </div>
     </section>
