@@ -500,18 +500,25 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
     if (options.json) {
       console.log(stableJSONStringify(report));
     } else {
-      console.log(chalk.cyan('\n  🧠 Blast Radius Analysis'));
+      let header = '🧠 Blast Radius Analysis';
+      if (options.lang) header = await translateText(header, options.lang);
+      console.log(chalk.cyan(`\n  ${header}`));
       console.log(chalk.gray(`  Source: ${tag1}`));
       console.log(chalk.gray(`  Target: ${tag2}\n`));
 
       const shownEndpoints = report.endpoints.slice(0, 6);
       for (const endpoint of shownEndpoints) {
+        let severityLabel = endpoint.highestSeverity.toUpperCase();
+        if (options.lang) severityLabel = await translateText(severityLabel, options.lang);
         const severityColor = colorForSeverity(endpoint.highestSeverity);
-        console.log(`  ${severityColor(endpoint.highestSeverity.toUpperCase())} ${chalk.white(endpoint.method)} ${chalk.gray(endpoint.path)}`);
-        endpoint.issues.slice(0, 4).forEach((issue) => {
+        console.log(`  ${severityColor(severityLabel)} ${chalk.white(endpoint.method)} ${chalk.gray(endpoint.path)}`);
+        
+        for (const issue of endpoint.issues.slice(0, 4)) {
           const issueColor = colorForSeverity(issue.severity);
-          console.log(`    - ${issueColor(issue.severity)} ${issue.message}`);
-        });
+          let issueMsg = issue.message;
+          if (options.lang) issueMsg = await translateText(issueMsg, options.lang);
+          console.log(`    - ${issueColor(issue.severity)} ${issueMsg}`);
+        }
         if (endpoint.issues.length > 4) {
           console.log(chalk.gray(`    - ... +${endpoint.issues.length - 4} more issues`));
         }
@@ -531,10 +538,21 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
         modelPriority,
         maxTokens
       });
-      console.log(chalk.magenta(`\n  🤖 AI Summary (${ai.model})`));
-      toConciseBullets(ai.summary, report).forEach((bullet) => {
-        console.log(`  ${bullet}`);
-      });
+      let aiSectionTitle = `🤖 AI Summary (${ai.model})`;
+      if (options.lang) aiSectionTitle = await translateText(aiSectionTitle, options.lang);
+      console.log(chalk.magenta(`\n  ${aiSectionTitle}`));
+      
+      const bullets = toConciseBullets(ai.summary, report);
+      for (const bullet of bullets) {
+        let finalBullet = bullet;
+        if (options.lang) {
+          // Translate the text part of the bullet
+          const bulletText = bullet.replace(/^- /, '');
+          const translatedBullet = await translateText(bulletText, options.lang);
+          finalBullet = `- ${translatedBullet}`;
+        }
+        console.log(`  ${finalBullet}`);
+      }
     }
 
     if (failOnSeverity && shouldFail(report, failOnSeverity)) {

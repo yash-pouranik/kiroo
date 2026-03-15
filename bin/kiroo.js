@@ -25,12 +25,16 @@ program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
   .version('0.9.1')
+  .showSuggestionAfterError()
   .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
 
 // Init command
 program
   .command('init')
   .description('Initialize Kiroo in current directory')
+  .addHelpText('after', `
+Examples:
+  $ kiroo init`)
   .action(async () => {
     await initProject();
   });
@@ -40,13 +44,19 @@ program
 program
   .command('check <url>')
   .description('Execute a request and validate the response against rules')
+  .addHelpText('after', `
+Examples:
+  $ kiroo check /api/users --status 200 --has id,email
+  $ kiroo check http://api.example.com/login --match status=active`)
   .option('-m, --method <method>', 'HTTP method (GET, POST, etc.)', 'GET')
+  // ... (keep options as is)
   .option('-H, --header <header...>', 'Add custom headers')
   .option('-d, --data <data>', 'Request body (JSON or shorthand)')
   .option('--status <code...>', 'Expected HTTP status code')
   .option('--has <fields...>', 'Comma-separated list of expected fields in JSON response')
   .option('--match <matches...>', 'Expected field values (e.g., status=active)')
   .action(async (url, options) => {
+    // ...
     // Execute request
     const response = await executeRequest(options.method || 'GET', url, {
       header: options.header,
@@ -85,7 +95,6 @@ program
       process.exit(1);
     }
   });
-  // sk_live_p7BWJjsYlKmauBOjiEeiLRuu4DokkBWsgYne_E6osTo
 
 // HTTP methods as commands
 ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'].forEach(method => {
@@ -156,7 +165,8 @@ program
   .option('-v, --verbose', 'Show detailed output for every request')
   .option('-d, --data <data>', 'Request body')
   .action(async (url, options) => {
-    await runBenchmark(url, options);
+    const opts = program.opts();
+    await runBenchmark(url, { ...options, lang: opts.lang });
   });
 
 // Clear command
@@ -351,9 +361,33 @@ program
 // Stats command
 program
   .command('stats')
-  .description('Show usage statistics')
+  .alias('stat')
+  .description('Show usage statistics and bottlenecks')
+  .addHelpText('after', `
+Examples:
+  $ kiroo stats
+  $ kiroo stats --lang hi`)
   .action(async () => {
-    await showStats();
+    const opts = program.opts();
+    await showStats({ lang: opts.lang });
+  });
+
+// Help command
+program
+  .command('help [command]')
+  .description('Display help for a command')
+  .action((cmd) => {
+    if (cmd) {
+      const subCommand = program.commands.find(c => c.name() === cmd || c.aliases().includes(cmd));
+      if (subCommand) {
+        subCommand.help();
+      } else {
+        console.error(chalk.red(`\n  ✗ Unknown command: ${cmd}`));
+        program.help();
+      }
+    } else {
+      program.help();
+    }
   });
 
 // Error handling
@@ -364,12 +398,12 @@ try {
 } catch (err) {
   if (err.code === 'commander.help' || err.code === 'commander.version' || err.message === '(outputHelp)') {
     process.exit(0);
-  } else if (err.code === 'commander.unknownCommand') {
-    console.error(chalk.red(`\n  ✗ Unknown command: ${err.message}\n`));
-    console.log(chalk.gray('  Run'), chalk.white('kiroo --help'), chalk.gray('for usage information.\n'));
+  } else if (err.code === 'commander.unknownCommand' || err.code === 'commander.missingArgument') {
+    // Commander already printed the error and suggestion, just exit
     process.exit(1);
   } else {
-    console.error(chalk.red('\n  ✗ Error:'), err.message, `(${err.code})`, '\n');
+    // For other unexpected errors, we print our own formatted message
+    console.error(chalk.red('\n  ✗ Error:'), err.message, '\n');
     process.exit(1);
   }
 }

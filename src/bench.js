@@ -4,6 +4,7 @@ import axios from 'axios';
 import ora from 'ora';
 import { loadEnv } from './storage.js';
 import { applyEnvReplacements } from './executor.js';
+import { translateText } from './lingo.js';
 
 export async function runBenchmark(url, options) {
   const envData = loadEnv();
@@ -177,7 +178,7 @@ export async function runBenchmark(url, options) {
       }
     };
 
-    const finalizeBenchmark = () => {
+    const finalizeBenchmark = async () => {
       const totalTime = Date.now() - startTime;
       if (!isVerbose) spinner.stop();
       
@@ -191,7 +192,9 @@ export async function runBenchmark(url, options) {
         avg = Math.round(results.times.reduce((a, b) => a + b, 0) / results.times.length);
       }
 
-      console.log('\n  ' + chalk.blue.bold('🚀 Benchmark Results'));
+      let resultTitle = '🚀 Benchmark Results';
+      if (options.lang) resultTitle = await translateText(resultTitle, options.lang);
+      console.log('\n  ' + chalk.blue.bold(resultTitle));
       console.log('  ' + chalk.gray(`${method} ${targetUrl}\n`));
 
       const statsTable = new Table({
@@ -212,9 +215,13 @@ export async function runBenchmark(url, options) {
       console.log(statsTable.toString());
       
       if (results.failures > 0) {
-        console.log(chalk.red(`\n  ⚠️  ${results.failures} requests failed (HTTP 4xx/5xx or Network Error).\n`));
+        let errorMsg = `⚠️  ${results.failures} requests failed (HTTP 4xx/5xx or Network Error).`;
+        if (options.lang) errorMsg = await translateText(errorMsg, options.lang);
+        console.log(chalk.red(`\n  ${errorMsg}\n`));
       } else {
-        console.log(chalk.green(`\n  ✅ All requests completed successfully.\n`));
+        let successMsg = '✅ All requests completed successfully.';
+        if (options.lang) successMsg = await translateText(successMsg, options.lang);
+        console.log(chalk.green(`\n  ${successMsg}\n`));
       }
       
       resolve();

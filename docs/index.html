@@ -4,216 +4,185 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kiroo — Version Control for API Interactions</title>
-  <meta name="description" content="Record, Replay, Snapshot, and Diff your APIs just like Git handles code.">
+  <meta name="description" content="Ship safer APIs with Kiroo. Capture traffic, compare snapshots, run semantic analysis, and export OpenAPI from real interactions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- NAV -->
-  <nav class="nav" id="nav">
-    <div class="nav-container">
-      <a href="index.html" class="nav-logo"><span class="logo-icon">🦏</span><span class="logo-text">Kiroo</span></a>
-      <div class="nav-center">
+  <header class="topbar" id="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">🦏</span>
+        <span class="brand-text">Kiroo</span>
+      </a>
+      <nav class="topbar-nav">
+        <a href="#workflow">Workflow</a>
         <a href="#features">Features</a>
-        <a href="#demo">Demo</a>
-        <a href="#how-it-works">Quick Start</a>
+        <a href="#commands">Commands</a>
         <a href="docs.html">Docs</a>
-        <a href="https://github.com/yash-pouranik/kiroo" target="_blank">GitHub</a>
-      </div>
-      <a href="#how-it-works" class="nav-cta">Get Started</a>
+      </nav>
+      <a class="topbar-cta" href="https://github.com/yash-pouranik/kiroo" target="_blank" rel="noopener noreferrer">GitHub</a>
     </div>
-  </nav>
+  </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-glow-1"></div>
-    <div class="hero-glow-2"></div>
-    <div class="hero-grid-lines"></div>
-    <div class="hero-inner">
-      <div class="hero-text">
-        <h1>Record Every API Call.<br>Replay Bugs Instantly.<br>Ship With <span class="accent">Confidence.</span></h1>
-        <p class="hero-sub">Version Control for API Interactions — Snapshot, Diff, and AI-Analyze your API contracts before they break production.</p>
-        <div class="hero-actions">
-          <div class="hero-input-group">
-            <span class="input-icon">$</span>
-            <input type="text" value="npm install -g kiroo" readonly class="hero-input">
-            <button class="hero-input-btn" onclick="navigator.clipboard.writeText('npm install -g kiroo');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+  <main>
+    <section class="hero">
+      <div class="hero-backdrop" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Version control for API interactions</p>
+          <h1>Your API changed.<br>Know exactly what breaks <span class="accent">before deployment.</span></h1>
+          <p class="hero-sub">Kiroo records real HTTP traffic, snapshots API behavior, and highlights contract drift with severity-based reports so teams can ship confidently.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary copy-btn" data-copy="npm install -g kiroo">npm install -g kiroo</button>
+            <a class="btn btn-ghost" href="docs.html">Read full docs</a>
           </div>
-          <a href="docs.html" class="btn-ghost">Read the Docs →</a>
+          <ul class="hero-points">
+            <li>Capture via CLI, proxy, or cURL import</li>
+            <li>Diff snapshots with semantic severity</li>
+            <li>Export Postman and OpenAPI from real traffic</li>
+          </ul>
         </div>
-      </div>
-      <div class="hero-visual">
-        <div class="float-card card-1">
-          <div class="float-card-head">📡 Proxy</div>
-          <div class="float-card-code">$ kiroo proxy --target :3000</div>
-          <div class="float-card-status"><span class="status-dot green"></span> Auto-capturing</div>
-        </div>
-        <div class="float-card card-2">
-          <div class="float-card-head">🧠 AI Analyze</div>
-          <div class="float-card-code">$ kiroo analyze v1 v2 --ai</div>
-          <div class="float-card-status"><span class="status-dot red"></span> HIGH — user_id removed</div>
-        </div>
-        <div class="float-card card-3">
-          <div class="float-card-head">📄 Export</div>
-          <div class="float-card-code">$ kiroo export --format openapi</div>
-          <div class="float-card-status"><span class="status-dot green"></span> openapi.json saved</div>
-        </div>
-        <div class="float-card card-4">
-          <div class="float-card-head">📸 Snapshot</div>
-          <div class="float-card-code">$ kiroo snapshot save v1</div>
-          <div class="float-card-status"><span class="status-dot green"></span> 12 interactions saved</div>
-        </div>
-      </div>
-    </div>
-    <div class="trust-bar">
-      <span class="trust-item"><strong>Node.js 18+</strong></span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item"><strong>OpenAPI 3.0</strong></span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item"><strong>Groq AI</strong></span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item"><strong>Postman Export</strong></span>
-      <span class="trust-sep">·</span>
-      <span class="trust-item"><strong>MIT License</strong></span>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="features" id="features">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag">Capabilities</p>
-        <h2>Everything You Need To<br><span class="accent">Master Your APIs</span></h2>
-        <p class="section-sub">From zero-effort recording to AI-powered impact analysis, Kiroo replaces 6 tools with one CLI.</p>
-      </div>
-      <div class="feat-grid">
-        <div class="feat"><div class="feat-icon">🕰️</div><h3>Time-Travel Proxy</h3><p>Start a proxy, click around your app — every API call is recorded automatically without typing commands.</p></div>
-        <div class="feat"><div class="feat-icon">🧠</div><h3>AI Blast Radius</h3><p>Let AI explain which pages will break and why — before you ship breaking changes to production.</p></div>
-        <div class="feat"><div class="feat-icon">📸</div><h3>Snapshots & Diffing</h3><p>Save your API state at any point. Compare versions with deep structural analysis that catches silent renames.</p></div>
-        <div class="feat"><div class="feat-icon">📄</div><h3>Auto OpenAPI Specs</h3><p>Generate a full Swagger/OpenAPI 3.0 specification from recorded traffic. Zero YAML writing.</p></div>
-        <div class="feat"><div class="feat-icon">🔐</div><h3>Secret Redaction</h3><p>Passwords, tokens, and API keys are masked at save time. Your .kiroo/ folder is Git-safe by default.</p></div>
-        <div class="feat"><div class="feat-icon">🧪</div><h3>Zero-Code Testing</h3><p>Validate responses in one line. No test framework needed — just status codes and field assertions.</p></div>
-        <div class="feat"><div class="feat-icon">🚀</div><h3>Load Benchmarking</h3><p>Stress test any endpoint with configurable concurrency. Find your latency limits instantly.</p></div>
-        <div class="feat"><div class="feat-icon">🌍</div><h3>Variable Chaining</h3><p>Save tokens from responses and inject them into future requests. Auth flows in two commands.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TERMINAL SHOWCASE -->
-  <section class="terminal-section" id="demo">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag">See It In Action</p>
-        <h2>One CLI. <span class="accent">Infinite Power.</span></h2>
-      </div>
-      <div class="terminal-wrap">
-        <div class="terminal">
-          <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span></div>
-            <span class="terminal-title">~/my-project — kiroo</span>
+        <aside class="hero-panel" aria-label="Kiroo terminal output">
+          <div class="terminal-head">
+            <span></span><span></span><span></span>
+            <p>kiroo-session</p>
           </div>
           <div class="terminal-body">
-            <div class="t-line"><span class="t-prompt">$</span> kiroo proxy --target http://localhost:3000</div>
-            <div class="t-line t-dim">  <span class="t-pink">📡</span> Kiroo Proxy Started</div>
-            <div class="t-line t-dim">  Listening on : <span class="t-white">http://localhost:8080</span></div>
-            <div class="t-line t-dim">  Forwarding to: <span class="t-white">http://localhost:3000</span></div>
-            <div class="t-line">&nbsp;</div>
-            <div class="t-line t-dim">  <span class="t-green">POST</span> <span class="t-gray">/api/login</span>       <span class="t-green">200</span> <span class="t-gray">— 142ms</span></div>
-            <div class="t-line t-dim">  <span class="t-green">GET</span>  <span class="t-gray">/api/users</span>       <span class="t-green">200</span> <span class="t-gray">— 89ms</span></div>
-            <div class="t-line t-dim">  <span class="t-red">GET</span>  <span class="t-gray">/api/users/5</span>     <span class="t-red">404</span> <span class="t-gray">— 12ms</span></div>
-            <div class="t-line t-dim">  <span class="t-green">PUT</span>  <span class="t-gray">/api/settings</span>   <span class="t-green">200</span> <span class="t-gray">— 210ms</span></div>
-            <div class="t-line">&nbsp;</div>
-            <div class="t-line"><span class="t-prompt">$</span> kiroo snapshot save v1-stable</div>
-            <div class="t-line t-dim">  📸 Snapshot saved: <span class="t-white">v1-stable</span> <span class="t-gray">(4 interactions)</span></div>
-            <div class="t-line">&nbsp;</div>
-            <div class="t-line"><span class="t-prompt">$</span> kiroo analyze v1-stable v2-refactor <span class="t-pink">--ai</span></div>
-            <div class="t-line t-dim">  <span class="t-red">🚨 HIGH</span> <span class="t-white">GET /api/users</span></div>
-            <div class="t-line t-dim">    <span class="t-gray">Field</span> <span class="t-red">user_id</span> <span class="t-gray">removed →</span> <span class="t-green">userId</span> <span class="t-gray">(rename candidate)</span></div>
-            <div class="t-line t-dim">  <span class="t-pink">🧠 AI:</span> <span class="t-gray">Frontend profile pages will break. Update all references to user_id.</span></div>
-            <div class="t-line">&nbsp;</div>
-            <div class="t-line"><span class="t-prompt">$</span> kiroo export --format openapi</div>
-            <div class="t-line t-dim">  <span class="t-green">✅</span> Export successful (openapi) — <span class="t-white">openapi.json</span></div>
+            <p><span class="prompt">$</span> kiroo proxy --target http://localhost:3000</p>
+            <p class="dim">Proxy listening on http://localhost:8080</p>
+            <p class="dim"><span class="ok">POST</span> /api/login 200 142ms</p>
+            <p class="dim"><span class="ok">GET</span> /api/profile 200 88ms</p>
+            <p class="dim"><span class="warn">PUT</span> /api/profile 422 55ms</p>
+            <br>
+            <p><span class="prompt">$</span> kiroo snapshot compare v1 v2 --analyze</p>
+            <p class="dim"><span class="warn">HIGH</span> GET /api/profile</p>
+            <p class="dim">field removed: <code>user_id</code> -> <code>userId</code></p>
           </div>
+        </aside>
+      </div>
+      <div class="container metric-strip">
+        <div><strong>Node 18+</strong><span>runtime support</span></div>
+        <div><strong>OpenAPI 3.0</strong><span>export format</span></div>
+        <div><strong>AI summary</strong><span>impact explanation</span></div>
+        <div><strong>Secret scrub</strong><span>Git-safe recordings</span></div>
+      </div>
+    </section>
+
+    <section class="workflow" id="workflow">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Developer workflow</p>
+          <h2>From local debugging to CI gates in four steps</h2>
+        </div>
+        <div class="steps">
+          <article class="step">
+            <span>01</span>
+            <h3>Capture traffic</h3>
+            <p>Record interactions using HTTP commands, <code>kiroo proxy</code>, or browser cURL import.</p>
+            <code>kiroo proxy --target http://localhost:3000</code>
+          </article>
+          <article class="step">
+            <span>02</span>
+            <h3>Snapshot a baseline</h3>
+            <p>Save a contract baseline before large refactors or backend releases.</p>
+            <code>kiroo snapshot save v1-stable</code>
+          </article>
+          <article class="step">
+            <span>03</span>
+            <h3>Analyze drift</h3>
+            <p>Compare versions and rank impact from low to critical severity.</p>
+            <code>kiroo analyze v1-stable current --fail-on high</code>
+          </article>
+          <article class="step">
+            <span>04</span>
+            <h3>Share artifacts</h3>
+            <p>Generate OpenAPI and Postman outputs from real interactions for teammates and documentation.</p>
+            <code>kiroo export --format openapi --out openapi.json</code>
+          </article>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how-section" id="how-it-works">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag">Quick Start</p>
-        <h2>Up and Running in <span class="accent">30 Seconds</span></h2>
-      </div>
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><h3>Install</h3><div class="step-code">$ npm install -g kiroo</div></div>
-        <div class="step"><div class="step-num">2</div><h3>Initialize</h3><div class="step-code">$ kiroo init</div></div>
-        <div class="step"><div class="step-num">3</div><h3>Record</h3><div class="step-code">$ kiroo proxy --target :3000</div></div>
-        <div class="step"><div class="step-num">4</div><h3>Analyze</h3><div class="step-code">$ kiroo analyze v1 v2 --ai</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- COMMANDS -->
-  <section class="commands-section" id="commands">
-    <div class="container">
-      <div class="section-head">
-        <p class="section-tag">Commands</p>
-        <h2><span class="accent">15+ Tools</span>, One CLI</h2>
-      </div>
-      <div class="cmd-list">
-        <div class="cmd-item"><code>kiroo get|post|put|delete &lt;url&gt;</code><span>Execute and record API requests</span></div>
-        <div class="cmd-item"><code>kiroo proxy --target &lt;url&gt;</code><span>Auto-capture frontend ↔ backend traffic</span></div>
-        <div class="cmd-item"><code>kiroo snapshot save|compare</code><span>Version and diff your API state</span></div>
-        <div class="cmd-item"><code>kiroo analyze &lt;v1&gt; &lt;v2&gt; --ai</code><span>AI-powered semantic blast radius</span></div>
-        <div class="cmd-item"><code>kiroo export --format openapi</code><span>Auto-generate OpenAPI 3.0 specs</span></div>
-        <div class="cmd-item"><code>kiroo check &lt;url&gt; --status 200</code><span>Zero-code API testing</span></div>
-        <div class="cmd-item"><code>kiroo bench &lt;url&gt; -n 100 -c 10</code><span>Load testing with concurrency</span></div>
-        <div class="cmd-item"><code>kiroo replay | edit | import | scrub</code><span>Replay, edit, import cURL, redact secrets</span></div>
-      </div>
-      <div class="cmd-cta">
-        <a href="docs.html" class="btn-primary">View Full Documentation →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <section class="cta-section">
-    <div class="container">
-      <div class="cta-box">
-        <h2>Ready to version control your APIs?</h2>
-        <p>Join developers saving hours of debugging time.</p>
-        <div class="cta-actions">
-          <a href="docs.html" class="btn-primary">Read the Docs</a>
-          <a href="https://github.com/yash-pouranik/kiroo" target="_blank" class="btn-ghost">⭐ Star on GitHub</a>
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Core capabilities</p>
+          <h2>Built for serious API teams</h2>
+        </div>
+        <div class="feature-grid">
+          <article><h3>Time-travel proxy</h3><p>Capture frontend flows with no manual command entry.</p></article>
+          <article><h3>Snapshot diffing</h3><p>Track structural API drift between named versions.</p></article>
+          <article><h3>AI blast radius</h3><p>Explain likely downstream breakage before shipping.</p></article>
+          <article><h3>Zero-code checks</h3><p>Assert status codes and response fields from CLI.</p></article>
+          <article><h3>Load benchmarking</h3><p>Quickly measure latency, throughput, and error ratios.</p></article>
+          <article><h3>Secret redaction</h3><p>Mask tokens, keys, and passwords in saved artifacts.</p></article>
+          <article><h3>Dependency graph</h3><p>Visualize variable flow across chained API calls.</p></article>
+          <article><h3>Portable export</h3><p>Emit Postman or OpenAPI specs from observed traffic.</p></article>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FOOTER -->
+    <section class="commands" id="commands">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Command surface</p>
+          <h2>Daily-use commands at a glance</h2>
+        </div>
+        <div class="command-list">
+          <div><code>kiroo get|post|put|delete &lt;url&gt;</code><p>Execute and record API interactions</p></div>
+          <div><code>kiroo replay &lt;id&gt; / kiroo edit &lt;id&gt;</code><p>Re-run or tweak historical calls quickly</p></div>
+          <div><code>kiroo snapshot save|compare</code><p>Version contract states and inspect drift</p></div>
+          <div><code>kiroo analyze &lt;tag1&gt; &lt;tag2&gt;</code><p>Semantic severity analysis with optional AI</p></div>
+          <div><code>kiroo check &lt;url&gt; --status 200 --has token</code><p>CI-friendly zero-code endpoint assertions</p></div>
+          <div><code>kiroo bench &lt;url&gt; -n 100 -c 10</code><p>Concurrent load tests from terminal</p></div>
+          <div><code>kiroo export --format openapi</code><p>Generate OpenAPI 3.0 from interactions</p></div>
+          <div><code>kiroo env / scrub / graph / stats</code><p>Manage envs, sanitize data, and inspect health</p></div>
+        </div>
+        <div class="commands-actions">
+          <a class="btn btn-primary" href="docs.html">Browse complete documentation</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-brand"><span class="logo-icon">🦏</span><span>Kiroo</span></div>
-      <p>Built with ❤️ for Developers · MIT License</p>
+      <p><strong>Kiroo</strong> · Version Control for API Interactions</p>
       <div class="footer-links">
-        <a href="https://github.com/yash-pouranik/kiroo" target="_blank">GitHub</a>
         <a href="docs.html">Docs</a>
-        <a href="https://github.com/yash-pouranik/kiroo/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a>
+        <a href="https://github.com/yash-pouranik/kiroo" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://github.com/yash-pouranik/kiroo/issues" target="_blank" rel="noopener noreferrer">Issues</a>
       </div>
     </div>
   </footer>
 
   <script>
-    window.addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50));
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => { e.preventDefault(); const t = document.querySelector(a.getAttribute('href')); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    const topbar = document.getElementById("topbar");
+    window.addEventListener("scroll", () => topbar.classList.toggle("scrolled", window.scrollY > 24));
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        const section = document.querySelector(link.getAttribute("href"));
+        if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
-    const io = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('show'); }); }, { threshold: 0.1 });
-    document.querySelectorAll('.feat, .step, .cmd-item, .cta-box, .terminal').forEach(el => { el.classList.add('reveal'); io.observe(el); });
+
+    document.querySelectorAll(".copy-btn").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const value = button.getAttribute("data-copy");
+        if (!value) return;
+        await navigator.clipboard.writeText(value);
+        const original = button.textContent;
+        button.textContent = "Copied command";
+        setTimeout(() => {
+          button.textContent = original;
+        }, 1200);
+      });
+    });
   </script>
 </body>
 </html>

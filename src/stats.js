@@ -1,8 +1,10 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { getAllInteractions } from './storage.js';
+import { translateText } from './lingo.js';
 
-export function showStats() {
+export async function showStats(options = {}) {
+  const lang = options.lang;
   const interactions = getAllInteractions();
 
   if (interactions.length === 0) {
@@ -11,7 +13,9 @@ export function showStats() {
     return;
   }
 
-  console.log(chalk.cyan.bold('\n  📊 Kiroo Analytics Dashboard\n'));
+  let title = '📊 Kiroo Analytics Dashboard';
+  if (lang) title = await translateText(title, lang);
+  console.log(chalk.cyan.bold(`\n  ${title}\n`));
 
   // 1. General Metrics
   const total = interactions.length;
@@ -26,7 +30,9 @@ export function showStats() {
     { [chalk.white('Avg. Duration')]: chalk.white(avgDuration + 'ms') }
   );
 
-  console.log(chalk.white.bold('  ● General Performance'));
+  let generalHeader = '● General Performance';
+  if (lang) generalHeader = await translateText(generalHeader, lang);
+  console.log(chalk.white.bold(`  ${generalHeader}`));
   console.log(generalTable.toString());
 
   // 2. Method Distribution
@@ -45,7 +51,9 @@ export function showStats() {
     methodTable.push([chalk.white(method), chalk.white(count), chalk.gray(percentage)]);
   });
 
-  console.log(chalk.white.bold('\n  ● Request Distribution'));
+  let distHeader = '● Request Distribution';
+  if (lang) distHeader = await translateText(distHeader, lang);
+  console.log(chalk.white.bold(`\n  ${distHeader}`));
   console.log(methodTable.toString());
 
   // 3. Slowest Endpoints
@@ -67,7 +75,9 @@ export function showStats() {
     ]);
   });
 
-  console.log(chalk.white.bold('\n  ● Top 5 Slowest Endpoints (Bottlenecks)'));
+  let slowHeader = '● Top 5 Slowest Endpoints (Bottlenecks)';
+  if (lang) slowHeader = await translateText(slowHeader, lang);
+  console.log(chalk.white.bold(`\n  ${slowHeader}`));
   console.log(slowTable.toString());
   console.log('');
 }
