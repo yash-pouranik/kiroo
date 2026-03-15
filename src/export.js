@@ -96,10 +96,12 @@ function getPathAndOrigin(rawUrl) {
 }
 
 function inferSchema(value) {
-  if (value === null) return { nullable: true };
+  if (value === null) return { type: 'object', nullable: true };
   if (Array.isArray(value)) {
     if (value.length === 0) return { type: 'array', items: {} };
-    const mergedItem = value.map((item) => inferSchema(item)).reduce(mergeSchemas, {});
+    // Only infer from first 5 items to avoid noise from duplicates
+    const sample = value.slice(0, 5);
+    const mergedItem = sample.map((item) => inferSchema(item)).reduce(mergeSchemas, {});
     return { type: 'array', items: mergedItem };
   }
   if (value && typeof value === 'object') {
@@ -253,6 +255,37 @@ function hasHeader(headers, name) {
   return Object.keys(headers || {}).some((k) => k.toLowerCase() === name.toLowerCase());
 }
 
+const SENSITIVE_PATTERNS = [
+  { regex: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, replace: '<REDACTED_EMAIL>' },
+  { regex: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, replace: '<REDACTED_JWT>' },
+  { regex: /\b(sk_live_|pk_live_|sk_test_|pk_test_)[A-Za-z0-9_-]{10,}/g, replace: '<REDACTED_KEY>' },
+  { regex: /\b(gsk_|ghp_|gho_|glpat-)[A-Za-z0-9_-]{10,}/g, replace: '<REDACTED_KEY>' },
+];
+
+function redactValue(val) {
+  if (typeof val !== 'string') return val;
+  let result = val;
+  for (const { regex, replace } of SENSITIVE_PATTERNS) {
+    result = result.replace(regex, replace);
+  }
+  return result;
+}
+
+function truncateAndRedact(value, maxArrayItems = 3) {
+  if (value === null || value === undefined) return value;
+  if (typeof value === 'string') return redactValue(value);
+  if (typeof value !== 'object') return value;
+  if (Array.isArray(value)) {
+    const sliced = value.slice(0, maxArrayItems);
+    return sliced.map((item) => truncateAndRedact(item, maxArrayItems));
+  }
+  const result = {};
+  for (const [k, v] of Object.entries(value)) {
+    result[k] = truncateAndRedact(v, maxArrayItems);
+  }
+  return result;
+}
+
 function buildOpenApiSpec(interactions, options = {}) {
   const title = options.title || 'Kiroo Traffic API';
   const version = options.apiVersion || '1.0.0';
@@ -368,7 +401,7 @@ function buildOpenApiSpec(interactions, options = {}) {
         content: {
           [mimeType]: {
             schema: mergedBodySchema,
-            example: op.requestBodies[0]
+            example: truncateAndRedact(op.requestBodies[0])
           }
         }
       };
@@ -377,17 +410,41 @@ function buildOpenApiSpec(interactions, options = {}) {
     const sortedStatuses = Array.from(op.responses.keys()).sort((a, b) => a.localeCompare(b));
     sortedStatuses.forEach((status) => {
       const res = op.responses.get(status);
+      const statusNum = parseInt(status, 10);
+
+      // Meaningful description based on status code
+      const description = statusNum === 200 ? 'Successful response'
+        : statusNum === 201 ? 'Resource created'
+        : statusNum === 204 ? 'No content'
+        : statusNum === 304 ? 'Not modified'
+        : statusNum === 400 ? 'Bad request'
+        : statusNum === 401 ? 'Unauthorized'
+        : statusNum === 403 ? 'Forbidden'
+        : statusNum === 404 ? 'Not found'
+        : statusNum === 409 ? 'Conflict'
+        : statusNum === 500 ? 'Internal server error'
+        : `Response ${status}`;
+
+      // 204 and 304 typically have no body
+      if (statusNum === 204 || statusNum === 304) {
+        operation.responses[status] = { description };
+        return;
+      }
+
       const mimeType = Array.from(res.mimeTypes)[0] || 'application/json';
       const schema = res.bodies.length > 0
         ? res.bodies.map((b) => inferSchema(b)).reduce(mergeSchemas, {})
         : {};
 
+      // Recursively truncate arrays and redact sensitive data in examples
+      let example = res.example !== undefined ? truncateAndRedact(res.example) : undefined;
+
       operation.responses[status] = {
-        description: 'Observed response',
+        description,
         content: {
           [mimeType]: {
             schema,
-            ...(res.example !== undefined ? { example: res.example } : {})
+            ...(example !== undefined ? { example } : {})
           }
         }
       };

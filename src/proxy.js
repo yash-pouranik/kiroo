@@ -91,8 +91,28 @@ export async function runProxy(targetHost, options = {}) {
     });
   });
 
+  // Add CORS headers to proxied responses
+  proxy.on('proxyRes', function (proxyRes, req, res) {
+    proxyRes.headers['access-control-allow-origin'] = req.headers.origin || '*';
+    proxyRes.headers['access-control-allow-credentials'] = 'true';
+  });
+
   const server = http.createServer((req, res) => {
     req.kirooStartTime = Date.now();
+
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': req.headers.origin || '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+        'Access-Control-Allow-Headers': req.headers['access-control-request-headers'] || '*',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400',
+      });
+      res.end();
+      return;
+    }
+
     let bodyChunks = [];
 
     req.on('data', (chunk) => {

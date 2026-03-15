@@ -17,13 +17,14 @@ import { editInteraction } from '../src/edit.js';
 import { exportInteractions } from '../src/export.js';
 import { runProxy } from '../src/proxy.js';
 import { analyzeSnapshots } from '../src/analyze.js';
+import { runSnapshot } from '../src/run.js';
 
 const program = new Command();
 
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.8.0')
+  .version('0.9.1')
   .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
 
 // Init command
@@ -266,6 +267,20 @@ snapshot
     }
   });
 
+snapshot
+  .command('run <tag>')
+  .description('Execute all interactions from a snapshot sequentially (auto-chains auth tokens)')
+  .option('-v, --verbose', 'Show response body preview for each request')
+  .option('--fail-fast', 'Exit immediately on first failure')
+  .option('--timeout <ms>', 'Request timeout in milliseconds', '30000')
+  .action(async (tag, options) => {
+    await runSnapshot(tag, {
+      verbose: !!options.verbose,
+      failFast: !!options.failFast,
+      timeout: parseInt(options.timeout, 10) || 30000,
+    });
+  });
+
 program
   .command('analyze <tag1> <tag2>')
   .description('Semantic blast-radius analysis between two snapshots')
@@ -347,8 +362,7 @@ program.exitOverride();
 try {
   await program.parseAsync(process.argv);
 } catch (err) {
-  if (err.code === 'commander.help' || err.message === '(outputHelp)') {
-    // Help was requested, exit normally
+  if (err.code === 'commander.help' || err.code === 'commander.version' || err.message === '(outputHelp)') {
     process.exit(0);
   } else if (err.code === 'commander.unknownCommand') {
     console.error(chalk.red(`\n  ✗ Unknown command: ${err.message}\n`));
