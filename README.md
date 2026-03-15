@@ -29,8 +29,6 @@ If your API changes frequently, Kiroo answers:
 
 ## 🎬 Demo
 
-> Tip: Replace the preview below with your product GIF file (for example `./docs/demo.gif`) when ready.
-
 <div align="center">
   <img src="./image.png" alt="Kiroo demo preview" width="100%">
 </div>
@@ -39,8 +37,8 @@ If your API changes frequently, Kiroo answers:
 
 ## 🌐 Product Landing Page
 
-- Local landing page source: [`docs/index.html`](./docs/index.html)
-- Full documentation page source: [`docs/docs.html`](./docs/docs.html)
+- Landing page: [`docs/index.html`](./docs/index.html)
+- Documentation page: [`docs/docs.html`](./docs/docs.html)
 
 ---
 
