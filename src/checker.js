@@ -1,11 +1,6 @@
 import chalk from 'chalk';
 
-/**
- * Validates a response against a set of rules
- * @param {Object} response - The Axios response object
- * @param {Object} rules - Rules like { status, has: [], match: { key: value } }
- * @returns {Object} { passed: boolean, results: [] }
- */
+// Validate response against rules
 export function validateResponse(response, rules) {
   const results = [];
   let allPassed = true;

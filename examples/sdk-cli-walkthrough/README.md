@@ -1,6 +1,6 @@
-# Judge-Ready Demo: SDK + CLI in 5 Minutes
+# SDK + CLI Walkthrough in 5 Minutes
 
-This example is built for judges to test Kiroo core value quickly:
+This example is built for developers to test Kiroo core value quickly:
 - `@kiroo/sdk` captures request/response traffic and emits `X-Kiroo-Replay-ID`.
 - `kiroo` CLI records, snapshots, compares, analyzes, and exports API contracts.
 - `kiroo fetch + replay` demonstrates production-to-local time travel.
@@ -27,7 +27,7 @@ SUPABASE_BUCKET=kiroo-captures
 ## 2) Start the demo API
 
 ```bash
-cd examples/judge-sdk-cli
+cd examples/sdk-cli-walkthrough
 npm install
 npm start
 ```
@@ -85,7 +85,7 @@ Expected highlights:
 ## 7) Export for team handoff
 
 ```bash
-kiroo export --format openapi --out judge-openapi.json
+kiroo export --format openapi --out demo-openapi.json
 ```
 
 If `kiroo fetch` fails, verify Supabase keys and storage bucket permissions.

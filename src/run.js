@@ -9,10 +9,7 @@ function isRedacted(val) {
   return typeof val === 'string' && REDACTED_RE.test(val.trim());
 }
 
-/**
- * Sort interactions chronologically (oldest first) so login
- * runs before authenticated requests.
- */
+// Sort interactions chronologically (oldest first)
 function sortChronologically(interactions) {
   return [...interactions].sort((a, b) => {
     // IDs are timestamps like "2026-03-15T08-10-57-031Z"
@@ -22,11 +19,7 @@ function sortChronologically(interactions) {
   });
 }
 
-/**
- * Deduplicate redundant interactions (e.g. 10 identical GET /api/projects 304s).
- * Keeps unique method+path combinations, but allows duplicates for different
- * status codes or non-cacheable methods (POST/PUT/DELETE).
- */
+// Deduplicate redundant interactions (e.g. 10 identical GETs)
 function deduplicateInteractions(interactions) {
   const seen = new Map();
   return interactions.filter((int) => {
@@ -43,13 +36,7 @@ function deduplicateInteractions(interactions) {
   });
 }
 
-/**
- * Run all interactions from a snapshot sequentially.
- * - Sorted oldest-first so login precedes authenticated requests
- * - Deduplicates redundant 304 GET requests
- * - Auto-chains tokens from auth responses
- * - Resolves <REDACTED> headers/body from env vars
- */
+// Run all interactions from a snapshot sequentially
 export async function runSnapshot(tag, options = {}) {
   let snapshot;
   try {

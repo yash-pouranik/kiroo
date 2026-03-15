@@ -16,7 +16,6 @@ function capture(options = {}) {
     const shouldSample = Math.random() <= sampleRate;
     const replayId = `kiroo-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`;
     
-    // Inject header early
     res.setHeader('X-Kiroo-Replay-ID', replayId);
 
     const capturedRequest = {

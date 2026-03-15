@@ -1,14 +1,14 @@
 {
-  "name": "judge-sdk-cli-demo",
+  "name": "sdk-cli-walkthrough-demo",
   "version": "1.0.0",
   "private": true,
-  "description": "Judge-ready demo that showcases Kiroo SDK + CLI in one flow.",
+  "description": "Developer walkthrough that showcases Kiroo SDK + CLI in one flow.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@kiroo/sdk": "^0.1.1",
+    "@kiroo/sdk": "file:../../packages/kiroo-capture",
     "dotenv": "^17.3.1",
     "express": "^5.2.1"
   }

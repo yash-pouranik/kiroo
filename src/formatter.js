@@ -16,7 +16,7 @@ export async function formatResponse(response, lang) {
   lines.push(chalk[statusColor].bold(`  ${response.status} ${response.statusText}`));
   lines.push('');
   
-  // Headers (selected)
+  // Headers
   const importantHeaders = ['content-type', 'content-length', 'set-cookie'];
   const headers = Object.entries(response.headers)
     .filter(([key]) => importantHeaders.includes(key.toLowerCase()))

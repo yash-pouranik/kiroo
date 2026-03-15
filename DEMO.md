@@ -1,6 +1,6 @@
-# Kiroo Demo Guide (Judge Playbook)
+# Kiroo Demo Guide (Developer Walkthrough)
 
-Use this as your exact demo script for judges.
+Use this as a practical end-to-end walkthrough for developers.
 
 ## Quick setup
 
@@ -13,7 +13,7 @@ kiroo env set SUPABASE_KEY <your_supabase_service_role_key>
 kiroo env set SUPABASE_BUCKET kiroo-captures
 ```
 
-Inside `examples/judge-sdk-cli`, create `.env`:
+Inside `examples/sdk-cli-walkthrough`, create `.env`:
 
 ```bash
 SUPABASE_URL=<your_supabase_url>
@@ -24,7 +24,7 @@ SUPABASE_BUCKET=kiroo-captures
 Start demo API:
 
 ```bash
-cd examples/judge-sdk-cli
+cd examples/sdk-cli-walkthrough
 npm install
 npm start
 ```
@@ -135,15 +135,7 @@ Then hit proxied endpoints from app/browser via `http://localhost:8080/...`.
 **Killer part:** Docs reflect real behavior, not stale hand-written specs.
 
 ```bash
-kiroo export --format openapi --out judge-openapi.json
+kiroo export --format openapi --out demo-openapi.json
 ```
 
 ---
-
-## checklist
-
-- Replay ID captured and replayed locally
-- AI analyze command runs with severity output
-- Snapshot compare shows contract drift (`price`, `user`, `checkout`)
-- `kiroo check` assertion passes
-- OpenAPI file generated

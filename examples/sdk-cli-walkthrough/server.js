@@ -17,7 +17,7 @@ app.use(
 );
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true, service: 'judge-sdk-cli-demo' });
+  res.json({ ok: true, service: 'sdk-cli-walkthrough-demo' });
 });
 
 app.get('/api/v1/products', (_req, res) => {
@@ -72,6 +72,6 @@ app.get('/api/fail', (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\nJudge demo running: http://localhost:${PORT}`);
+  console.log(`\nDemo server running: http://localhost:${PORT}`);
   console.log('Try: /api/v1/products, /api/v2/products, /api/fail');
 });

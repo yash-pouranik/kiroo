@@ -32,9 +32,7 @@ export async function translateText(text, targetLang) {
   }
 }
 
-/**
- * Recursively translates strings within an object or array
- */
+// Recursive localization for objects/arrays
 export async function translateResponseData(data, targetLang) {
   if (!data) return data;
   if (typeof data === 'string') {

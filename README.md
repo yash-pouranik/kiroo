@@ -10,7 +10,7 @@
 
   **Record, Replay, Snapshot, Analyze, and Export your APIs — like Git for HTTP workflows.**
 
-  [Demo](#-demo) • [Feature Grid](#-feature-grid) • [Use Cases](#-real-world-use-cases) • [Install](#-installation) • [Docs](#-full-command-documentation) • [Judge Demo Guide](./DEMO.md)
+  [Demo](#-demo) • [Feature Grid](#-feature-grid) • [Use Cases](#-real-world-use-cases) • [Install](#-installation) • [Docs](#-full-command-documentation) • [Demo Walkthrough](./DEMO.md)
 
 </div>
 
@@ -33,7 +33,7 @@ If your API changes frequently, Kiroo answers:
   <img src="./image.png" alt="Kiroo demo preview" width="100%">
 </div>
 
-### 🔥 Start Here (Judge Demo)
+### 🔥 Start Here (Developer Walkthrough)
 
 If you test only one thing, test this:
 - **Production Time-Travel Debugging** (`kiroo fetch + kiroo replay`)
@@ -45,7 +45,7 @@ Use the full walkthrough: **[`DEMO.md`](./DEMO.md)**
 Quick launch:
 
 ```bash
-cd examples/judge-sdk-cli
+cd examples/sdk-cli-walkthrough
 npm install
 npm start
 ```
@@ -65,7 +65,7 @@ kiroo replay <replay-id> --target http://localhost:3311
 
 - Landing page: [`docs/index.html`](./docs/index.html)
 - Documentation page: [`docs/docs.html`](./docs/docs.html)
-- Judge quick-test example (SDK + CLI): [`examples/judge-sdk-cli`](./examples/judge-sdk-cli)
+- SDK + CLI walkthrough example: [`examples/sdk-cli-walkthrough`](./examples/sdk-cli-walkthrough)
 
 ---
 

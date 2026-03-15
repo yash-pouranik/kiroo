@@ -108,8 +108,8 @@ export async function saveInteraction(interaction) {
     response: interaction.response,
     metadata: {
       duration_ms: interaction.duration,
-      saves: interaction.saves || [], // Variables saved from this response
-      uses: interaction.uses || [],   // Variables used in this request
+      saves: interaction.saves || [],
+      uses: interaction.uses || [],
     },
   };
 

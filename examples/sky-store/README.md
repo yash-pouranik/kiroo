@@ -1,6 +1,6 @@
 # 🌌 SkyStore API: A Senior Architect's Playground
 
-Welcome to the **SkyStore Migration Demo**. This scenario is specifically designed to wow judges by showing how Kiroo handles **Structural Difts**, **Behavioral Risk**, and **Localized Errors**.
+Welcome to the **SkyStore Migration Demo**. This scenario is designed to show how Kiroo handles **Structural Difts**, **Behavioral Risk**, and **Localized Errors** in real migration workflows.
 
 ## 🏗️ Scenario: "The Modernization Sprint"
 
