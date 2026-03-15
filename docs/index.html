@@ -7,10 +7,10 @@
   <meta name="description" content="Ship safer APIs with Kiroo. Capture traffic, compare snapshots, run semantic analysis, and export OpenAPI from real interactions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body style="padding: 50px;">
   <header class="topbar" id="topbar">
     <div class="container topbar-inner">
       <a class="brand" href="index.html">
@@ -23,7 +23,7 @@
         <a href="#commands">Commands</a>
         <a href="docs.html">Docs</a>
       </nav>
-      <a class="topbar-cta" href="https://github.com/yash-pouranik/kiroo" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a class="topbar-cta" href="https://github.com/yash-pouranik/kiroo" target="_blank" rel="noopener noreferrer">Get Started</a>
     </div>
   </header>
 
@@ -132,14 +132,14 @@
           <h2>Daily-use commands at a glance</h2>
         </div>
         <div class="command-list">
-          <div><code>kiroo get|post|put|delete &lt;url&gt;</code><p>Execute and record API interactions</p></div>
-          <div><code>kiroo replay &lt;id&gt; / kiroo edit &lt;id&gt;</code><p>Re-run or tweak historical calls quickly</p></div>
-          <div><code>kiroo snapshot save|compare</code><p>Version contract states and inspect drift</p></div>
-          <div><code>kiroo analyze &lt;tag1&gt; &lt;tag2&gt;</code><p>Semantic severity analysis with optional AI</p></div>
-          <div><code>kiroo check &lt;url&gt; --status 200 --has token</code><p>CI-friendly zero-code endpoint assertions</p></div>
-          <div><code>kiroo bench &lt;url&gt; -n 100 -c 10</code><p>Concurrent load tests from terminal</p></div>
-          <div><code>kiroo export --format openapi</code><p>Generate OpenAPI 3.0 from interactions</p></div>
-          <div><code>kiroo env / scrub / graph / stats</code><p>Manage envs, sanitize data, and inspect health</p></div>
+          <div><code>kiroo get|post|put|delete &lt;url&gt;</code><p>Execute and record API interactions</p><button class="cmd-copy" data-copy="kiroo get https://api.example.com">Copy</button></div>
+          <div><code>kiroo replay &lt;id&gt; / kiroo edit &lt;id&gt;</code><p>Re-run or tweak historical calls quickly</p><button class="cmd-copy" data-copy="kiroo replay 1">Copy</button></div>
+          <div><code>kiroo snapshot save|compare</code><p>Version contract states and inspect drift</p><button class="cmd-copy" data-copy="kiroo snapshot save v1">Copy</button></div>
+          <div><code>kiroo analyze &lt;tag1&gt; &lt;tag2&gt;</code><p>Semantic severity analysis with optional AI</p><button class="cmd-copy" data-copy="kiroo analyze v1 v2 --ai">Copy</button></div>
+          <div><code>kiroo check &lt;url&gt; --status 200 --has token</code><p>CI-friendly zero-code endpoint assertions</p><button class="cmd-copy" data-copy="kiroo check /api/login --status 200">Copy</button></div>
+          <div><code>kiroo bench &lt;url&gt; -n 100 -c 10</code><p>Concurrent load tests from terminal</p><button class="cmd-copy" data-copy="kiroo bench /api/products -n 100 -c 10">Copy</button></div>
+          <div><code>kiroo export --format openapi</code><p>Generate OpenAPI 3.0 from interactions</p><button class="cmd-copy" data-copy="kiroo export --format openapi">Copy</button></div>
+          <div><code>kiroo env / scrub / graph / stats</code><p>Manage envs, sanitize data, and inspect health</p><button class="cmd-copy" data-copy="kiroo stats">Copy</button></div>
         </div>
         <div class="commands-actions">
           <a class="btn btn-primary" href="docs.html">Browse complete documentation</a>
@@ -171,15 +171,17 @@
       });
     });
 
-    document.querySelectorAll(".copy-btn").forEach((button) => {
+    document.querySelectorAll(".copy-btn, .cmd-copy").forEach((button) => {
       button.addEventListener("click", async () => {
         const value = button.getAttribute("data-copy");
         if (!value) return;
         await navigator.clipboard.writeText(value);
         const original = button.textContent;
-        button.textContent = "Copied command";
+        button.textContent = "Copied!";
+        button.style.background = "#4ade80"; // Bright Green on Success
         setTimeout(() => {
           button.textContent = original;
+          button.style.background = ""; // Revert to CSS default
         }, 1200);
       });
     });

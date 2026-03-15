@@ -3,263 +3,361 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyStore API Explorer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <title>SkyStore Dashboard | Notion x Grafana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #ffffff;
-            --text: #000000;
-            --border-width: 2px;
+            --bg: #111217;
+            --surface: #161719;
+            --sidebar: #0b0c10;
+            --border: #24272e;
+            --text: #f0f0f2;
+            --text-muted: #ccccdc;
+            --blue: #3274d9;
+            --orange: #ff9830;
+            --green: #73bf69;
+            --red: #f2495c;
+            --mono: "JetBrains Mono", monospace;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Courier Prime', monospace;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 2rem;
             display: flex;
-            flex-direction: column;
-            gap: 2rem;
             height: 100vh;
-            box-sizing: border-box;
             overflow: hidden;
         }
 
+        /* NOTION SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 12px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 10px 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .nav-group { margin-bottom: 24px; }
+        .nav-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 0 10px 8px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover { background: var(--surface); color: #fff; }
+        .nav-item.active { background: var(--surface); color: var(--blue); font-weight: 600; }
+
+        /* GRAFANA MAIN AREA */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--bg);
+        }
+
         .header {
-            border: var(--border-width) solid var(--text);
-            padding: 1rem 1.5rem;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: var(--surface);
         }
 
-        h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            text-transform: uppercase;
-        }
+        .header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
 
-        .main-container {
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+            padding: 24px;
+        }
+
+        /* GRAFANA PANELS */
+        .panel {
+            grid-column: span 6;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            background: #202226;
+        }
+
+        .panel-title { font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .panel-content {
+            padding: 16px;
             flex: 1;
-            min-height: 0;
         }
 
-        .left-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            overflow-y: auto;
-        }
+        .full-width { grid-column: span 12; }
 
-        .section-box {
-            border: var(--border-width) solid var(--text);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .section-header {
-            background: var(--text);
-            color: var(--bg);
-            padding: 0.5rem 1rem;
-            font-weight: bold;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
-
-        .section-content {
-            padding: 1rem;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-
+        /* INTERACTABLES */
         button {
-            background: var(--bg);
-            border: var(--border-width) solid var(--text);
+            background: var(--surface);
+            border: 1px solid var(--border);
             color: var(--text);
-            padding: 0.75rem;
+            padding: 8px 16px;
+            border-radius: 4px;
             font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        button:hover { border-color: var(--blue); background: #22252b; }
+
+        .btn-stack { display: flex; flex-direction: column; gap: 8px; }
+
+        /* STATUS BADGES */
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.1s;
+        }
+        .badge-get { background: rgba(115, 191, 105, 0.15); color: var(--green); }
+        .badge-post { background: rgba(50, 116, 217, 0.15); color: var(--blue); }
+        .badge-warn { background: rgba(255, 152, 48, 0.15); color: var(--orange); }
+
+        #inspector {
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            color: #ccc;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            background: #090b0e;
+            padding: 12px;
         }
 
-        button:hover {
-            box-shadow: 4px 4px 0px var(--text);
-            transform: translate(-2px, -2px);
-        }
-
-        button:active {
-            box-shadow: 0px 0px 0px var(--text);
-            transform: translate(0, 0);
-        }
-
-        .search-row {
+        .res-log-header {
             display: flex;
-            border-top: var(--border-width) solid var(--text);
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+        }
+
+        .proxy-label {
+            background: var(--blue);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
         input {
-            flex: 1;
-            border: none;
-            padding: 0.75rem;
+            background: #090b0e;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 12px;
             font-family: inherit;
-            outline: none;
         }
 
-        .search-btn {
-            border-left: var(--border-width) solid var(--text);
-            border-right: none;
-            border-top: none;
-            border-bottom: none;
+        @media (max-width: 1024px) {
+            .panel { grid-column: span 12; }
+            .dashboard-grid { padding: 12px; }
         }
 
-        .right-panel {
-            display: flex;
-            flex-direction: column;
-            border: var(--border-width) solid var(--text);
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+            .main { height: auto; }
         }
 
-        .inspector-header {
-            background: var(--text);
-            color: var(--bg);
-            padding: 0.5rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-        }
-
-        #output {
-            flex: 1;
-            padding: 1rem;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-size: 0.85rem;
-            background: #fff;
-        }
-
-        .res-log {
-            border-bottom: 1px dashed var(--text);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-            font-weight: bold;
-        }
-
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fff;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #000;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #33363f; }
+        ::-webkit-scrollbar-thumb:hover { background: #444955; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>SkyStore API Lab</h1>
-        <div style="font-weight: 700;">PROX: 8080</div>
-    </div>
-
-    <div class="main-container">
-        <div class="left-panel">
-            <!-- Catalog Section -->
-            <div class="section-box">
-                <div class="section-header">01. Catalog & Products</div>
-                <div class="section-content">
-                    <button onclick="hitApi('/api/v1/products')">Catalog v1 (Stable)</button>
-                    <button onclick="hitApi('/api/v2/products')">Catalog v2 (Structural Drift)</button>
-                </div>
-            </div>
-
-            <!-- Profile Section -->
-            <div class="section-box">
-                <div class="section-header">02. Profiles & Preferences</div>
-                <div class="section-content">
-                    <button onclick="hitApi('/api/v1/user')">User v1 (Flat Mapping)</button>
-                    <button onclick="hitApi('/api/v2/user')">User v2 (Nested Mapping)</button>
-                </div>
-            </div>
-
-            <!-- Logic Section -->
-            <div class="section-box">
-                <div class="section-header">03. Checkout Logic</div>
-                <div class="section-content">
-                    <button onclick="hitApi('/api/v1/checkout', 'POST', {productId: 'sky-1'})">Checkout v1 (200 OK)</button>
-                    <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-1'})">Checkout v2 (202 ACCEPTED)</button>
-                    <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-3'})">Trigger Exception (v2)</button>
-                </div>
-            </div>
-
-            <!-- Search Section -->
-            <div class="section-box">
-                <div class="section-header">04. Search Drift</div>
-                <div class="search-row">
-                    <input type="text" id="sq" placeholder="SEARCH QUERY...">
-                    <button class="search-btn" style="border-bottom:none; border-top:none;" onclick="hitApi('/api/v1/search?q=' + document.getElementById('sq').value)">v1</button>
-                    <button class="search-btn" style="border-bottom:none; border-top:none; border-right:none;" onclick="hitApi('/api/v2/search?q=' + document.getElementById('sq').value)">v2</button>
-                </div>
-            </div>
-
-            <!-- Meta Section -->
-            <div class="section-box">
-                <div class="section-header">05. Collections</div>
-                <div class="section-content">
-                    <button onclick="hitApi('/api/v1/wishlist')">Wishlist v1 (Array)</button>
-                    <button onclick="hitApi('/api/v2/wishlist')">Wishlist v2 (Object)</button>
-                    <button onclick="hitApi('/api/v2/notifications')">NOTIFICATIONS (v2-ONLY)</button>
-                </div>
-            </div>
+    
+    <!-- SIDEBAR (Notion Style) -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <span>🦏</span> Kiroo SkyStore
         </div>
 
-        <div class="right-panel">
-            <div class="inspector-header">
-                <span>INSPECTOR</span>
-                <span id="p-status">READY</span>
+        <div class="nav-group">
+            <div class="nav-label">Core Scenarios</div>
+            <div class="nav-item active" onclick="activateNav(this)">📦 Catalog Discovery</div>
+            <div class="nav-item" onclick="activateNav(this)">👤 User Evolution</div>
+            <div class="nav-item" onclick="activateNav(this)">🛒 Transactions</div>
+        </div>
+
+        <div class="nav-group">
+            <div class="nav-label">Utilities</div>
+            <div class="nav-item" onclick="activateNav(this)">🔍 Search Drift</div>
+            <div class="nav-item" onclick="activateNav(this)">📑 Collections</div>
+        </div>
+
+        <div style="margin-top: auto; padding: 10px;">
+            <div class="proxy-label">PROXY: :8080</div>
+        </div>
+    </div>
+
+    <!-- MAIN (Grafana Dashboard) -->
+    <div class="main">
+        <div class="header">
+            <h1>API Dashboard / SkyStore Manager</h1>
+            <div id="p-status" class="badge" style="background: var(--surface)">AWAITING_INPUT</div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Catalog Actions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Catalog Actions</span>
+                    <span class="badge badge-get">GET</span>
+                </div>
+                <div class="panel-content">
+                    <div class="btn-stack">
+                        <button onclick="hitApi('/api/v1/products')">Baseline: /api/v1/products</button>
+                        <button onclick="hitApi('/api/v2/products')">Evolution: /api/v2/products</button>
+                    </div>
+                </div>
             </div>
-            <pre id="output">WAITING_FOR_INTERACTION...</pre>
+
+            <!-- Profile Actions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Identity & Auth</span>
+                    <span class="badge badge-post">POST</span>
+                </div>
+                <div class="panel-content">
+                    <div class="btn-stack">
+                        <button onclick="hitApi('/api/v1/user')">User Info v1</button>
+                        <button onclick="hitApi('/api/v2/user')">User Info v2 (Nested)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Transactional Logic</span>
+                    <span class="badge badge-warn">MIXED</span>
+                </div>
+                <div class="panel-content">
+                    <div class="btn-stack">
+                        <button onclick="hitApi('/api/v1/checkout', 'POST', {productId: 'sky-1'})">Checkout v1 (Stable)</button>
+                        <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-1'})">Checkout v2 (Async)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Global Search</span>
+                </div>
+                <div class="panel-content">
+                    <input type="text" id="sq" placeholder="Query for v1 vs v2 root drift...">
+                    <div style="display: flex; gap: 8px;">
+                        <button style="flex: 1" onclick="hitApi('/api/v1/search?q=' + document.getElementById('sq').value)">v1 Search</button>
+                        <button style="flex: 1" onclick="hitApi('/api/v2/search?q=' + document.getElementById('sq').value)">v2 Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response Inspector -->
+            <div class="panel full-width">
+                <div class="panel-header">
+                    <span class="panel-title">Response Explorer</span>
+                    <span id="log-meta" style="color: var(--text-muted); font-size: 0.7rem;"></span>
+                </div>
+                <div class="panel-content">
+                    <div id="inspector">// Select an action to view real-time API interaction...</div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        function activateNav(el) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+        }
+
         async function hitApi(path, method = 'GET', body = null) {
-            const out = document.getElementById('output');
+            const inspector = document.getElementById('inspector');
             const status = document.getElementById('p-status');
+            const meta = document.getElementById('log-meta');
             const port = 3000;
             
-            out.innerHTML = `> EXECUTING ${method} ${path}\n> PENDING...`;
-            status.innerHTML = 'BUSY';
+            inspector.innerHTML = `> EXECUTING ${method} ${path}\n> PENDING...`;
+            status.innerHTML = 'RUNNING';
+            status.style.background = 'rgba(50, 116, 217, 0.4)';
             
             try {
                 const start = performance.now();
                 const response = await fetch(`http://localhost:${port}${path}`, {
                     method,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: body ? { 'Content-Type': 'application/json' } : {},
                     body: body ? JSON.stringify(body) : null
                 });
                 const data = await response.json();
                 const end = performance.now();
-                
-                status.innerHTML = 'DONE';
-                out.innerHTML = `
-<div class="res-log">
-METHOD: ${method}
-PATH:   ${path}
-STATUS: ${response.status} ${response.statusText}
-TIME:   ${(end - start).toFixed(0)}MS
-</div>
-${JSON.stringify(data, null, 2)}
-                `;
+                const time = (end - start).toFixed(0);
+
+                status.innerHTML = 'SUCCESS';
+                status.style.background = 'rgba(115, 191, 105, 0.4)';
+                meta.innerHTML = `${response.status} ${response.statusText} · ${time}ms`;
+
+                inspector.innerHTML = `<span style="color: var(--blue)">[${method}]</span> <span style="color: var(--green)">${response.status}</span> ${path}\n\n${JSON.stringify(data, null, 2)}`;
             } catch (err) {
                 status.innerHTML = 'ERROR';
-                out.innerHTML = `> CONNECTION_FAILED: ${err.message}`;
+                status.style.background = 'rgba(242, 73, 92, 0.4)';
+                inspector.innerHTML = `> CONNECTION_ERROR: ${err.message}`;
             }
         }
     </script>

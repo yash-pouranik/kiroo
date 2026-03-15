@@ -274,6 +274,26 @@ kiroo env rm baseUrl</code></pre>
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
+
+    // Copy to clipboard functionality
+    document.querySelectorAll("pre").forEach((pre) => {
+      const button = document.createElement("button");
+      button.className = "copy-btn";
+      button.textContent = "Copy";
+      pre.style.position = "relative";
+      pre.appendChild(button);
+
+      button.addEventListener("click", async () => {
+        const code = pre.querySelector("code")?.innerText || pre.innerText.replace("Copy", "").trim();
+        await navigator.clipboard.writeText(code);
+        button.textContent = "Copied!";
+        button.classList.add("success");
+        setTimeout(() => {
+          button.textContent = "Copy";
+          button.classList.remove("success");
+        }, 2000);
+      });
+    });
   </script>
 </body>
 </html>
