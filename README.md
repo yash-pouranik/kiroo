@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./kiroo_banner.png" alt="Kiroo Banner" width="100%">
+  <img src="https://raw.githubusercontent.com/yash-pouranik/kiroo/main/kiroo_banner.png" alt="Kiroo Banner" width="100%">
 
   # 🦏 KIROO
   ### **Version Control for API Interactions**
@@ -75,7 +75,7 @@ kiroo replay <replay-id> --target http://localhost:3311
 |---|---|
 | **Request Recording** | Store request/response history in `.kiroo/` for replay and auditability |
 | **Snapshot Versioning** | Save versioned API states and compare contract drift |
-| **AI Blast Radius Analysis** | Get severity scoring and impact summaries before deployment |
+| **AI + Localized Blast Radius** | Get severity, developer/product impact, and field intent labels before deployment |
 | **Time-Travel Proxy** | Auto-capture frontend traffic without manually typing requests |
 | **Zero-Code API Checks** | CI-friendly assertions for status, fields, and exact matches |
 | **Load Benchmarking** | Concurrency and throughput testing from CLI |

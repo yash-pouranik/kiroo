@@ -4,6 +4,7 @@ This example is built for developers to test Kiroo core value quickly:
 - `@kiroo/sdk` captures request/response traffic and emits `X-Kiroo-Replay-ID`.
 - `kiroo` CLI records, snapshots, compares, analyzes, and exports API contracts.
 - `kiroo fetch + replay` demonstrates production-to-local time travel.
+- `kiroo analyze --lang` adds localized blast radius and field-intent signals.
 
 ## 1) Configure Supabase (required for replay-ID flow)
 

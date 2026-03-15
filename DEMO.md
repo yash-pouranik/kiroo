@@ -51,7 +51,7 @@ kiroo replay <replay-id-from-X-Kiroo-Replay-ID> --target http://localhost:3311
 
 **What:** Compare snapshots and get impact severity.
 
-**Killer part:** AI summary explains practical break risk, not just raw diffs.
+**Killer part:** AI summary explains practical break risk, plus localized developer/product impact with field-intent labels.
 
 First record snapshots:
 
@@ -122,6 +122,12 @@ kiroo scrub
 
 ```bash
 kiroo proxy --target http://localhost:3311 --port 8080
+```
+
+Standard example command:
+
+```bash
+kiroo proxy --target http://localhost:3000 --port 8080
 ```
 
 Then hit proxied endpoints from app/browser via `http://localhost:8080/...`.

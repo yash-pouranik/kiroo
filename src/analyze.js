@@ -20,6 +20,90 @@ const DEFAULT_MODEL_PRIORITY = [
   'openai/gpt-oss-20b'
 ];
 
+const USER_FACING_FIELD_HINTS = [
+  'name', 'title', 'label', 'message', 'description', 'summary', 'content', 'text',
+  'price', 'amount', 'currency', 'country', 'locale', 'language',
+  'product', 'checkout', 'cart', 'profile', 'notification', 'error', 'user'
+];
+
+const LOCALIZATION_CRITICAL_HINTS = [
+  'title', 'label', 'message', 'description', 'summary', 'content', 'text',
+  'price', 'amount', 'currency', 'country', 'locale', 'language'
+];
+
+function inferIntentLabels(issue, endpointPath = '') {
+  const haystack = `${String(issue.path || '')} ${String(issue.message || '')} ${String(endpointPath || '')}`.toLowerCase();
+  const labels = new Set();
+
+  if (USER_FACING_FIELD_HINTS.some((hint) => haystack.includes(hint))) {
+    labels.add('user-facing');
+  }
+
+  if (LOCALIZATION_CRITICAL_HINTS.some((hint) => haystack.includes(hint))) {
+    labels.add('localization-critical');
+  }
+
+  if (['field_removed', 'field_type_changed', 'endpoint_removed', 'status_changed'].includes(issue.type)) {
+    labels.add('contract-critical');
+  }
+
+  return Array.from(labels).sort((a, b) => a.localeCompare(b));
+}
+
+function annotateIssue(issue, endpointPath = '') {
+  const intentLabels = inferIntentLabels(issue, endpointPath);
+  return {
+    ...issue,
+    intentLabels
+  };
+}
+
+function buildIntentSummary(endpoints) {
+  const counts = {
+    'user-facing': 0,
+    'localization-critical': 0,
+    'contract-critical': 0
+  };
+
+  for (const endpoint of endpoints) {
+    for (const issue of endpoint.issues || []) {
+      for (const label of issue.intentLabels || []) {
+        if (counts[label] !== undefined) counts[label] += 1;
+      }
+    }
+  }
+
+  return counts;
+}
+
+function buildImpactSummary(report) {
+  const intent = report.summary.intent || {};
+  const criticalOrHigh = (report.summary.bySeverity?.critical || 0) + (report.summary.bySeverity?.high || 0);
+  const affectedEndpoints = report.endpoints.filter((endpoint) => (
+    SEVERITY_RANK[endpoint.highestSeverity] >= SEVERITY_RANK.high
+  )).length;
+
+  const developerImpact = criticalOrHigh > 0
+    ? `High merge risk: ${criticalOrHigh} high/critical issues across ${affectedEndpoints} endpoint(s).`
+    : `Low merge risk: no high/critical issues detected in current diff.`;
+
+  const localizationCount = intent['localization-critical'] || 0;
+  const userFacingCount = intent['user-facing'] || 0;
+  const productImpact = localizationCount > 0
+    ? `Localization-sensitive drift in ${localizationCount} issue(s); verify multilingual UI/API contracts before release.`
+    : `No localization-sensitive drift detected; focus on technical contract compatibility.`;
+
+  const consumerImpact = userFacingCount > 0
+    ? `${userFacingCount} user-facing field change(s) may alter frontend rendering and copy behavior.`
+    : 'No user-facing field change detected in sampled diff output.';
+
+  return {
+    developerImpact,
+    productImpact,
+    consumerImpact
+  };
+}
+
 function getPath(urlStr) {
   try {
     const urlObj = new URL(urlStr);
@@ -203,21 +287,22 @@ function ensureEndpoint(reportMap, method, path) {
 
 function addIssue(reportMap, summary, method, path, issue) {
   const endpoint = ensureEndpoint(reportMap, method, path);
+  const annotatedIssue = annotateIssue(issue, path);
   const isDuplicate = endpoint.issues.some((existing) =>
-    existing.type === issue.type &&
-    existing.path === issue.path &&
-    existing.message === issue.message &&
-    existing.severity === issue.severity
+    existing.type === annotatedIssue.type &&
+    existing.path === annotatedIssue.path &&
+    existing.message === annotatedIssue.message &&
+    existing.severity === annotatedIssue.severity
   );
   if (isDuplicate) {
     return;
   }
 
-  endpoint.issues.push(issue);
-  if (SEVERITY_RANK[issue.severity] > SEVERITY_RANK[endpoint.highestSeverity]) {
-    endpoint.highestSeverity = issue.severity;
+  endpoint.issues.push(annotatedIssue);
+  if (SEVERITY_RANK[annotatedIssue.severity] > SEVERITY_RANK[endpoint.highestSeverity]) {
+    endpoint.highestSeverity = annotatedIssue.severity;
   }
-  updateSummaryFromIssue(summary, issue);
+  updateSummaryFromIssue(summary, annotatedIssue);
 }
 
 function compareInteractionsForAnalysis(beforeInteractions, afterInteractions) {
@@ -304,6 +389,7 @@ function compareInteractionsForAnalysis(beforeInteractions, afterInteractions) {
     }));
 
   summary.totalEndpoints = endpoints.length;
+  summary.intent = buildIntentSummary(endpoints);
   const highestSeverity = endpoints.reduce((highest, endpoint) => (
     SEVERITY_RANK[endpoint.highestSeverity] > SEVERITY_RANK[highest] ? endpoint.highestSeverity : highest
   ), 'none');
@@ -363,7 +449,8 @@ async function requestGroqSummary(report, { model, maxTokens, apiKey }) {
     issues: endpoint.issues.slice(0, 6).map((issue) => ({
       type: issue.type,
       severity: issue.severity,
-      message: issue.message
+      message: issue.message,
+      intentLabels: issue.intentLabels || []
     }))
   }));
 
@@ -381,6 +468,7 @@ async function requestGroqSummary(report, { model, maxTokens, apiKey }) {
       targetTag: report.target.tag,
       summary: report.summary,
       highestSeverity: report.highestSeverity,
+      impact: report.impact,
       endpoints: endpointPreview
     }, 2)
   ].join('\n');
@@ -496,6 +584,7 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
     const sourceSnapshot = loadSnapshotData(tag1);
     const targetSnapshot = loadSnapshotData(tag2);
     const report = analyzeSnapshotData(sourceSnapshot, targetSnapshot);
+    report.impact = buildImpactSummary(report);
 
     if (options.json) {
       console.log(stableJSONStringify(report));
@@ -517,7 +606,10 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
           const issueColor = colorForSeverity(issue.severity);
           let issueMsg = issue.message;
           if (options.lang) issueMsg = await translateText(issueMsg, options.lang);
-          console.log(`    - ${issueColor(issue.severity)} ${issueMsg}`);
+          const labels = issue.intentLabels?.length
+            ? ` ${chalk.gray(`[${issue.intentLabels.join(', ')}]`)}`
+            : '';
+          console.log(`    - ${issueColor(issue.severity)} ${issueMsg}${labels}`);
         }
         if (endpoint.issues.length > 4) {
           console.log(chalk.gray(`    - ... +${endpoint.issues.length - 4} more issues`));
@@ -530,6 +622,16 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
       const summaryLine = `Issues: ${report.summary.totalIssues} | Endpoints: ${report.summary.totalEndpoints} | Highest severity: ${report.highestSeverity.toUpperCase()}`;
       const translatedSummary = await maybeTranslate(summaryLine, options.lang);
       console.log(chalk.cyan(`\n  ${translatedSummary}`));
+
+      let impactTitle = '🌍 Localized Blast Radius';
+      if (options.lang) impactTitle = await translateText(impactTitle, options.lang);
+      console.log(chalk.cyan(`\n  ${impactTitle}`));
+      const devImpact = await maybeTranslate(`Developer impact: ${report.impact.developerImpact}`, options.lang);
+      const productImpact = await maybeTranslate(`Product impact: ${report.impact.productImpact}`, options.lang);
+      const consumerImpact = await maybeTranslate(`Consumer impact: ${report.impact.consumerImpact}`, options.lang);
+      console.log(chalk.gray(`  ${devImpact}`));
+      console.log(chalk.gray(`  ${productImpact}`));
+      console.log(chalk.gray(`  ${consumerImpact}`));
     }
 
     if (options.ai) {

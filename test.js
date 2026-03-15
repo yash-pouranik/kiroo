@@ -282,6 +282,8 @@ test('Analyze: detects rename candidate and severity', () => {
   const report = analyzeSnapshotData(source, target);
   assert.strictEqual(report.highestSeverity, 'medium');
   assert.strictEqual(report.summary.byType.field_rename_candidate, 1);
+  assert.ok((report.summary.intent?.['user-facing'] || 0) >= 1);
+  assert.ok(report.endpoints[0].issues[0].intentLabels.includes('user-facing'));
 });
 
 test('Analyze: detects removed endpoint as high severity', () => {
