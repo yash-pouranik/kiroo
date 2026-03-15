@@ -10,7 +10,7 @@
 
   **Record, Replay, Snapshot, Analyze, and Export your APIs — like Git for HTTP workflows.**
 
-  [Demo](#-demo) • [Feature Grid](#-feature-grid) • [Use Cases](#-real-world-use-cases) • [Install](#-installation) • [Docs](#-full-command-documentation)
+  [Demo](#-demo) • [Feature Grid](#-feature-grid) • [Use Cases](#-real-world-use-cases) • [Install](#-installation) • [Docs](#-full-command-documentation) • [Judge Demo Guide](./DEMO.md)
 
 </div>
 
@@ -33,12 +33,15 @@ If your API changes frequently, Kiroo answers:
   <img src="./image.png" alt="Kiroo demo preview" width="100%">
 </div>
 
+- Quick judge flow: [`DEMO.md`](./DEMO.md)
+
 ---
 
 ## 🌐 Product Landing Page
 
 - Landing page: [`docs/index.html`](./docs/index.html)
 - Documentation page: [`docs/docs.html`](./docs/docs.html)
+- Judge quick-test example (SDK + CLI): [`examples/judge-sdk-cli`](./examples/judge-sdk-cli)
 
 ---
 
