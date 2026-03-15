@@ -6,12 +6,16 @@ const MAX_BUFFER = 1000;
 
 async function uploadBatchToSupabase(batch, options) {
   const { supabaseUrl, supabaseKey, bucket, retentionDays } = options;
-  if (!supabaseUrl || !supabaseKey) return;
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[kiroo-capture] Missing Supabase credentials. Capture will not be saved.');
+    return;
+  }
 
   const supabase = createClient(supabaseUrl, supabaseKey);
   const date = new Date().toISOString().split('T')[0];
   const fileName = `${date}.json`;
   
+  console.log(`[kiroo-capture] Uploading ${batch.length} captures to ${bucket}/${fileName}...`);
   try {
     const { data: existingData, error: downloadError } = await supabase.storage
       .from(bucket)
@@ -32,7 +36,9 @@ async function uploadBatchToSupabase(batch, options) {
         contentType: 'application/json'
       });
 
-    if (uploadError) throw uploadError;
+     if (uploadError) throw uploadError;
+
+    console.log(`[kiroo-capture] ✓ Batch upload successful.`);
 
     // Periodic cleanup
     if (Math.random() < 0.05) {

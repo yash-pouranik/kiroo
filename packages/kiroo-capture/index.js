@@ -40,7 +40,10 @@ function capture(options = {}) {
       return originalJson.apply(res, arguments);
     };
 
+    const startTime = Date.now();
+
     res.on('finish', () => {
+      const duration = Date.now() - startTime;
       const isError = res.statusCode >= 400;
       if (!isError && !shouldSample) return;
 
@@ -59,7 +62,11 @@ function capture(options = {}) {
           headers: res.getHeaders(),
           body: scrub ? scrubSensitive(responseBody) : responseBody
         },
-        metadata: { sampled: !isError, isError: isError }
+        metadata: { 
+          sampled: !isError, 
+          isError: isError,
+          duration_ms: duration
+        }
       };
 
       addToBuffer(captureRecord, { 

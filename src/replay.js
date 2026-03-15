@@ -75,13 +75,30 @@ export async function replayInteraction(id, options = {}) {
     let url = interaction.request.url;
     if (options.target) {
       try {
-        const originalUrl = new URL(interaction.request.url);
         const targetBase = options.target.startsWith('http') ? options.target : `http://${options.target}`;
         const targetUrl = new URL(targetBase);
-        // Replace origin but keep path and query
-        url = `${targetUrl.origin}${originalUrl.pathname}${originalUrl.search}`;
+        
+        // Handle captured URL which might be full URL OR just a path
+        let pathAndQuery = interaction.request.url;
+        if (pathAndQuery.startsWith('http')) {
+          const parsedOriginal = new URL(pathAndQuery);
+          pathAndQuery = `${parsedOriginal.pathname}${parsedOriginal.search}`;
+        }
+        
+        // Ensure path starts with /
+        if (!pathAndQuery.startsWith('/')) {
+          pathAndQuery = '/' + pathAndQuery;
+        }
+        
+        url = `${targetUrl.origin}${pathAndQuery}`;
+        
+        // Optimization: Remove original host header to avoid conflicts with target
+        if (interaction.request.headers) {
+          delete interaction.request.headers.host;
+          delete interaction.request.headers.Host;
+        }
       } catch (e) {
-        console.error(chalk.red('\n  ✗ Invalid target URL:'), options.target);
+        console.error(chalk.red('\n  ✗ Error processing target URL:'), e.message);
         process.exit(1);
       }
     }
@@ -114,9 +131,12 @@ export async function replayInteraction(id, options = {}) {
       console.log(chalk.red('  ✗ Status changed:'), chalk.gray(interaction.response.status), chalk.white('→'), chalk.red(response.status));
     }
     
-    const timeDiff = duration - interaction.metadata.duration_ms;
+    const originalDuration = interaction.metadata?.duration_ms;
+    const timeDiff = originalDuration !== undefined ? duration - originalDuration : null;
     const timeColor = timeDiff > 0 ? chalk.yellow : chalk.green;
-    console.log(chalk.gray('  ⏱  Duration:'), chalk.white(`${duration}ms`), timeColor(`(${timeDiff > 0 ? '+' : ''}${timeDiff}ms)`));
+    const timeStr = timeDiff !== null ? timeColor(`(${timeDiff > 0 ? '+' : ''}${timeDiff}ms)`) : '';
+    
+    console.log(chalk.gray('  ⏱  Duration:'), chalk.white(`${duration}ms`), timeStr);
     console.log('');
     
   } catch (error) {
