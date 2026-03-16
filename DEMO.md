@@ -51,7 +51,7 @@ kiroo replay <replay-id-from-X-Kiroo-Replay-ID> --target http://localhost:3311
 
 **What:** Compare snapshots and get impact severity.
 
-**Killer part:** AI summary explains practical break risk, plus localized developer/product impact with field-intent labels.
+**Killer part:** AI summary explains practical break risk, plus localized impact, field-intent labels, and migration hints.
 
 First record snapshots:
 

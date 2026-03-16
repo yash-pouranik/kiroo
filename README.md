@@ -75,7 +75,7 @@ kiroo replay <replay-id> --target http://localhost:3311
 |---|---|
 | **Request Recording** | Store request/response history in `.kiroo/` for replay and auditability |
 | **Snapshot Versioning** | Save versioned API states and compare contract drift |
-| **AI + Localized Blast Radius** | Get severity, developer/product impact, and field intent labels before deployment |
+| **AI + Localized Blast Radius** | Get severity, locale-aware risk boosts, field intent labels, and migration hints before deployment |
 | **Time-Travel Proxy** | Auto-capture frontend traffic without manually typing requests |
 | **Zero-Code API Checks** | CI-friendly assertions for status, fields, and exact matches |
 | **Load Benchmarking** | Concurrency and throughput testing from CLI |

@@ -50,11 +50,43 @@ function inferIntentLabels(issue, endpointPath = '') {
   return Array.from(labels).sort((a, b) => a.localeCompare(b));
 }
 
+function migrationHintsForIssue(issue, intentLabels = []) {
+  const hints = [];
+
+  if (issue.type === 'field_rename_candidate') {
+    hints.push('Update client field mapping and keep temporary backward-compatible aliases.');
+  } else if (issue.type === 'field_removed') {
+    hints.push('Add fallback handling for missing field and avoid hard-required parsing.');
+  } else if (issue.type === 'field_type_changed') {
+    hints.push('Update serializers/validators for the new field type and add compatibility parsing.');
+  } else if (issue.type === 'status_changed') {
+    hints.push('Adjust status handling logic and retries for the new response code.');
+  } else if (issue.type === 'endpoint_removed') {
+    hints.push('Restore endpoint alias or publish deprecation plan before removing old route.');
+  } else if (issue.type === 'endpoint_added') {
+    hints.push('Add contract tests and client adoption docs for the new endpoint.');
+  } else if (issue.type === 'field_added') {
+    hints.push('Ensure clients ignore unknown fields safely to prevent parser breaks.');
+  }
+
+  if (intentLabels.includes('localization-critical')) {
+    hints.push('Validate locale/currency/text handling across target languages before release.');
+  }
+
+  if (intentLabels.includes('user-facing')) {
+    hints.push('Run UI regression checks for all affected user-visible fields.');
+  }
+
+  return Array.from(new Set(hints)).slice(0, 3);
+}
+
 function annotateIssue(issue, endpointPath = '') {
   const intentLabels = inferIntentLabels(issue, endpointPath);
+  const migrationHints = migrationHintsForIssue(issue, intentLabels);
   return {
     ...issue,
-    intentLabels
+    intentLabels,
+    migrationHints
   };
 }
 
@@ -78,7 +110,8 @@ function buildIntentSummary(endpoints) {
 
 function buildImpactSummary(report) {
   const intent = report.summary.intent || {};
-  const criticalOrHigh = (report.summary.bySeverity?.critical || 0) + (report.summary.bySeverity?.high || 0);
+  const severityView = report.summary.bySeverityEffective || report.summary.bySeverity || {};
+  const criticalOrHigh = (severityView.critical || 0) + (severityView.high || 0);
   const affectedEndpoints = report.endpoints.filter((endpoint) => (
     SEVERITY_RANK[endpoint.highestSeverity] >= SEVERITY_RANK.high
   )).length;
@@ -101,6 +134,71 @@ function buildImpactSummary(report) {
     developerImpact,
     productImpact,
     consumerImpact
+  };
+}
+
+function bumpSeverity(severity, steps = 1) {
+  const order = ['none', 'low', 'medium', 'high', 'critical'];
+  const idx = order.indexOf(String(severity || 'none'));
+  if (idx === -1) return severity;
+  return order[Math.min(order.length - 1, idx + steps)];
+}
+
+function applyLocaleRiskBoost(report, lang) {
+  if (!lang) return report;
+
+  const boostedEndpoints = report.endpoints.map((endpoint) => {
+    const boostedIssues = endpoint.issues.map((issue) => {
+      let extraRiskSteps = 0;
+      const labels = issue.intentLabels || [];
+      const baseSeverity = issue.severity;
+
+      if (labels.includes('localization-critical')) extraRiskSteps += 1;
+      if (labels.includes('user-facing') && ['field_removed', 'field_type_changed', 'status_changed', 'endpoint_removed'].includes(issue.type)) {
+        extraRiskSteps += 1;
+      }
+
+      const effectiveSeverity = extraRiskSteps > 0 ? bumpSeverity(baseSeverity, extraRiskSteps) : baseSeverity;
+      return {
+        ...issue,
+        effectiveSeverity,
+        localeRiskBoosted: effectiveSeverity !== baseSeverity
+      };
+    });
+
+    const effectiveHighestSeverity = boostedIssues.reduce((highest, issue) => (
+      SEVERITY_RANK[issue.effectiveSeverity] > SEVERITY_RANK[highest] ? issue.effectiveSeverity : highest
+    ), 'none');
+
+    return {
+      ...endpoint,
+      issues: boostedIssues,
+      effectiveHighestSeverity
+    };
+  });
+
+  const bySeverityEffective = { low: 0, medium: 0, high: 0, critical: 0 };
+  for (const endpoint of boostedEndpoints) {
+    for (const issue of endpoint.issues) {
+      if (bySeverityEffective[issue.effectiveSeverity] !== undefined) {
+        bySeverityEffective[issue.effectiveSeverity] += 1;
+      }
+    }
+  }
+
+  const effectiveHighestSeverity = boostedEndpoints.reduce((highest, endpoint) => (
+    SEVERITY_RANK[endpoint.effectiveHighestSeverity] > SEVERITY_RANK[highest] ? endpoint.effectiveHighestSeverity : highest
+  ), 'none');
+
+  return {
+    ...report,
+    baseHighestSeverity: report.highestSeverity,
+    highestSeverity: effectiveHighestSeverity,
+    endpoints: boostedEndpoints,
+    summary: {
+      ...report.summary,
+      bySeverityEffective
+    }
   };
 }
 
@@ -448,9 +546,10 @@ async function requestGroqSummary(report, { model, maxTokens, apiKey }) {
     highestSeverity: endpoint.highestSeverity,
     issues: endpoint.issues.slice(0, 6).map((issue) => ({
       type: issue.type,
-      severity: issue.severity,
+      severity: issue.effectiveSeverity || issue.severity,
       message: issue.message,
-      intentLabels: issue.intentLabels || []
+      intentLabels: issue.intentLabels || [],
+      migrationHints: issue.migrationHints || []
     }))
   }));
 
@@ -583,7 +682,8 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
 
     const sourceSnapshot = loadSnapshotData(tag1);
     const targetSnapshot = loadSnapshotData(tag2);
-    const report = analyzeSnapshotData(sourceSnapshot, targetSnapshot);
+    let report = analyzeSnapshotData(sourceSnapshot, targetSnapshot);
+    report = applyLocaleRiskBoost(report, options.lang);
     report.impact = buildImpactSummary(report);
 
     if (options.json) {
@@ -597,19 +697,27 @@ export async function analyzeSnapshots(tag1, tag2, options = {}) {
 
       const shownEndpoints = report.endpoints.slice(0, 6);
       for (const endpoint of shownEndpoints) {
-        let severityLabel = endpoint.highestSeverity.toUpperCase();
+        const endpointSeverity = endpoint.effectiveHighestSeverity || endpoint.highestSeverity;
+        let severityLabel = endpointSeverity.toUpperCase();
         if (options.lang) severityLabel = await translateText(severityLabel, options.lang);
-        const severityColor = colorForSeverity(endpoint.highestSeverity);
+        const severityColor = colorForSeverity(endpointSeverity);
         console.log(`  ${severityColor(severityLabel)} ${chalk.white(endpoint.method)} ${chalk.gray(endpoint.path)}`);
         
         for (const issue of endpoint.issues.slice(0, 4)) {
-          const issueColor = colorForSeverity(issue.severity);
+          const displaySeverity = issue.effectiveSeverity || issue.severity;
+          const issueColor = colorForSeverity(displaySeverity);
           let issueMsg = issue.message;
           if (options.lang) issueMsg = await translateText(issueMsg, options.lang);
           const labels = issue.intentLabels?.length
             ? ` ${chalk.gray(`[${issue.intentLabels.join(', ')}]`)}`
             : '';
-          console.log(`    - ${issueColor(issue.severity)} ${issueMsg}${labels}`);
+          const boostedNote = issue.localeRiskBoosted ? chalk.gray(' [locale-risk-boost]') : '';
+          console.log(`    - ${issueColor(displaySeverity)} ${issueMsg}${labels}${boostedNote}`);
+          if (issue.migrationHints?.length) {
+            let hintLine = `Hint: ${issue.migrationHints[0]}`;
+            if (options.lang) hintLine = await maybeTranslate(hintLine, options.lang);
+            console.log(chalk.gray(`      ↳ ${hintLine}`));
+          }
         }
         if (endpoint.issues.length > 4) {
           console.log(chalk.gray(`    - ... +${endpoint.issues.length - 4} more issues`));

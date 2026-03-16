@@ -1,6 +1,6 @@
 {
   "name": "@kiroo/cli",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Git for API interactions. Record, replay, snapshot, and diff your APIs.",
   "type": "module",
   "bin": {
