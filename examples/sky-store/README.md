@@ -65,7 +65,7 @@ Expected:
 ### 3) Validate high-risk/error paths
 
 ```bash
-kiroo check http://localhost:3000/api/v2/checkout -m POST -d "productId=sky-3" --status 403
+kiroo check "http://localhost:3000/api/v2/checkout" -m POST -d "productId=sky-3" --status 403
 kiroo check "http://localhost:3000/api/v2/shipping/quote?country=BR&fast=true" --status 429
 kiroo get "http://localhost:3000/api/v2/coupons/validate?code=BADCODE"
 ```
