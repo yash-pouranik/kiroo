@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { executeRequest } from '../src/executor.js';
 import { listInteractions, replayInteraction } from '../src/replay.js';
 import { saveSnapshot, compareSnapshots, listSnapshots } from '../src/snapshot.js';
-import { setEnv, setVar, deleteVar, listEnv } from '../src/env.js';
+import { setEnv, setVar, deleteVar, listEnv, getPreferredLang } from '../src/env.js';
 import { showGraph } from '../src/graph.js';
 import { validateResponse, showCheckResult } from '../src/checker.js';
 import { initProject } from '../src/init.js';
@@ -30,7 +30,7 @@ ${chalk.magenta.bold(`
   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝ 
 `)}
   ${chalk.gray('Git for API Interactions')}
-  ${chalk.magenta('v0.9.5')}
+  ${chalk.magenta('v0.9.7')}
 `;
 
 const program = new Command();
@@ -46,9 +46,14 @@ if (process.argv.length <= 2 || process.argv.includes('--help') || process.argv.
 program
   .name('kiroo')
   .description('Git for API interactions. Record, replay, snapshot, and diff your APIs.')
-  .version('0.9.5')
+  .version('0.9.7')
   .showSuggestionAfterError()
   .option('--lang <language>', 'Translate output to specified language (e.g., hi, es, fr)');
+
+function resolvedLang() {
+  const opts = program.opts();
+  return getPreferredLang(opts.lang);
+}
 
 // Init command
 program
@@ -80,11 +85,11 @@ Examples:
   .action(async (url, options) => {
     // ...
     // Execute request
-    const opts = program.opts();
+    const lang = resolvedLang();
     const response = await executeRequest(options.method || 'GET', url, {
       header: options.header,
       data: options.data,
-      lang: opts.lang
+      lang
     });
 
     if (!response) {
@@ -113,7 +118,7 @@ Examples:
 
     // Validate
     const validation = validateResponse(response, rules);
-    await showCheckResult(validation, opts.lang);
+    await showCheckResult(validation, lang);
 
     if (!validation.passed) {
       process.exit(1);
@@ -130,8 +135,7 @@ Examples:
     .option('-d, --data <data>', 'Request body (JSON string or key=value pairs)')
     .option('-s, --save <pairs...>', 'Extract values from response to env (key=path.to.data)')
     .action(async (url, options) => {
-      const opts = program.opts();
-      await executeRequest(method, url, { ...options, lang: opts.lang });
+      await executeRequest(method, url, { ...options, lang: resolvedLang() });
     });
 });
 
@@ -199,8 +203,7 @@ program
   .option('-v, --verbose', 'Show detailed output for every request')
   .option('-d, --data <data>', 'Request body')
   .action(async (url, options) => {
-    const opts = program.opts();
-    await runBenchmark(url, { ...options, lang: opts.lang });
+    await runBenchmark(url, { ...options, lang: resolvedLang() });
   });
 
 // Clear command
@@ -298,15 +301,15 @@ snapshot
   .option('--max-tokens <number>', 'Max completion tokens for analyze --ai mode')
   .option('--fail-on <severity>', 'Severity threshold for analyze mode (low|medium|high|critical)')
   .action(async (tag1, tag2, options) => {
-    const opts = program.opts();
-    await compareSnapshots(tag1, tag2, opts.lang);
+    const lang = resolvedLang();
+    await compareSnapshots(tag1, tag2, lang);
     if (options.analyze) {
       await analyzeSnapshots(tag1, tag2, {
         ai: !!options.ai,
         model: options.model,
         maxTokens: options.maxTokens,
         failOn: options.failOn,
-        lang: opts.lang,
+        lang,
       });
     }
   });
@@ -334,10 +337,9 @@ program
   .option('--max-tokens <number>', 'Max completion tokens for AI summary')
   .option('--fail-on <severity>', 'Exit non-zero when severity >= threshold (low|medium|high|critical)')
   .action(async (tag1, tag2, options) => {
-    const opts = program.opts();
     await analyzeSnapshots(tag1, tag2, {
       ...options,
-      lang: opts.lang
+      lang: resolvedLang()
     });
   });
 
@@ -397,13 +399,14 @@ program
   .command('stats')
   .alias('stat')
   .description('Show usage statistics and bottlenecks')
+  .option('--json', 'Output structured JSON analytics')
   .addHelpText('after', `
 Examples:
   $ kiroo stats
-  $ kiroo stats --lang hi`)
-  .action(async () => {
-    const opts = program.opts();
-    await showStats({ lang: opts.lang });
+  $ kiroo stats --lang hi
+  $ kiroo stats --json`)
+  .action(async (options) => {
+    await showStats({ lang: resolvedLang(), json: !!options.json });
   });
 
 // Help command

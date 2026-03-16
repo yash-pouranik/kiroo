@@ -43,7 +43,16 @@ function inferIntentLabels(issue, endpointPath = '') {
     labels.add('localization-critical');
   }
 
-  if (['field_removed', 'field_type_changed', 'endpoint_removed', 'status_changed'].includes(issue.type)) {
+  if ([
+    'field_removed',
+    'field_type_changed',
+    'endpoint_removed',
+    'status_changed',
+    'auth_or_rate_limit_changed',
+    'required_field_missing',
+    'request_body_removed',
+    'enum_value_removed'
+  ].includes(issue.type)) {
     labels.add('contract-critical');
   }
 
@@ -61,12 +70,22 @@ function migrationHintsForIssue(issue, intentLabels = []) {
     hints.push('Update serializers/validators for the new field type and add compatibility parsing.');
   } else if (issue.type === 'status_changed') {
     hints.push('Adjust status handling logic and retries for the new response code.');
+  } else if (issue.type === 'auth_or_rate_limit_changed') {
+    hints.push('Review auth scopes, token flow, and rate-limit policy before rollout.');
   } else if (issue.type === 'endpoint_removed') {
     hints.push('Restore endpoint alias or publish deprecation plan before removing old route.');
   } else if (issue.type === 'endpoint_added') {
     hints.push('Add contract tests and client adoption docs for the new endpoint.');
   } else if (issue.type === 'field_added') {
     hints.push('Ensure clients ignore unknown fields safely to prevent parser breaks.');
+  } else if (issue.type === 'required_field_missing') {
+    hints.push('Treat this as breaking: restore field or publish versioned contract migration.');
+  } else if (issue.type === 'request_body_removed') {
+    hints.push('Update client request builders and backend validators for body-less requests.');
+  } else if (issue.type === 'request_body_added') {
+    hints.push('Document new request payload requirements and add server-side defaults.');
+  } else if (issue.type === 'enum_value_removed' || issue.type === 'enum_value_added') {
+    hints.push('Update enum handling in clients and validation rules for new/removed values.');
   }
 
   if (intentLabels.includes('localization-critical')) {
@@ -226,6 +245,17 @@ function isObject(val) {
 function compareStatus(beforeStatus, afterStatus) {
   if (beforeStatus === afterStatus) return null;
 
+  const authAndLimitStatuses = new Set([401, 403, 429]);
+  if (authAndLimitStatuses.has(beforeStatus) || authAndLimitStatuses.has(afterStatus)) {
+    return {
+      type: 'auth_or_rate_limit_changed',
+      path: 'response.status',
+      severity: 'high',
+      breaking: true,
+      message: `Auth/rate-limit behavior changed from ${beforeStatus} to ${afterStatus}`
+    };
+  }
+
   const before2xx = beforeStatus >= 200 && beforeStatus < 300;
   const before4xx5xx = beforeStatus >= 400;
   const after3xx = afterStatus >= 300 && afterStatus < 400;
@@ -364,6 +394,150 @@ function compareBodies(beforeValue, afterValue, path = '') {
   return issues;
 }
 
+function collectFieldPresence(value, path, map) {
+  if (value === null || value === undefined) return;
+  if (Array.isArray(value)) {
+    const sample = value.slice(0, 5);
+    for (const item of sample) {
+      collectFieldPresence(item, `${path}[0]`, map);
+    }
+    return;
+  }
+  if (!isObject(value)) return;
+
+  const keys = Object.keys(value);
+  for (const key of keys) {
+    const childPath = path ? `${path}.${key}` : key;
+    map.set(childPath, (map.get(childPath) || 0) + 1);
+    collectFieldPresence(value[key], childPath, map);
+  }
+}
+
+function collectEnumCandidates(value, path, map) {
+  if (value === null || value === undefined) return;
+  if (Array.isArray(value)) {
+    const sample = value.slice(0, 5);
+    for (const item of sample) {
+      collectEnumCandidates(item, `${path}[0]`, map);
+    }
+    return;
+  }
+  if (isObject(value)) {
+    for (const [key, child] of Object.entries(value)) {
+      const childPath = path ? `${path}.${key}` : key;
+      collectEnumCandidates(child, childPath, map);
+    }
+    return;
+  }
+
+  if (!['string', 'number', 'boolean'].includes(typeof value)) return;
+  if (!map.has(path)) map.set(path, new Set());
+  const store = map.get(path);
+  if (typeof value === 'string' && value.length > 60) return;
+  store.add(String(value));
+}
+
+function buildEndpointInsights(interactions) {
+  const insights = new Map();
+
+  for (const interaction of interactions) {
+    const method = String(interaction.method || '').toUpperCase();
+    const path = getPath(interaction.url || '');
+    const key = endpointKey(method, path);
+    if (!insights.has(key)) {
+      insights.set(key, {
+        method,
+        path,
+        samples: 0,
+        requestPresence: new Map(),
+        responsePresence: new Map(),
+        requestEnums: new Map(),
+        responseEnums: new Map()
+      });
+    }
+
+    const stat = insights.get(key);
+    stat.samples += 1;
+
+    if (interaction.request?.body !== undefined) {
+      collectFieldPresence(interaction.request.body, 'request.body', stat.requestPresence);
+      collectEnumCandidates(interaction.request.body, 'request.body', stat.requestEnums);
+    }
+
+    if (interaction.response?.body !== undefined) {
+      collectFieldPresence(interaction.response.body, 'response.body', stat.responsePresence);
+      collectEnumCandidates(interaction.response.body, 'response.body', stat.responseEnums);
+    }
+  }
+
+  return insights;
+}
+
+function getRequiredPaths(statsMap, sampleCount) {
+  if (!sampleCount || sampleCount < 2) return new Set();
+  const required = new Set();
+  for (const [fieldPath, count] of statsMap.entries()) {
+    if (count >= sampleCount) required.add(fieldPath);
+  }
+  return required;
+}
+
+function addRequiredFieldIssues(reportMap, summary, method, path, sourceRequired, targetRequired, scopeLabel) {
+  for (const reqPath of sourceRequired) {
+    if (targetRequired.has(reqPath)) continue;
+    addIssue(reportMap, summary, method, path, {
+      type: 'required_field_missing',
+      path: reqPath,
+      severity: 'critical',
+      breaking: true,
+      message: `Previously required ${scopeLabel} field missing: ${reqPath}`
+    });
+  }
+}
+
+function isEnumLikePath(enumPath) {
+  const tail = String(enumPath || '').split('.').pop() || '';
+  const normalized = normalizeFieldName(tail);
+  const enumHints = [
+    'status', 'state', 'type', 'mode', 'role', 'tier', 'level',
+    'currency', 'country', 'locale', 'language'
+  ];
+  return enumHints.some((hint) => normalized.includes(hint));
+}
+
+function addEnumDriftIssues(reportMap, summary, method, path, sourceEnums, targetEnums, scopeLabel) {
+  const enumPaths = new Set([...sourceEnums.keys(), ...targetEnums.keys()]);
+  for (const enumPath of enumPaths) {
+    if (!isEnumLikePath(enumPath)) continue;
+    const sourceVals = sourceEnums.get(enumPath) || new Set();
+    const targetVals = targetEnums.get(enumPath) || new Set();
+    if (sourceVals.size === 0 && targetVals.size === 0) continue;
+
+    const removed = [...sourceVals].filter((v) => !targetVals.has(v));
+    const added = [...targetVals].filter((v) => !sourceVals.has(v));
+
+    if (removed.length > 0) {
+      addIssue(reportMap, summary, method, path, {
+        type: 'enum_value_removed',
+        path: enumPath,
+        severity: 'high',
+        breaking: true,
+        message: `${scopeLabel} enum values removed at ${enumPath}: ${removed.slice(0, 4).join(', ')}`
+      });
+    }
+
+    if (added.length > 0) {
+      addIssue(reportMap, summary, method, path, {
+        type: 'enum_value_added',
+        path: enumPath,
+        severity: 'medium',
+        breaking: false,
+        message: `${scopeLabel} enum values added at ${enumPath}: ${added.slice(0, 4).join(', ')}`
+      });
+    }
+  }
+}
+
 function updateSummaryFromIssue(summary, issue) {
   summary.totalIssues += 1;
   summary.bySeverity[issue.severity] += 1;
@@ -419,6 +593,8 @@ function compareInteractionsForAnalysis(beforeInteractions, afterInteractions) {
 
   const sortedBefore = [...beforeInteractions].sort((a, b) => endpointKey(a.method, getPath(a.url)).localeCompare(endpointKey(b.method, getPath(b.url))));
   const sortedAfter = [...afterInteractions].sort((a, b) => endpointKey(a.method, getPath(a.url)).localeCompare(endpointKey(b.method, getPath(b.url))));
+  const beforeInsights = buildEndpointInsights(sortedBefore);
+  const afterInsights = buildEndpointInsights(sortedAfter);
   const consumedBeforeIndexes = new Set();
 
   for (const after of sortedAfter) {
@@ -454,6 +630,29 @@ function compareInteractionsForAnalysis(beforeInteractions, afterInteractions) {
         addIssue(reportMap, summary, method, path, issue);
       }
     }
+
+    if (before.request?.body !== undefined && after.request?.body !== undefined) {
+      const requestBodyIssues = compareBodies(before.request.body, after.request.body, 'request.body');
+      for (const issue of requestBodyIssues) {
+        addIssue(reportMap, summary, method, path, issue);
+      }
+    } else if (before.request?.body !== undefined && after.request?.body === undefined) {
+      addIssue(reportMap, summary, method, path, {
+        type: 'request_body_removed',
+        path: 'request.body',
+        severity: 'high',
+        breaking: true,
+        message: 'Request body removed in target snapshot'
+      });
+    } else if (before.request?.body === undefined && after.request?.body !== undefined) {
+      addIssue(reportMap, summary, method, path, {
+        type: 'request_body_added',
+        path: 'request.body',
+        severity: 'medium',
+        breaking: false,
+        message: 'Request body added in target snapshot'
+      });
+    }
   }
 
   sortedBefore.forEach((before, index) => {
@@ -468,6 +667,43 @@ function compareInteractionsForAnalysis(beforeInteractions, afterInteractions) {
       message: 'Endpoint removed from target snapshot'
     });
   });
+
+  const insightKeys = new Set([...beforeInsights.keys(), ...afterInsights.keys()]);
+  for (const key of insightKeys) {
+    const sourceStat = beforeInsights.get(key);
+    const targetStat = afterInsights.get(key);
+    const method = sourceStat?.method || targetStat?.method || 'GET';
+    const path = sourceStat?.path || targetStat?.path || '/';
+
+    if (sourceStat && targetStat) {
+      const sourceReqRequired = getRequiredPaths(sourceStat.requestPresence || new Map(), sourceStat.samples || 0);
+      const targetReqRequired = getRequiredPaths(targetStat.requestPresence || new Map(), targetStat.samples || 0);
+      addRequiredFieldIssues(reportMap, summary, method, path, sourceReqRequired, targetReqRequired, 'request');
+
+      const sourceResRequired = getRequiredPaths(sourceStat.responsePresence || new Map(), sourceStat.samples || 0);
+      const targetResRequired = getRequiredPaths(targetStat.responsePresence || new Map(), targetStat.samples || 0);
+      addRequiredFieldIssues(reportMap, summary, method, path, sourceResRequired, targetResRequired, 'response');
+    }
+
+    addEnumDriftIssues(
+      reportMap,
+      summary,
+      method,
+      path,
+      sourceStat?.requestEnums || new Map(),
+      targetStat?.requestEnums || new Map(),
+      'Request'
+    );
+    addEnumDriftIssues(
+      reportMap,
+      summary,
+      method,
+      path,
+      sourceStat?.responseEnums || new Map(),
+      targetStat?.responseEnums || new Map(),
+      'Response'
+    );
+  }
 
   const endpoints = Array.from(reportMap.values())
     .sort((a, b) => {

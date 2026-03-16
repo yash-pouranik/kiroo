@@ -1,90 +1,71 @@
-# 🌌 SkyStore API: A Senior Architect's Playground
+# SkyStore Drift Lab
 
-Welcome to the **SkyStore Migration Demo**. This scenario is designed to show how Kiroo handles **Structural Difts**, **Behavioral Risk**, and **Localized Errors** in real migration workflows.
+SkyStore is a migration playground to demo **real API contract drift** between `v1` and `v2`, with a Neobrutalism UI to generate traffic quickly.
 
-## 🏗️ Scenario: "The Modernization Sprint"
+## What this example shows
 
-Your company is moving from a flat, monolithic API (v1) to a modern, nested, and feature-rich architecture (v2). This migration introduces several subtle breaking changes that Kiroo is designed to catch.
+- Structural drift: flat objects become nested contracts.
+- Behavioral drift: status code and flow changes (`200` -> `202`, `400` -> `403`, `429` path).
+- Enum/locale drift: currency, shipping, coupon constraints.
+- Snapshot-driven diff + blast-radius analysis with localization.
 
-### What is changing?
-| Component | v1 (Stable) | v2 (Evolution) | Drift Type |
-|-----------|-------------|----------------|------------|
-| **Products** | `price: 4500` | `price: { amount: 4500, ... }` | **Structural (Breaking)** |
-| **User** | `{ name: 'Yash', country: 'IN' }` | `{ profile: { name: 'Yash' }, preferences: { ... } }` | **Structural (Nesting)** |
-| **Reviews** | `["Great!"]` | `[{ user: 'Alice', comment: 'Great!' }]` | **Type (Array Primitive to Object)** |
-| **Search** | `[ { product1 }, { product2 } ]` | `{ results: [...], total: 2, ... }` | **Root Type Change** |
-| **Checkout**| `200 OK` (Sync) | `202 Accepted` (Async) | **Behavioral Risk** |
+## 1) Start backend
 
----
+```bash
+cd examples/sky-store/backend
+npm install
+node server.js
+```
 
-## 🚀 Step 1: Initialize the Lab
+## 2) Open frontend
 
-1. **Start Backend**:
-   ```bash
-   cd examples/sky-store/backend
-   npm install && node server.js
-   ```
+Open `examples/sky-store/frontend/index.html` in browser.
 
-2. **Open Dashboard**:
-   Open `examples/sky-store/frontend/index.html` in your browser.
+Use endpoint buttons or presets to generate realistic traffic.
 
----
-
-## 🧪 Step 2: Record Stable State (v1)
-
-Capture the baseline traffic. You can use the buttons in the dashboard or run:
+## 3) Capture baseline (v1)
 
 ```bash
 kiroo get http://localhost:3000/api/v1/products
 kiroo get http://localhost:3000/api/v1/user
-kiroo get http://localhost:3000/api/v1/wishlist
 kiroo get http://localhost:3000/api/v1/search?q=watch
-kiroo snapshot save v1-stable
+kiroo get http://localhost:3000/api/v1/inventory/sky-1
+kiroo get http://localhost:3000/api/v1/shipping/quote?country=IN
+kiroo snapshot save v1
 ```
 
----
-
-## 🧪 Step 3: Record Next-Gen State (v2)
-
-Capture the updated API surface:
+## 4) Capture target (v2)
 
 ```bash
 kiroo get http://localhost:3000/api/v2/products
 kiroo get http://localhost:3000/api/v2/user
 kiroo get http://localhost:3000/api/v2/search?q=watch
+kiroo get http://localhost:3000/api/v2/inventory/sky-1
+kiroo get http://localhost:3000/api/v2/shipping/quote?country=IN&fast=true
 kiroo get http://localhost:3000/api/v2/notifications
-kiroo snapshot save v2-staging
+kiroo snapshot save v2
 ```
 
----
+## 5) Compare + analyze
 
-## 🧪 Step 4: The Comparison Magic
-
-### 1. Structural Analysis (Lingo.dev)
-Reveal exactly where the data moved:
 ```bash
-kiroo snapshot compare v1-stable v2-staging --lang hi
+kiroo snapshot compare v1 v2 --analyze --lang de
+kiroo snapshot compare v1 v2 --analyze --ai --lang hi
 ```
-*Observe: Kiroo flags the Price change, User nesting, and Search result wrapping.*
 
-### 2. AI Blast Radius Analysis
-Get an architectural review of the migration risks:
-```bash
-kiroo analyze v1-stable v2-staging --ai --lang hi
-```
-*Note: AI will warn about the 202 status on checkout and the impact of price object change on UI components.*
+## 6) Optional: proxy capture mode
 
-### 3. Localized Semantic Test
-```bash
-kiroo check http://localhost:3000/api/v2/checkout -m POST -d "productId=sky-3" --status 403 --lang es
-```
-*Observe how the logistics error is translated for global debugging.*
-
----
-
-## 🔌 Pro Tip: Use the Proxy
-Instead of typing commands, run the proxy and click the buttons on the dashboard!
 ```bash
 kiroo proxy --target http://localhost:3000 --port 8080
 ```
-*(Remember to update the fetch URL in index.html script to port 8080)*
+
+Then call endpoints on `http://localhost:8080/...` to auto-record traffic from the UI flow.
+
+## v1 -> v2 drift highlights
+
+- `/products`: `price:number` -> `price:{amount,currency,symbol}`
+- `/user`: root fields -> `profile` + `preferences`
+- `/search`: array -> wrapped object with `results`, `total`, `suggestion`
+- `/checkout`: synchronous `200` -> async-like `202`, restricted item now `403`
+- `/shipping/quote`: added fast mode and a rate-limited region path (`BR` => `429`)
+- `/coupons/validate`: simple discount fields -> richer `discount` and `constraints`

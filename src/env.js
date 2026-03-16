@@ -29,6 +29,14 @@ export function getEnvVar(key) {
   return vars[key];
 }
 
+export function getPreferredLang(cliLang) {
+  if (cliLang && String(cliLang).trim()) {
+    return String(cliLang).trim();
+  }
+  const envLang = getEnvVar('DEFAULT_LANG');
+  return envLang && String(envLang).trim() ? String(envLang).trim() : undefined;
+}
+
 export function listEnv() {
   const env = loadEnv();
   

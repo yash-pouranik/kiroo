@@ -1,6 +1,6 @@
 {
   "name": "@kiroo/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Production API traffic capture for Kiroo with Time-Travel Replay support",
   "main": "index.js",
   "type": "commonjs",

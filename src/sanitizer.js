@@ -1,7 +1,7 @@
 const REDACTED = '<REDACTED>';
 
 const SENSITIVE_KEY_PATTERN =
-  /authorization|cookie|set-cookie|token|secret|password|passwd|pwd|api[-_]?key|x-api-key|client[-_]?secret|session|jwt|access[-_]?token|refresh[-_]?token/i;
+  /authorization|cookie|set-cookie|token|secret|password|passwd|pwd|api[-_]?key|x-api-key|client[-_]?secret|session|jwt|access[-_]?token|refresh[-_]?token|supabase[-_]?key|service[-_]?role/i;
 
 function redactSensitiveString(value, redactedValue = REDACTED) {
   if (typeof value !== 'string') {

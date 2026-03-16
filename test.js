@@ -313,6 +313,112 @@ test('Analyze: detects removed endpoint as high severity', () => {
   assert.strictEqual(report.summary.byType.endpoint_removed, 1);
 });
 
+test('Analyze: detects auth/rate-limit status drift as high severity', () => {
+  const source = {
+    tag: 'before',
+    interactions: [
+      {
+        id: 'sec-1',
+        method: 'GET',
+        url: 'https://api.example.com/secure/profile',
+        response: {
+          status: 200,
+          body: { ok: true }
+        }
+      }
+    ]
+  };
+
+  const target = {
+    tag: 'after',
+    interactions: [
+      {
+        id: 'sec-1',
+        method: 'GET',
+        url: 'https://api.example.com/secure/profile',
+        response: {
+          status: 401,
+          body: { error: 'unauthorized' }
+        }
+      }
+    ]
+  };
+
+  const report = analyzeSnapshotData(source, target);
+  assert.strictEqual(report.highestSeverity, 'high');
+  assert.strictEqual(report.summary.byType.auth_or_rate_limit_changed, 1);
+});
+
+test('Analyze: detects request diff, required field missing, and enum drift', () => {
+  const source = {
+    tag: 'before',
+    interactions: [
+      {
+        id: 'ord-1',
+        method: 'POST',
+        url: 'https://api.example.com/orders',
+        request: {
+          body: { status: 'pending', amount: 100, currency: 'INR' }
+        },
+        response: {
+          status: 201,
+          body: { state: 'created', mode: 'sync' }
+        }
+      },
+      {
+        id: 'ord-2',
+        method: 'POST',
+        url: 'https://api.example.com/orders',
+        request: {
+          body: { status: 'paid', amount: 200, currency: 'INR' }
+        },
+        response: {
+          status: 201,
+          body: { state: 'created', mode: 'sync' }
+        }
+      }
+    ]
+  };
+
+  const target = {
+    tag: 'after',
+    interactions: [
+      {
+        id: 'ord-1',
+        method: 'POST',
+        url: 'https://api.example.com/orders',
+        request: {
+          body: { currency: 'INR' }
+        },
+        response: {
+          status: 201,
+          body: { state: 'queued', mode: 'async' }
+        }
+      },
+      {
+        id: 'ord-2',
+        method: 'POST',
+        url: 'https://api.example.com/orders',
+        request: {
+          body: { currency: 'INR' }
+        },
+        response: {
+          status: 201,
+          body: { state: 'queued', mode: 'async' }
+        }
+      }
+    ]
+  };
+
+  const report = analyzeSnapshotData(source, target);
+  assert.strictEqual(report.highestSeverity, 'critical');
+  assert.ok((report.summary.byType.required_field_missing || 0) >= 1);
+  assert.ok((report.summary.byType.enum_value_removed || 0) >= 1);
+
+  const endpointIssues = report.endpoints[0].issues;
+  assert.ok(endpointIssues.some((issue) => String(issue.path).startsWith('request.body')));
+});
+
 test('CLI: env list masks sensitive values', async () => {
   const { spawnSync } = await import('node:child_process');
   const envData = storage.loadEnv();
@@ -392,6 +498,21 @@ test('CLI: node bin/kiroo.js --help runs without error', async () => {
   const result = spawnSync('node', ['bin/kiroo.js', '--help'], { encoding: 'utf8' });
   assert.strictEqual(result.status, 0);
   assert.match(result.stdout, /Usage: kiroo/);
+});
+
+test('CLI: stats --json returns structured analytics', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const prep = spawnSync('node', ['bin/kiroo.js', 'get', 'https://jsonplaceholder.typicode.com/todos/1'], { encoding: 'utf8' });
+  assert.strictEqual(prep.status, 0);
+
+  const result = spawnSync('node', ['bin/kiroo.js', 'stats', '--json'], { encoding: 'utf8' });
+  assert.strictEqual(result.status, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.ok(payload.generatedAt);
+  assert.ok(payload.core);
+  assert.ok(typeof payload.core.totalRequests === 'number');
+  assert.ok(payload.distributions?.methods);
+  assert.ok(Array.isArray(payload.endpointRiskTop));
 });
 
 test('CLI: both GET and get commands work', async () => {

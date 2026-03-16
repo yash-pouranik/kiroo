@@ -1,365 +1,376 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyStore Dashboard | Notion x Grafana</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #111217;
-            --surface: #161719;
-            --sidebar: #0b0c10;
-            --border: #24272e;
-            --text: #f0f0f2;
-            --text-muted: #ccccdc;
-            --blue: #3274d9;
-            --orange: #ff9830;
-            --green: #73bf69;
-            --red: #f2495c;
-            --mono: "JetBrains Mono", monospace;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkyStore Drift Lab — Neobrutal</title>
+  <style>
+    :root {
+      --blue: #1d4ed8;
+      --green: #16a34a;
+      --yellow: #facc15;
+      --white: #ffffff;
+      --black: #000000;
+      --muted: #1f2937;
+      --shadow: 6px 6px 0 var(--black);
+      --shadow-sm: 4px 4px 0 var(--black);
+    }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--white);
+      color: var(--black);
+      font-family: "Trebuchet MS", "Segoe UI", Arial, sans-serif;
+    }
 
-        /* NOTION SIDEBAR */
-        .sidebar {
-            width: 260px;
-            background: var(--sidebar);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 12px;
-        }
+    .wrap {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
 
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0 10px 20px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-        }
+    .hero {
+      background: var(--yellow);
+      border: 3px solid var(--black);
+      border-radius: 0;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      display: grid;
+      gap: 8px;
+    }
 
-        .nav-group { margin-bottom: 24px; }
-        .nav-label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            padding: 0 10px 8px;
-            font-weight: 600;
-        }
+    .hero h1 {
+      margin: 0;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            transition: all 0.2s;
-        }
+    .hero p {
+      margin: 0;
+      color: var(--black);
+      font-weight: 700;
+    }
 
-        .nav-item:hover { background: var(--surface); color: #fff; }
-        .nav-item.active { background: var(--surface); color: var(--blue); font-weight: 600; }
+    .hero .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
 
-        /* GRAFANA MAIN AREA */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            background: var(--bg);
-        }
+    .chip {
+      border: 2px solid var(--black);
+      background: var(--white);
+      padding: 6px 10px;
+      border-radius: 0;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 2px 2px 0 var(--black);
+    }
 
-        .header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--surface);
-        }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 14px;
+    }
 
-        .header h1 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+    .panel {
+      border: 3px solid var(--black);
+      border-radius: 0;
+      box-shadow: var(--shadow-sm);
+      background: var(--white);
+      overflow: hidden;
+    }
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 16px;
-            padding: 24px;
-        }
+    .panel h2 {
+      margin: 0;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      border-bottom: 3px solid var(--black);
+    }
 
-        /* GRAFANA PANELS */
-        .panel {
-            grid-column: span 6;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            display: flex;
-            flex-direction: column;
-        }
+    .panel .body {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
 
-        .panel-header {
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            background: #202226;
-        }
+    .span-4 { grid-column: span 4; }
+    .span-6 { grid-column: span 6; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: span 12; }
 
-        .panel-title { font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .title-catalog { background: var(--blue); color: var(--white); }
+    .title-user { background: var(--green); color: var(--white); }
+    .title-transactions { background: var(--yellow); }
+    .title-ops { background: var(--blue); color: var(--white); }
+    .title-inspector { background: var(--green); color: var(--white); }
 
-        .panel-content {
-            padding: 16px;
-            flex: 1;
-        }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
 
-        .full-width { grid-column: span 12; }
+    button {
+      border: 2px solid var(--black);
+      border-radius: 0;
+      background: var(--white);
+      padding: 10px;
+      font-weight: 800;
+      font-size: 12px;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 var(--black);
+    }
 
-        /* INTERACTABLES */
-        button {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
+    button:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 var(--black);
+    }
 
-        button:hover { border-color: var(--blue); background: #22252b; }
+    .v1 { background: var(--white); }
+    .v2 { background: var(--blue); color: var(--white); }
+    .warn { background: #fff8d9; }
 
-        .btn-stack { display: flex; flex-direction: column; gap: 8px; }
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
 
-        /* STATUS BADGES */
-        .badge {
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .badge-get { background: rgba(115, 191, 105, 0.15); color: var(--green); }
-        .badge-post { background: rgba(50, 116, 217, 0.15); color: var(--blue); }
-        .badge-warn { background: rgba(255, 152, 48, 0.15); color: var(--orange); }
+    input {
+      border: 2px solid var(--black);
+      border-radius: 0;
+      padding: 10px;
+      font-weight: 700;
+      font-size: 12px;
+    }
 
-        #inspector {
-            font-family: var(--mono);
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            color: #ccc;
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            background: #090b0e;
-            padding: 12px;
-        }
+    .status-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
 
-        .res-log-header {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            font-size: 0.8rem;
-        }
+    .badge {
+      border: 2px solid var(--black);
+      border-radius: 0;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      box-shadow: 2px 2px 0 var(--black);
+      background: var(--white);
+    }
 
-        .proxy-label {
-            background: var(--blue);
-            color: #fff;
-            padding: 2px 8px;
-            border-radius: 2px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
+    .badge-running { background: var(--blue); color: var(--white); }
+    .badge-success { background: var(--green); color: var(--white); }
+    .badge-error { background: #fff8d9; }
 
-        input {
-            background: #090b0e;
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            width: 100%;
-            margin-bottom: 12px;
-            font-family: inherit;
-        }
+    #inspector {
+      border: 2px solid var(--black);
+      border-radius: 0;
+      padding: 12px;
+      min-height: 360px;
+      background: var(--white);
+      white-space: pre-wrap;
+      overflow: auto;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.4;
+    }
 
-        @media (max-width: 1024px) {
-            .panel { grid-column: span 12; }
-            .dashboard-grid { padding: 12px; }
-        }
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
 
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: auto; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
-            .main { height: auto; }
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #33363f; }
-        ::-webkit-scrollbar-thumb:hover { background: #444955; }
-    </style>
+    @media (max-width: 1024px) {
+      .span-4, .span-6, .span-8 { grid-column: span 12; }
+      .btn-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    
-    <!-- SIDEBAR (Notion Style) -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <span>🦏</span> Kiroo SkyStore
+  <div class="wrap">
+    <section class="hero">
+      <h1>SkyStore Drift Lab</h1>
+      <p>Neobrutal migration playground for Kiroo snapshot compare + analyze.</p>
+      <div class="chips">
+        <span class="chip">V1 vs V2 Contract Drift</span>
+        <span class="chip">Request/Response Shape Changes</span>
+        <span class="chip">Auth/Rate-Limit Edge Cases</span>
+        <span class="chip">Enum + Required Field Changes</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel span-4">
+        <h2 class="title-catalog">Catalog & Search</h2>
+        <div class="body btn-grid">
+          <button class="v1" onclick="hitApi('/api/v1/products')">V1 Products</button>
+          <button class="v2" onclick="hitApi('/api/v2/products')">V2 Products</button>
+          <button class="v1" onclick="hitApi('/api/v1/search?q=' + q())">V1 Search</button>
+          <button class="v2" onclick="hitApi('/api/v2/search?q=' + q())">V2 Search</button>
+          <button class="v1" onclick="hitApi('/api/v1/wishlist')">V1 Wishlist</button>
+          <button class="v2" onclick="hitApi('/api/v2/wishlist')">V2 Wishlist</button>
         </div>
+      </article>
 
-        <div class="nav-group">
-            <div class="nav-label">Core Scenarios</div>
-            <div class="nav-item active" onclick="activateNav(this)">📦 Catalog Discovery</div>
-            <div class="nav-item" onclick="activateNav(this)">👤 User Evolution</div>
-            <div class="nav-item" onclick="activateNav(this)">🛒 Transactions</div>
+      <article class="panel span-4">
+        <h2 class="title-user">User & Fulfillment</h2>
+        <div class="body btn-grid">
+          <button class="v1" onclick="hitApi('/api/v1/user')">V1 User</button>
+          <button class="v2" onclick="hitApi('/api/v2/user')">V2 User</button>
+          <button class="v1" onclick="hitApi('/api/v1/inventory/sky-1')">V1 Inventory</button>
+          <button class="v2" onclick="hitApi('/api/v2/inventory/sky-1')">V2 Inventory</button>
+          <button class="v1" onclick="hitApi('/api/v1/shipping/quote?country=' + country())">V1 Shipping Quote</button>
+          <button class="v2" onclick="hitApi('/api/v2/shipping/quote?country=' + country() + '&fast=true')">V2 Shipping Quote</button>
         </div>
+      </article>
 
-        <div class="nav-group">
-            <div class="nav-label">Utilities</div>
-            <div class="nav-item" onclick="activateNav(this)">🔍 Search Drift</div>
-            <div class="nav-item" onclick="activateNav(this)">📑 Collections</div>
+      <article class="panel span-4">
+        <h2 class="title-transactions">Transactions & Risk</h2>
+        <div class="body btn-grid">
+          <button class="v1" onclick="hitApi('/api/v1/checkout', 'POST', { productId: 'sky-1' })">V1 Checkout (200)</button>
+          <button class="warn" onclick="hitApi('/api/v2/checkout', 'POST', { productId: 'sky-1' })">V2 Checkout (202)</button>
+          <button class="warn" onclick="hitApi('/api/v2/checkout', 'POST', { productId: 'sky-3' })">V2 Checkout Error (403)</button>
+          <button class="v2" onclick="hitApi('/api/v2/shipping/quote?country=BR&fast=true')">Rate Limit Path (429)</button>
+          <button class="v1" onclick="hitApi('/api/v1/coupons/validate?code=' + coupon())">V1 Coupon</button>
+          <button class="v2" onclick="hitApi('/api/v2/coupons/validate?code=' + coupon())">V2 Coupon</button>
         </div>
+      </article>
 
-        <div style="margin-top: auto; padding: 10px;">
-            <div class="proxy-label">PROXY: :8080</div>
+      <article class="panel span-8">
+        <h2 class="title-ops">Scenario Controls</h2>
+        <div class="body">
+          <div class="status-strip">
+            <span id="run-state" class="badge">AWAITING_INPUT</span>
+            <span id="meta" class="badge">-</span>
+            <span class="badge">Backend :3000</span>
+            <span class="badge">Proxy tip: :8080</span>
+          </div>
+
+          <div class="input-row">
+            <input id="searchInput" placeholder="Search query (example: watch)" value="watch" />
+            <button onclick="syncSearch()">Use Query</button>
+          </div>
+          <div class="input-row">
+            <input id="countryInput" placeholder="Country code (example: IN / BR)" value="IN" />
+            <button onclick="syncCountry()">Use Country</button>
+          </div>
+          <div class="input-row">
+            <input id="couponInput" placeholder="Coupon code (example: LUX10 / LUX20)" value="LUX10" />
+            <button onclick="syncCoupon()">Use Coupon</button>
+          </div>
+
+          <div class="small">
+            Tip: run <code>kiroo proxy --target http://localhost:3000 --port 8080</code> and switch requests to :8080 for auto-capture.
+          </div>
         </div>
-    </div>
+      </article>
 
-    <!-- MAIN (Grafana Dashboard) -->
-    <div class="main">
-        <div class="header">
-            <h1>API Dashboard / SkyStore Manager</h1>
-            <div id="p-status" class="badge" style="background: var(--surface)">AWAITING_INPUT</div>
+      <article class="panel span-4">
+        <h2 class="title-ops">Quick Presets</h2>
+        <div class="body">
+          <button onclick="runV1Preset()">Record V1 Surface</button>
+          <button onclick="runV2Preset()">Record V2 Surface</button>
+          <button onclick="runRiskPreset()">Run Risk Endpoints</button>
+          <div class="small">Presets are UI-side convenience calls for faster demo capture.</div>
         </div>
+      </article>
 
-        <div class="dashboard-grid">
-            <!-- Catalog Actions -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Catalog Actions</span>
-                    <span class="badge badge-get">GET</span>
-                </div>
-                <div class="panel-content">
-                    <div class="btn-stack">
-                        <button onclick="hitApi('/api/v1/products')">Baseline: /api/v1/products</button>
-                        <button onclick="hitApi('/api/v2/products')">Evolution: /api/v2/products</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Actions -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Identity & Auth</span>
-                    <span class="badge badge-post">POST</span>
-                </div>
-                <div class="panel-content">
-                    <div class="btn-stack">
-                        <button onclick="hitApi('/api/v1/user')">User Info v1</button>
-                        <button onclick="hitApi('/api/v2/user')">User Info v2 (Nested)</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Transactions -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Transactional Logic</span>
-                    <span class="badge badge-warn">MIXED</span>
-                </div>
-                <div class="panel-content">
-                    <div class="btn-stack">
-                        <button onclick="hitApi('/api/v1/checkout', 'POST', {productId: 'sky-1'})">Checkout v1 (Stable)</button>
-                        <button onclick="hitApi('/api/v2/checkout', 'POST', {productId: 'sky-1'})">Checkout v2 (Async)</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search Panel -->
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Global Search</span>
-                </div>
-                <div class="panel-content">
-                    <input type="text" id="sq" placeholder="Query for v1 vs v2 root drift...">
-                    <div style="display: flex; gap: 8px;">
-                        <button style="flex: 1" onclick="hitApi('/api/v1/search?q=' + document.getElementById('sq').value)">v1 Search</button>
-                        <button style="flex: 1" onclick="hitApi('/api/v2/search?q=' + document.getElementById('sq').value)">v2 Search</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Response Inspector -->
-            <div class="panel full-width">
-                <div class="panel-header">
-                    <span class="panel-title">Response Explorer</span>
-                    <span id="log-meta" style="color: var(--text-muted); font-size: 0.7rem;"></span>
-                </div>
-                <div class="panel-content">
-                    <div id="inspector">// Select an action to view real-time API interaction...</div>
-                </div>
-            </div>
+      <article class="panel span-12">
+        <h2 class="title-inspector">Response Inspector</h2>
+        <div class="body">
+          <div id="inspector">// Choose any endpoint button to inspect real API payloads.</div>
         </div>
-    </div>
+      </article>
+    </section>
+  </div>
 
-    <script>
-        function activateNav(el) {
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            el.classList.add('active');
-        }
+  <script>
+    function q() { return encodeURIComponent(document.getElementById('searchInput').value || 'watch'); }
+    function country() { return encodeURIComponent((document.getElementById('countryInput').value || 'IN').toUpperCase()); }
+    function coupon() { return encodeURIComponent((document.getElementById('couponInput').value || 'LUX10').toUpperCase()); }
+    function syncSearch() {}
+    function syncCountry() {}
+    function syncCoupon() {}
 
-        async function hitApi(path, method = 'GET', body = null) {
-            const inspector = document.getElementById('inspector');
-            const status = document.getElementById('p-status');
-            const meta = document.getElementById('log-meta');
-            const port = 3000;
-            
-            inspector.innerHTML = `> EXECUTING ${method} ${path}\n> PENDING...`;
-            status.innerHTML = 'RUNNING';
-            status.style.background = 'rgba(50, 116, 217, 0.4)';
-            
-            try {
-                const start = performance.now();
-                const response = await fetch(`http://localhost:${port}${path}`, {
-                    method,
-                    headers: body ? { 'Content-Type': 'application/json' } : {},
-                    body: body ? JSON.stringify(body) : null
-                });
-                const data = await response.json();
-                const end = performance.now();
-                const time = (end - start).toFixed(0);
+    function setState(kind, metaText) {
+      const stateEl = document.getElementById('run-state');
+      const meta = document.getElementById('meta');
+      stateEl.className = 'badge';
+      if (kind === 'RUNNING') stateEl.classList.add('badge-running');
+      if (kind === 'SUCCESS') stateEl.classList.add('badge-success');
+      if (kind === 'ERROR') stateEl.classList.add('badge-error');
+      stateEl.textContent = kind;
+      meta.textContent = metaText || '-';
+    }
 
-                status.innerHTML = 'SUCCESS';
-                status.style.background = 'rgba(115, 191, 105, 0.4)';
-                meta.innerHTML = `${response.status} ${response.statusText} · ${time}ms`;
+    async function hitApi(path, method = 'GET', body = null) {
+      const inspector = document.getElementById('inspector');
+      inspector.textContent = `> ${method} ${path}\n> pending...`;
+      setState('RUNNING', `${method} ${path}`);
 
-                inspector.innerHTML = `<span style="color: var(--blue)">[${method}]</span> <span style="color: var(--green)">${response.status}</span> ${path}\n\n${JSON.stringify(data, null, 2)}`;
-            } catch (err) {
-                status.innerHTML = 'ERROR';
-                status.style.background = 'rgba(242, 73, 92, 0.4)';
-                inspector.innerHTML = `> CONNECTION_ERROR: ${err.message}`;
-            }
-        }
-    </script>
+      try {
+        const start = performance.now();
+        const response = await fetch(`http://localhost:3000${path}`, {
+          method,
+          headers: body ? { 'Content-Type': 'application/json' } : {},
+          body: body ? JSON.stringify(body) : null
+        });
+        const data = await response.json();
+        const ms = Math.round(performance.now() - start);
+
+        setState('SUCCESS', `${response.status} ${response.statusText} • ${ms}ms`);
+        inspector.textContent = `[${method}] ${path}\nSTATUS ${response.status}\nLATENCY ${ms}ms\n\n${JSON.stringify(data, null, 2)}`;
+      } catch (error) {
+        setState('ERROR', 'connection_error');
+        inspector.textContent = `connection_error: ${error.message}`;
+      }
+    }
+
+    async function runPreset(list) {
+      for (const step of list) {
+        // eslint-disable-next-line no-await-in-loop
+        await hitApi(step.path, step.method || 'GET', step.body || null);
+      }
+    }
+
+    function runV1Preset() {
+      runPreset([
+        { path: '/api/v1/products' },
+        { path: '/api/v1/user' },
+        { path: '/api/v1/search?q=' + q() },
+        { path: '/api/v1/checkout', method: 'POST', body: { productId: 'sky-1' } }
+      ]);
+    }
+
+    function runV2Preset() {
+      runPreset([
+        { path: '/api/v2/products' },
+        { path: '/api/v2/user' },
+        { path: '/api/v2/search?q=' + q() },
+        { path: '/api/v2/checkout', method: 'POST', body: { productId: 'sky-1' } }
+      ]);
+    }
+
+    function runRiskPreset() {
+      runPreset([
+        { path: '/api/v2/checkout', method: 'POST', body: { productId: 'sky-3' } },
+        { path: '/api/v2/shipping/quote?country=BR&fast=true' },
+        { path: '/api/v2/coupons/validate?code=BADCODE' }
+      ]);
+    }
+  </script>
 </body>
 </html>

@@ -124,7 +124,7 @@ kiroo snapshot compare v1 current --analyze
 
 ### `kiroo init`
 Initialize Kiroo in your current project.
-- **Description**: Creates the `.kiroo/` directory structure, a default `env.json`, and `.kiroo/config.json` with deterministic/redaction-safe defaults. During setup, you can store `baseUrl`, `GROQ_API_KEY`, and `LINGODOTDEV_API_KEY` into `.kiroo/env.json`.
+- **Description**: Creates the `.kiroo/` directory structure, a default `env.json`, and `.kiroo/config.json` with deterministic/redaction-safe defaults. During setup, you can configure environment name, `baseUrl`, `GROQ_API_KEY`, `LINGODOTDEV_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_BUCKET`, optional `DEFAULT_LANG`, and redaction preferences.
 - **Prerequisites**: None. Run once per project.
 - **Example**:
   ```bash
@@ -240,9 +240,12 @@ Visualize API dependencies.
 ### `kiroo stats`
 Analytics dashboard.
 - **Description**: Shows performance metrics, success rates, and identify slow endpoints.
+- **Options**:
+  - `--json`: Output machine-readable JSON stats for dashboards/CI.
 - **Example**:
   ```bash
   kiroo stats
+  kiroo stats --json
   ```
 
 ### `kiroo import`
@@ -329,11 +332,14 @@ Environment & Variable management.
   - `rm <key>`: Remove a variable.
 - **Note**:
   - Sensitive keys (tokens/passwords/API keys) are masked in `kiroo env list`.
+  - Set `DEFAULT_LANG` to auto-apply language when `--lang` is not passed.
 - **Example**:
   ```bash
   kiroo env set baseUrl https://api.myapp.com
   kiroo env set GROQ_API_KEY your_key
   kiroo env set LINGODOTDEV_API_KEY your_key
+  kiroo env set SUPABASE_URL https://your-project.supabase.co
+  kiroo env set DEFAULT_LANG de
   ```
 
 ### `kiroo clear`

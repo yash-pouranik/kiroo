@@ -10,7 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@kiroo/sdk": "^0.1.1",
+    "@kiroo/sdk": "^0.1.2",
     "dotenv": "^17.3.1",
     "express": "^5.2.1"
   }
