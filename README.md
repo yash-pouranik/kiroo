@@ -30,7 +30,7 @@ If your API changes frequently, Kiroo answers:
 ## 🎬 Demo
 
 <div align="center">
-  (Demo @YT)[https://youtu.be/OKY3gWdeg4k?si=aqTHUUdD-6BWGRLh]
+  [Demo @YT](https://youtu.be/OKY3gWdeg4k?si=aqTHUUdD-6BWGRLh)
 </div>
 
 ### 🔥 Start Here (Developer Walkthrough)
